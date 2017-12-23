@@ -3,6 +3,7 @@ package com.aurea.methobase.meta.purity
 import com.aurea.testgenerator.symbolsolver.SymbolSolver
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.*
+import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
 
@@ -58,17 +59,17 @@ class IsPureFunction implements Predicate<MethodDeclaration> {
 
         ]
     }
+    
+    JavaParserFacade solver
 
-    SymbolSolver solver
-
-    IsPureFunction(SymbolSolver solver) {
+    IsPureFunction(JavaParserFacade solver) {
         this.solver = solver
     }
 
     @Override
     boolean test(MethodDeclaration n) {
         List<Expression> expressions = n.findAll(Expression)
-        MethodContext context = MethodContext.buildForMethod(n)
+        MethodContext context = MethodContext.buildForMethod(n, solver)
 
         Map<Boolean, List<Expression>> partitionedExpressions = StreamEx.of(expressions).partitioningBy { Expression e ->
             BiPredicate<? extends Expression, MethodContext> tester = PURITY_FUNCTIONS.get(e.getClass())
