@@ -1,5 +1,5 @@
 .gradle
-/build/
+**/build
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -46,6 +46,7 @@ cmake-build-release/
 
 # IntelliJ
 out/
+**/out
 
 # mpeltonen/sbt-idea plugin
 .idea_modules/

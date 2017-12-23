@@ -1,14 +1,19 @@
 package com.aurea.methobase.yaml
 
-import com.aurea.methobase.meta.MetaInformationConsumer
+import com.aurea.methobase.meta.MetaInformationRepository
 import com.aurea.methobase.meta.MethodMetaInformation
 
 class QueryRunner {
 
-    static final Map<String, Closure<File>> QUERIES = [
-            'c0-public-static': { File input -> new C0StaticBatch(input.parentFile.toPath().resolve('c0-public-static.yml')) },
-            'primitive'       : { File input -> new PrimitiveBatch(input.parentFile.toPath().resolve('primitive.yml')) }
+    static final Map<String, Closure<Query<MethodMetaInformation>>> QUERIES = [
+            'c0-public-static': { MetaInformationRepository<MethodMetaInformation> repository -> new C0StaticBatch(repository) },
+            'primitive'       : { MetaInformationRepository<MethodMetaInformation> repository -> new PrimitiveBatch(repository) }
 
+    ]
+
+    static final Map<String, String> BATCH_FILES = [
+            'c0-public-static': 'c0-public-static.yml',
+            'primitive'       : 'primitive.yml'
     ]
 
     static void main(String[] args) {
@@ -18,6 +23,10 @@ class QueryRunner {
 
         File yamlFileOrFolder = new File(args[0])
         String queryName = args[1]
-        new YamlMethodProcessor(QUERIES[queryName].call(yamlFileOrFolder) as MetaInformationConsumer<MethodMetaInformation>).process(yamlFileOrFolder)
+        String saveFileName = BATCH_FILES[queryName]
+        File saveFile = yamlFileOrFolder.parentFile.toPath().resolve(saveFileName).toFile()
+        MetaInformationRepository<MethodMetaInformation> repository = YamlMetaInformationRepository.createForMethods(yamlFileOrFolder, saveFile)
+        Query<MethodMetaInformation> query = QUERIES[queryName].call(repository)
+        new YamlMethodProcessor(query).process(yamlFileOrFolder)
     }
 }

@@ -1,13 +1,12 @@
 package com.aurea.methobase.yaml
 
+import com.aurea.methobase.meta.MetaInformationRepository
 import com.aurea.methobase.meta.MethodMetaInformation
-
-import java.nio.file.Path
 
 class PrimitiveBatch extends Query<MethodMetaInformation> {
 
-    PrimitiveBatch(Path saveTo) {
-        super(YamlMetaInformationRepository.createForMethods(null, saveTo.toFile()), { MethodMetaInformation it ->
+    PrimitiveBatch(MetaInformationRepository<MethodMetaInformation> repository) {
+        super(repository, { MethodMetaInformation it ->
             it.referencedTypes.stream().allMatch { it in ALLOWED_TYPES }
         })
     }
