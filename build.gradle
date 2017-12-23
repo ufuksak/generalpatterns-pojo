@@ -29,6 +29,7 @@ subprojects {
     dependencies {
         implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.12'
         implementation group: 'com.github.javaparser', name: 'javaparser-core', version: '3.5.6'
+        implementation group: 'com.github.javaparser', name: 'java-symbol-solver-core', version: '0.6.3'
         implementation group: 'junit', name: 'junit', version: '4.12'
         implementation group: 'org.codehaus.janino', name: 'janino', version: '3.0.8'
         implementation group: 'pl.pragmatists', name: 'JUnitParams', version: '1.1.1'

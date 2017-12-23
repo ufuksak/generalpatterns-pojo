@@ -1,5 +1,7 @@
 .gradle
-**/build
+/build/
+**/build/
+
 
 # Ignore Gradle GUI config
 gradle-app.setting
@@ -64,3 +66,4 @@ crashlytics-build.properties
 fabric.properties
 
 *.iml
+.idea/
