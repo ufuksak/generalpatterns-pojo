@@ -1,2 +1,5 @@
-rootProject.name = 'BigCodeTestGenerator'
+rootProject.name = 'BigCode'
+
+include 'entropy'
+include 'generator'
 

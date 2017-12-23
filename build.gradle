@@ -1,50 +1,89 @@
 group 'com.aurea.bigcode'
 version '1.0-SNAPSHOT'
 
-apply plugin: 'java-library'
-apply plugin: 'groovy'
-
-sourceCompatibility = "1.9"
-targetCompatibility = "1.9"
-
-repositories {
-    mavenCentral()
-    maven {
-        url "https://scm.devfactory.com/nexus/content/repositories/EngUnitTests"
+buildscript {
+    repositories {
+        mavenCentral()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "me.champeau.gradle:jmh-gradle-plugin:0.4.4"
     }
 }
 
-dependencies {
-    implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.12'
-    implementation group: 'com.github.javaparser', name: 'javaparser-core', version: '3.5.6'
-    implementation group: 'junit', name: 'junit', version: '4.12'
-    implementation group: 'org.codehaus.janino', name: 'janino', version: '3.0.8'
-    implementation group: 'pl.pragmatists', name: 'JUnitParams', version: '1.1.1'
-    implementation group: 'com.aurea.bigcode', name: 'analytics', version: '1.0'
-    implementation group: 'com.jason-goodwin', name: 'better-monads', version: '0.4.1'
-    implementation group: 'com.aurea', name: 'test-generator', version: '1.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
+subprojects {
+    apply plugin: 'java-library'
+    apply plugin: 'groovy'
+    apply plugin: 'maven-publish'
 
-    testImplementation group: 'org.spockframework', name: 'spock-core', version: '1.1-groovy-2.4'
-}
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven {
+            url "https://scm.devfactory.com/nexus/content/repositories/EngUnitTests"
+        }
+    }
 
-sourceSets {
-    main {
-        java { srcDirs = [] }    // no source dirs for the java compiler
-        groovy { srcDirs = ["src/main/java", "src/main/groovy"] }  // compile   everything in src/ with groovy
+    dependencies {
+        implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.12'
+        implementation group: 'com.github.javaparser', name: 'javaparser-core', version: '3.5.6'
+        implementation group: 'junit', name: 'junit', version: '4.12'
+        implementation group: 'org.codehaus.janino', name: 'janino', version: '3.0.8'
+        implementation group: 'pl.pragmatists', name: 'JUnitParams', version: '1.1.1'
+        implementation group: 'com.jason-goodwin', name: 'better-monads', version: '0.4.1'
+        implementation group: 'com.aurea', name: 'test-generator', version: '1.0'
+        implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
+        implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
+        implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
+        implementation group: 'one.util', name: 'streamex', version: '0.6.6'
+
+        testImplementation group: 'junit', name: 'junit', version: '4.12'
+        testImplementation group: 'org.spockframework', name: 'spock-core', version: '1.1-groovy-2.4'
+        testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.10.0'
+        testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.8.0'
+    }
+
+
+    sourceCompatibility = "1.9"
+    targetCompatibility = "1.9"
+
+    sourceSets {
+        main {
+            java { srcDirs = [] }    // no source dirs for the java compiler
+            groovy { srcDirs = ["src/main/java", "src/main/groovy"] }  // compile   everything in src/ with groovy
+        }
+    }
+
+    compileJava {
+        options.forkOptions.jvmArgs += '--illegal-access=deny'
+    }
+
+    compileGroovy {
+        options.forkOptions.jvmArgs += '--illegal-access=deny'
+    }
+
+    test {
+        jvmArgs '--illegal-access=deny'
+    }
+
+    publishing {
+        publications {
+            maven(MavenPublication) {
+                groupId 'com.aurea.bigcode'
+                artifactId 'bigcode'
+                version '1.0'
+
+                from components.java
+            }
+        }
+        repositories {
+            maven {
+                url 'https://scm.devfactory.com/nexus/content/repositories/EngUnitTests'
+            }
+        }
     }
 }
 
-compileJava {
-    options.forkOptions.jvmArgs += '--illegal-access=deny'
-}
-
-compileGroovy {
-    options.forkOptions.jvmArgs += '--illegal-access=deny'
-}
-
-test {
-    jvmArgs '--illegal-access=deny'
-}
 
