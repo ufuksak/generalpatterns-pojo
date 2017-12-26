@@ -3,8 +3,11 @@ package com.aurea.methobase.meta.purity
 import com.aurea.ast.common.UnitHelper
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.expr.MethodCallExpr
+import com.github.javaparser.resolution.MethodUsage
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
 import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration
+import com.github.javaparser.resolution.types.ResolvedPrimitiveType
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import com.github.javaparser.symbolsolver.model.resolution.SymbolReference
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
@@ -53,7 +56,7 @@ class JavaFacadeSpec extends Specification {
             }
         ''', 'Foo'
 
-        File baseFile = fileWithCode '''
+        fileWithCode '''
             class Base {
                 public static final int i = 123;
             }
@@ -71,6 +74,33 @@ class JavaFacadeSpec extends Specification {
         ResolvedFieldDeclaration rfd = reference.getCorrespondingDeclaration().asField()
         rfd.isStatic()
         rfd.isFinal()
+    }
+
+
+    def "java facade knows about java.util classes and can figure out method calls to it"() {
+        given:
+        File classFile = fileWithCode '''
+        import java.util.List;
+        import java.util.ArrayList;
+        
+        class Foo {
+            int foo() {
+                List<Integer> ints = new ArrayList<>();
+                return ints.size();
+                
+            } 
+        }
+        ''', 'Foo'
+        MethodDeclaration md = getFirstMethodDeclaration(classFile)
+        MethodCallExpr sizeMethodCallExpr = md.findAll(MethodCallExpr).first()
+        JavaParserFacade facade = getFacade()
+
+        when:
+        MethodUsage usage = facade.solveMethodAsUsage(sizeMethodCallExpr)
+
+        then:
+        usage.returnType().isPrimitive()
+        usage.returnType().asPrimitive() == ResolvedPrimitiveType.INT
     }
 
     File fileWithCode(String code, String className) {
