@@ -1,5 +1,5 @@
 package com.aurea.bigcode
 
 interface TestGenerator {
-    TestMethod generate(TestedMethod testedMethod)
+    UnitTest generate(TestedMethod testedMethod)
 }

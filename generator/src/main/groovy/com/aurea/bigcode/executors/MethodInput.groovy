@@ -8,7 +8,7 @@ import groovy.transform.Canonical
 class MethodInput {
     public static final MethodInput NO_INPUT = ofValues()
 
-    private final Collection<Value> values
+    final Collection<Value> values
 
     private MethodInput(Value[] values) {
         this.values = Arrays.asList(values)

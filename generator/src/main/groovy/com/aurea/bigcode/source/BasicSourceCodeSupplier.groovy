@@ -13,8 +13,8 @@ class BasicSourceCodeSupplier implements SourceCodeSupplier {
         new BasicSourceCodeSupplier(sourceCode)
     }
 
-    BasicSourceCodeSupplier addImports(String... imports) {
-        this.imports.addAll(imports)
+    BasicSourceCodeSupplier addImports(ImportStatementsSupplier... importStatementsSupplier) {
+        importStatementsSupplier.each { imports.addAll(it.imports) }
         this
     }
 

@@ -1,7 +1,5 @@
 package com.aurea.bigcode.source
 
-@FunctionalInterface
-interface SourceCodeSupplier {
-    Set<String> getImports()
+interface SourceCodeSupplier extends ImportStatementsSupplier {
     String getSourceCode()
 }

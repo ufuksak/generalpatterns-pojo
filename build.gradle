@@ -1,18 +1,6 @@
 group 'com.aurea.bigcode'
 version '1.0-SNAPSHOT'
 
-buildscript {
-    repositories {
-        mavenCentral()
-        maven {
-            url "https://plugins.gradle.org/m2/"
-        }
-    }
-    dependencies {
-        classpath "me.champeau.gradle:jmh-gradle-plugin:0.4.4"
-    }
-}
-
 subprojects {
     apply plugin: 'java-library'
     apply plugin: 'groovy'
