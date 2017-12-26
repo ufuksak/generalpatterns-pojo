@@ -1,17 +1,19 @@
 package com.aurea.methobase.meta.purity
 
-import com.github.javaparser.ast.expr.AssignExpr
-import com.github.javaparser.ast.expr.FieldAccessExpr
 import com.github.javaparser.ast.expr.ThisExpr
+import com.github.javaparser.resolution.declarations.ResolvedTypeDeclaration
+import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
+import com.github.javaparser.symbolsolver.model.resolution.SymbolReference
 
 import java.util.function.BiPredicate
 
-class ThisExprPureFunctionPredicate implements BiPredicate<ThisExpr, MethodContext> {
+class ThisExprPureFunctionPredicate implements BiPredicate<ThisExpr, JavaParserFacade> {
     @Override
-    boolean test(ThisExpr expr, MethodContext context) {
-        return expr.parentNode
-            .map { parentNode -> (parentNode instanceof FieldAccessExpr) &&
-                parentNode.parentNode.map{ !(it instanceof AssignExpr) }.orElse(false)}
-            .orElse(false)
+    boolean test(ThisExpr expr, JavaParserFacade context) {
+        SymbolReference<ResolvedTypeDeclaration> ref = context.solve(expr)
+        ref.solved && (ref.correspondingDeclaration.isParameter() ||
+                ref.correspondingDeclaration.isField() &&
+                ref.correspondingDeclaration.asField().isStatic() &&
+                ref.correspondingDeclaration.asField().isFinal())
     }
 }

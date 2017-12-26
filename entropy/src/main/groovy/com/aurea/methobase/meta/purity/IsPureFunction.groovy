@@ -16,7 +16,7 @@ import java.util.function.Predicate
 @Log4j2
 class IsPureFunction implements Predicate<MethodDeclaration> {
 
-    static final Map<Class<? extends Expression>, BiPredicate<? extends Expression, MethodContext>> PURITY_FUNCTIONS
+    static final Map<Class<? extends Expression>, BiPredicate<? extends Expression, JavaParserFacade>> PURITY_FUNCTIONS
 
     static {
         def PURE = { expr, context -> true }
@@ -38,7 +38,7 @@ class IsPureFunction implements Predicate<MethodDeclaration> {
                 (IntegerLiteralExpr)        : PURE,
                 (LongLiteralExpr)           : PURE,
                 (MarkerAnnotationExpr)      : PURE,
-                (NameExpr)                  : PURE,
+                (NameExpr)                  : new NameExprPureFunctionPredicate(),
                 (NormalAnnotationExpr)      : PURE,
                 (NullLiteralExpr)           : PURE,
                 (SingleMemberAnnotationExpr): PURE,
@@ -69,17 +69,15 @@ class IsPureFunction implements Predicate<MethodDeclaration> {
     @Override
     boolean test(MethodDeclaration n) {
         List<Expression> expressions = n.findAll(Expression)
-        MethodContext context = MethodContext.buildForMethod(n, solver)
-
         Map<Boolean, List<Expression>> partitionedExpressions = StreamEx.of(expressions).partitioningBy { Expression e ->
-            BiPredicate<? extends Expression, MethodContext> tester = PURITY_FUNCTIONS.get(e.getClass())
-            tester.test(e, context)
+            BiPredicate<? extends Expression, JavaParserFacade> tester = PURITY_FUNCTIONS.get(e.getClass())
+            tester.test(e, solver)
         }
         List<Expression> pureExpressions = partitionedExpressions[true]
         List<Expression> impureExpressions = partitionedExpressions[false]
 
-        log.debug("Pure expressions: " + System.lineSeparator() + pureExpressions.join(System.lineSeparator()))
-        log.debug("Impure expressions: " + System.lineSeparator() + impureExpressions.join(System.lineSeparator()))
+        log.debug("Pure expressions: " + System.lineSeparator() + pureExpressions.collect{it.class.simpleName + ": " + it}.join(System.lineSeparator()))
+        log.debug("Impure expressions: " + System.lineSeparator() + impureExpressions.collect{it.class.simpleName + ": " + it}.join(System.lineSeparator()))
 
         impureExpressions.empty
     }
