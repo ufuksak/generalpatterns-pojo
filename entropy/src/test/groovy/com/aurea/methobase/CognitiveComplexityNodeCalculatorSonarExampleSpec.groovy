@@ -1,7 +1,6 @@
 package com.aurea.methobase
 
 import com.aurea.ast.common.UnitHelper
-import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.MethodDeclaration
 import spock.lang.Specification
 
@@ -174,8 +173,7 @@ class CognitiveComplexityNodeCalculatorSonarExampleSpec extends Specification {
     }
 
     int scoreOfMethodInClass(String methodInClassCode) {
-        Optional<CompilationUnit> maybeUnit = UnitHelper.getUnitForCode(methodInClassCode)
-        CompilationUnit unit = maybeUnit.orElseThrow { throw new IllegalArgumentException("Faled to parse code: $methodInClassCode") }
-        CognitiveComplexityNodeCalculator.visit(unit.getNodesByType(MethodDeclaration).first())
+        MethodDeclaration method = UnitHelper.getMethodFromSource(methodInClassCode)
+        CognitiveComplexityNodeCalculator.visit(method)
     }
 }

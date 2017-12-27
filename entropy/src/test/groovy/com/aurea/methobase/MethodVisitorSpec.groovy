@@ -29,11 +29,9 @@ class MethodVisitorSpec extends Specification {
     }
 
     MethodMetaInformation fromMethod(String methodCode) {
-        Optional<CompilationUnit> maybeUnit = UnitHelper.getUnitForMethod(methodCode)
-        CompilationUnit unit = maybeUnit.orElseThrow { throw new IllegalArgumentException("Faled to parse code: $methodCode") }
-        MethodDeclaration md = unit.findAll(MethodDeclaration).first()
-        MethodVisitor visitor = new MethodVisitor()
-        visitor.visit(md, new Unit(modulePath: Paths.get("dummy")))
+        def method = UnitHelper.getMethodFromSource(methodCode)
+        def visitor = new MethodVisitor()
+        visitor.visit(method, new Unit(modulePath: Paths.get("dummy")))
         visitor.methodMetaInformations[0]
     }
 }

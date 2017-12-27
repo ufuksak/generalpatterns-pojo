@@ -187,10 +187,7 @@ class TypeVisitorSpec extends Specification {
     }
 
     List<ClassMetaInformation> fromCode(String code) {
-        Optional<CompilationUnit> maybeUnit = UnitHelper.getUnitForCode(code)
-        CompilationUnit unit = maybeUnit.orElseThrow {
-            throw new IllegalArgumentException("Failed to parse code: $code")
-        }
+        CompilationUnit unit = UnitHelper.getUnitForCode(code)
         SymbolSolver solverStub = Mock()
         solverStub.getParentOf(_) >> Optional.empty()
         solverStub.getOfType(_, _) >> Optional.empty()

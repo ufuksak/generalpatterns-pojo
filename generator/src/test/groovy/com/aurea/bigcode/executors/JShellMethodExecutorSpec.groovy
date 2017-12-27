@@ -1,6 +1,6 @@
 package com.aurea.bigcode.executors
 
-import com.aurea.UnitHelper
+import com.aurea.ast.common.UnitHelper
 
 import com.aurea.bigcode.TestedMethod
 import com.aurea.bigcode.Value
@@ -118,8 +118,8 @@ class JShellMethodExecutorSpec extends Specification {
     }
 
     private static TestedMethod createUTAMethod(String methodCode) {
-        CompilationUnit cu = UnitHelper.getUnitForMethod(methodCode).get()
-        MethodDeclaration methodDeclaration = cu.findAll(MethodDeclaration).first()
+        CompilationUnit cu = UnitHelper.getUnitForMethod(methodCode)
+        MethodDeclaration methodDeclaration = cu.findFirst(MethodDeclaration).get()
         MethodVisitor visitor = new MethodVisitor()
         visitor.visit(methodDeclaration, new Unit(cu, UnitHelper.TEST_CLASS_NAME, Paths.get("dummy")))
         MethodMetaInformation meta = visitor.getMethodMetaInformations().first()

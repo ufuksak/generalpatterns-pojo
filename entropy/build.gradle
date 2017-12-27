@@ -13,6 +13,8 @@ buildscript {
 apply plugin: 'me.champeau.gradle.jmh'
 
 dependencies {
+    implementation project(':common')
+
     implementation group: 'com.github.michael-rapp', name: 'apriori', version: '1.3.0'
     implementation group: 'com.esotericsoftware.yamlbeans', name: 'yamlbeans', version: '1.12'
     

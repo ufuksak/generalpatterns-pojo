@@ -148,10 +148,7 @@ class TypeVisitorParentResolutionSpec extends Specification {
         }
         SymbolSolver solver = new SymbolSolver(finder, this.projectRoot.toPath(), noFilter)
 
-        Optional<CompilationUnit> maybeUnit = UnitHelper.getUnitForCode(last)
-        CompilationUnit unit = maybeUnit.orElseThrow {
-            throw new IllegalArgumentException("Failed to parse $last")
-        }
+        CompilationUnit unit = UnitHelper.getUnitForCode(last)
         TypeVisitor visitor = new TypeVisitor(solver)
         unit.accept(visitor, new Unit(cu: unit, modulePath: get("dummy")))
         visitor.metas

@@ -261,14 +261,13 @@ class IsPureFunctionSpec extends Specification {
     }
 
     boolean runOnMethod(String code) {
-        CompilationUnit cu = UnitHelper.getUnitForMethod(code).get()
-        MethodDeclaration md = cu.findAll(MethodDeclaration).first()
+        MethodDeclaration md = UnitHelper.getMethodFromSource(code)
 
         matcher.test(md)
     }
 
     boolean runOnClass(String code) {
-        CompilationUnit cu = UnitHelper.getUnitForCode(code).get()
+        CompilationUnit cu = UnitHelper.getUnitForCode(code)
         MethodDeclaration md = cu.findAll(MethodDeclaration).first()
 
         matcher.test(md)

@@ -1,17 +1,12 @@
 package com.aurea.bigcode
 
-import org.junit.Rule
-import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 class SingleUnitTestBuilderSpec extends Specification {
 
-    @Rule
-    TemporaryFolder folder = new TemporaryFolder()
-
     def "creating single test case unit test"() {
         when:
-        def result = UnitTestInputDataProvider.createSingleTestCaseIntUnitTest(folder)
+        def result = UnitTestInputDataProvider.createSingleTestCaseIntUnitTest()
 
         then:
         result.method.getSourceCode() ==
@@ -27,7 +22,7 @@ class SingleUnitTestBuilderSpec extends Specification {
 
     def "creating single test case unit test for floating point type"() {
         when:
-        def result = UnitTestInputDataProvider.createSingleTestCaseFloatUnitTest(folder)
+        def result = UnitTestInputDataProvider.createSingleTestCaseFloatUnitTest()
 
         then:
         result.method.getSourceCode() ==
@@ -36,14 +31,14 @@ class SingleUnitTestBuilderSpec extends Specification {
     public void test_addNumbers_float() {
         float result = Sample.addNumbers(3.1F, 2);
 
-        assertThat(result).isCloseTo(5.1F, Offset.offset(0.001));
+        assertThat(result).isCloseTo(5.1F, Offset.offset(0.001F));
     }
 '''
     }
 
     def "creating parametrized unit test"() {
         when:
-        def result = UnitTestInputDataProvider.createMultilpeTestCasesIntUnitTest(folder)
+        def result = UnitTestInputDataProvider.createMultilpeTestCasesIntUnitTest()
 
         then:
         result.method.getSourceCode() ==

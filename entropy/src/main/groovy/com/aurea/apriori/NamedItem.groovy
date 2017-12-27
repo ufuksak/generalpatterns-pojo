@@ -73,7 +73,6 @@ class NamedItem implements Item {
             return false
         if (getClass() != obj.getClass())
             return false
-        NamedItem other = (NamedItem) obj
-        name == other.name
+        name == (obj as NamedItem).name
     }
 }

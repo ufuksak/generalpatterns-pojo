@@ -223,8 +223,7 @@ class CognitiveComplexityNodeCalculatorSpec extends Specification {
     }
 
     int scoreOfMethodInClass(String methodInClassCode) {
-        Optional<CompilationUnit> maybeUnit = UnitHelper.getUnitForCode(methodInClassCode)
-        CompilationUnit unit = maybeUnit.orElseThrow { throw new IllegalArgumentException("Faled to parse code: $methodInClassCode") }
+        CompilationUnit unit = UnitHelper.getUnitForCode(methodInClassCode)
         CognitiveComplexityNodeCalculator.visit(unit.getNodesByType(MethodDeclaration).first())
     }
 }

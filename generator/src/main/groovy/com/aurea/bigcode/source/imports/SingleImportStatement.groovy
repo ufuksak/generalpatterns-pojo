@@ -1,4 +1,4 @@
-package com.aurea.bigcode.source
+package com.aurea.bigcode.source.imports
 
 class SingleImportStatement implements ImportStatementsSupplier {
     String importStatement
@@ -13,6 +13,6 @@ class SingleImportStatement implements ImportStatementsSupplier {
 
     @Override
     Collection<String> getImports() {
-        return List.of(importStatement)
+        [importStatement]
     }
 }

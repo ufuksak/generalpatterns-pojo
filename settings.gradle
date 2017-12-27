@@ -1,5 +1,6 @@
 rootProject.name = 'BigCode'
 
+include 'common'
 include 'entropy'
 include 'generator'
 

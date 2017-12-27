@@ -2,12 +2,14 @@ package com.aurea.bigcode.source
 
 import com.aurea.bigcode.TestCase
 import com.aurea.bigcode.UnitTest
+import com.aurea.bigcode.source.runner.JUnitParamsRunnerConfiguration
 import com.aurea.testgenerator.source.JavaClass
 import com.github.javaparser.ast.body.MethodDeclaration
 import groovy.util.logging.Log4j2
 
 import static BasicSourceCodeSupplier.from
 import static com.aurea.bigcode.source.CodeStyle.lineSeparator
+import static com.aurea.bigcode.source.imports.Imports.*
 import static java.util.Objects.requireNonNull
 
 @Log4j2
@@ -65,7 +67,11 @@ class SingleUnitTestBuilder {
     }
 """
 
-        new UnitTest(method: from(methodSourceCode).addImports(Imports.JUNIT_TEST, assertion))
+        BasicSourceCodeSupplier method = from(methodSourceCode)
+                .addDependencies(assertion)
+                .addImports(JUNIT_TEST)
+
+        new UnitTest(method: method)
     }
 
     UnitTest buildParametrizedUnitTest() {
@@ -87,7 +93,12 @@ class SingleUnitTestBuilder {
     }
 """
 
-        new UnitTest(method: from(methodSourceCode).addImports(Imports.JUNIT_TEST, Imports.JUNITPARAMS_PARAMETERS, assertion))
+        BasicSourceCodeSupplier method = from(methodSourceCode)
+                .addDependencies(assertion)
+                .addImports(JUNIT_TEST, JUNITPARAMS_PARAMETERS, JUNIT_RUNWITH, JUNITPARAMS_JUNITPARAMSRUNNER)
+                .addRunnerConfigurations(JUnitParamsRunnerConfiguration.createJUnitParamsRunnerConfiguration())
+
+        new UnitTest(method: method)
     }
 
     private createTestName() {

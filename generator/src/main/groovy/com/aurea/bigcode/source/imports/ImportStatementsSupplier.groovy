@@ -1,4 +1,4 @@
-package com.aurea.bigcode.source
+package com.aurea.bigcode.source.imports
 
 @FunctionalInterface
 interface ImportStatementsSupplier {
