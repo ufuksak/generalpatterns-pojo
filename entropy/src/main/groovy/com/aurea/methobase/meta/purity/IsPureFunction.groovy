@@ -1,6 +1,5 @@
 package com.aurea.methobase.meta.purity
 
-import com.aurea.testgenerator.symbolsolver.SymbolSolver
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.*
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
@@ -13,14 +12,25 @@ import java.util.function.Predicate
 /*
  * https://www.sitepoint.com/functional-programming-pure-functions/
  */
+
 @Log4j2
 class IsPureFunction implements Predicate<MethodDeclaration> {
 
     static final Map<Class<? extends Expression>, BiPredicate<? extends Expression, JavaParserFacade>> PURITY_FUNCTIONS
 
     static {
-        def PURE = { expr, context -> true }
-        def IMPURE = { expr, context -> false }
+        def PURE = new BiPredicate<? extends Expression, JavaParserFacade>() {
+            @Override
+            boolean test(Expression o, JavaParserFacade javaParserFacade) {
+                true
+            }
+        }
+        def IMPURE = new BiPredicate<? extends Expression, JavaParserFacade>() {
+            @Override
+            boolean test(Expression o, JavaParserFacade javaParserFacade) {
+                false
+            }
+        }
         PURITY_FUNCTIONS = [
                 (AnnotationExpr)            : PURE,
                 (BinaryExpr)                : PURE,
@@ -59,7 +69,7 @@ class IsPureFunction implements Predicate<MethodDeclaration> {
 
         ]
     }
-    
+
     JavaParserFacade solver
 
     IsPureFunction(JavaParserFacade solver) {
@@ -68,17 +78,17 @@ class IsPureFunction implements Predicate<MethodDeclaration> {
 
     @Override
     boolean test(MethodDeclaration n) {
-        List<Expression> expressions = n.findAll(Expression)
-        Map<Boolean, List<Expression>> partitionedExpressions = StreamEx.of(expressions).partitioningBy { Expression e ->
-            BiPredicate<? extends Expression, JavaParserFacade> tester = PURITY_FUNCTIONS.get(e.getClass())
-            tester.test(e, solver)
-        }
-        List<Expression> pureExpressions = partitionedExpressions[true]
-        List<Expression> impureExpressions = partitionedExpressions[false]
+        boolean pure = StreamEx.of(n.findAll(Expression)).allMatch { isPure it }
+        log.debug(n.findCompilationUnit()
+                   .flatMap { it.storage }
+                   .map { "${it.path}::${n.nameAsString} is ${pure ? "pure" : "impure"}" }
+                   .orElse("${n.nameAsString} is ${pure ? "pure" : "impure"}"))
+        pure
+    }
 
-        log.debug("Pure expressions: " + System.lineSeparator() + pureExpressions.collect{it.class.simpleName + ": " + it}.join(System.lineSeparator()))
-        log.debug("Impure expressions: " + System.lineSeparator() + impureExpressions.collect{it.class.simpleName + ": " + it}.join(System.lineSeparator()))
-
-        impureExpressions.empty
+    boolean isPure(Expression expr) {
+        boolean pure = PURITY_FUNCTIONS.get(expr.class).test(expr, solver)
+        log.trace "${expr.class.simpleName}: ${expr} is ${pure ? "pure" : "impure"}"
+        pure
     }
 }

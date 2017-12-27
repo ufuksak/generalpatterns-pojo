@@ -6,6 +6,7 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.resolution.MethodUsage
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
+import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration
 import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration
 import com.github.javaparser.resolution.types.ResolvedPrimitiveType
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
@@ -102,6 +103,76 @@ class JavaFacadeSpec extends Specification {
         usage.returnType().isPrimitive()
         usage.returnType().asPrimitive() == ResolvedPrimitiveType.INT
     }
+
+    def "java facade can resolve static method calls from another class in the same directory"() {
+        given:
+        File fooFile = fileWithCode '''
+            package foo;
+
+            import foo.Bar;
+            
+            class Foo {
+                int foo() {
+                    return Bar.bar();
+                } 
+            }
+        ''', 'Foo'
+
+        fileWithCode '''
+            package foo;
+
+            class Bar {
+                public static int bar() {
+                    return 4;
+                }
+            }
+        ''', 'Bar'
+
+        JavaParserFacade facade = getFacade()
+
+        when:
+        ResolvedReferenceTypeDeclaration typeDecl = facade.typeSolver.solveType('Bar')
+
+        then:
+        println typeDecl
+    }
+
+    def "java facade can resolve static method calls from another class from different package"() {
+        given:
+        File fooFile = fileWithCode '''
+            package foo;
+
+            import foo.bar.Bar;
+            
+            class Foo {
+                int foo() {
+                    return Bar.bar();
+                } 
+            }
+        ''', 'Foo'
+
+        folder.newFolder("bar")
+        File barJava = folder.newFile("bar/Bar.java")
+        barJava.text = '''
+            package foo.bar;
+
+            class Bar {
+                public static int bar() {
+                    return 4;
+                }
+            }
+        '''
+
+        JavaParserFacade facade = getFacade()
+
+        when:
+        ResolvedReferenceTypeDeclaration typeDecl = facade.typeSolver.solveType('Bar')
+
+        then:
+        println typeDecl
+    }
+
+
 
     File fileWithCode(String code, String className) {
         File file = folder.newFile("${className}.java")

@@ -265,6 +265,15 @@ class IsPureFunctionSpec extends Specification {
         '''
     }
 
+    def "calling method by class + method name is impure"() {
+        expect:
+        !runOnMethod('''
+            int foo() {
+                return Collections.emptyMap();
+            }
+        ''')
+    }
+
     boolean runOnMethod(String code) {
         runOnMethod(code, UnitHelper.TEST_CLASS_NAME, UnitHelper.PACKAGE_NAME)
     }
