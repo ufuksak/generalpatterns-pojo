@@ -61,7 +61,7 @@ class ProjectCrawler {
                     modules: StreamEx.of(modulePaths).map { modulePath ->
                         Path filePath = Paths.get("")
                         try {
-                            filePath = modulePath.subpath(2, modulePath.nameCount - 1)
+                            filePath = modulePath.subpath(2, modulePath.nameCount)
                         } catch (IllegalArgumentException iae) {}
                         new ModuleMetaInformation(filePath: filePath)
                     }.toList()

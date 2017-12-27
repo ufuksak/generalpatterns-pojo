@@ -14,9 +14,12 @@ import java.util.function.BiPredicate
 class ArrayAccessExprPureFunctionPredicate implements BiPredicate<ArrayAccessExpr, JavaParserFacade> {
     @Override
     boolean test(ArrayAccessExpr expr, JavaParserFacade context) {
-        NameExpr nameExpr = expr.name as NameExpr
-        boolean isAssignment = expr.parentNode.map { it instanceof AssignExpr }.orElse(false)
-        !(isAssignment && !isVariable(nameExpr, context))
+        if (expr.name instanceof NameExpr) {
+            NameExpr nameExpr = expr.name as NameExpr
+            boolean isAssignment = expr.parentNode.map { it instanceof AssignExpr }.orElse(false)
+            !(isAssignment && !isVariable(nameExpr, context))
+        }
+        false
     }
 
     static boolean isVariable(NameExpr nameExpr, JavaParserFacade context) {
