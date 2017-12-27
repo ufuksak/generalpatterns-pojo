@@ -1,5 +1,6 @@
 package com.aurea.methobase
 
+import com.aurea.methobase.meta.JavaParserFacadeFactory
 import com.aurea.methobase.meta.MetaInformation
 import com.aurea.methobase.meta.MetaInformationRepository
 import com.github.javaparser.JavaParser
