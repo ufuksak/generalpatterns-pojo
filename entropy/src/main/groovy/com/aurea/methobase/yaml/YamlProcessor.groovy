@@ -19,7 +19,13 @@ abstract class YamlProcessor<T extends MetaInformation> {
         this.consumer = consumer
     }
 
+    YamlProcessor() {}
+
     void process(File yamlFileOrFolder) {
+        consumer.accept(processYaml(yamlFileOrFolder))
+    }
+
+    StreamEx<T> processYaml(File yamlFileOrFolder) {
         if (!yamlFileOrFolder.exists()) {
             println "File not found: " + yamlFileOrFolder
             exit(-1)
@@ -28,7 +34,7 @@ abstract class YamlProcessor<T extends MetaInformation> {
         List<File> ymlFiles = yamlFileOrFolder.directory ? yamlFileOrFolder.listFiles().toList() : [yamlFileOrFolder]
         total = ymlFiles.size()
 
-        consumer.accept(StreamEx.of(ymlFiles).parallel().flatMap{ ymlToComplexityLocEntries(it) })
+        StreamEx.of(ymlFiles).parallel().flatMap{ ymlToComplexityLocEntries(it) }
     }
 
     StreamEx<T> ymlToComplexityLocEntries(File ymlFile) {

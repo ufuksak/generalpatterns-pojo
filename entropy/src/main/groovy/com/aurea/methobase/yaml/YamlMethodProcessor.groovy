@@ -9,6 +9,8 @@ class YamlMethodProcessor extends YamlProcessor<MethodMetaInformation> {
         super(consumer)
     }
 
+    YamlMethodProcessor() {}
+
     @Override
     protected YamlMetaInformationRepository<MethodMetaInformation> createRepository(File ymlFile) {
         YamlMetaInformationRepository.createForMethods(ymlFile)
