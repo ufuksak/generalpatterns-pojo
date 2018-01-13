@@ -288,7 +288,7 @@ class IsPureFunctionSpec extends Specification {
         """
         File file = folder.newFile("${className}.java")
         file.text = javaText
-        CompilationUnit cu = UnitHelper.getUnitForCode(file).get()
+        CompilationUnit cu = UnitHelper.getUnitForCode(file)
         MethodDeclaration md = cu.findAll(MethodDeclaration).first()
 
         matcher.test(md)
@@ -309,7 +309,7 @@ class IsPureFunctionSpec extends Specification {
         """
         File file = folder.newFile("${className}.java")
         file.text = javaText
-        CompilationUnit cu = UnitHelper.getUnitForCode(file).get()
+        CompilationUnit cu = UnitHelper.getUnitForCode(file)
         MethodDeclaration md = cu.findAll(MethodDeclaration).first()
 
         matcher.test(md)

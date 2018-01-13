@@ -17,7 +17,7 @@ class ArrayAccessExprPureFunctionPredicate implements BiPredicate<ArrayAccessExp
         if (expr.name instanceof NameExpr) {
             NameExpr nameExpr = expr.name as NameExpr
             boolean isAssignment = expr.parentNode.map { it instanceof AssignExpr }.orElse(false)
-            !(isAssignment && !isVariable(nameExpr, context))
+            return !(isAssignment && !isVariable(nameExpr, context))
         }
         false
     }

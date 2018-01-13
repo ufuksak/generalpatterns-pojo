@@ -20,7 +20,11 @@ class ClassCrawler extends Crawler<ClassMetaInformation> {
         }
     }
 
-    static Map<Path, SymbolSolver> SOLVERS
+    static Map<Path, SymbolSolver> SOLVERS = Collections.emptyMap()
+    static SymbolSolver NO_SYMBOLS = new SymbolSolver(
+            new JavaSourceFinder(),
+            Paths.get(""),
+            NO_FILTER)
 
     ClassCrawler(CrawlerConfiguration config) {
         super(config, YamlMetaInformationRepository.&createForMethods)
@@ -28,7 +32,7 @@ class ClassCrawler extends Crawler<ClassMetaInformation> {
 
     @Override
     protected List<ClassMetaInformation> toMetaInformations(Unit unit) {
-        SymbolSolver solver = SOLVERS[unit.modulePath.subpath(0, 1)]
+        SymbolSolver solver = SOLVERS.getOrDefault(unit.modulePath.subpath(0, 1), NO_SYMBOLS)
         TypeVisitor visitor = new TypeVisitor(solver)
         unit.cu.accept(visitor, unit)
         visitor.metas

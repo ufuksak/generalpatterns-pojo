@@ -9,6 +9,8 @@ import groovy.util.logging.Log4j2
 @Log4j2
 final class UnitHelper {
 
+    static final TEST_CLASS_NAME = "Sample"
+    static final PACKAGE_NAME = "com.aurea.sample"
     static final TEST_CLASS = new JavaClass('com.aurea.sample.Sample')
 
     static MethodDeclaration getMethodFromSource(String code) {
