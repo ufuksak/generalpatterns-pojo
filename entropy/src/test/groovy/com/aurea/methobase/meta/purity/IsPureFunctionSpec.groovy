@@ -6,6 +6,12 @@ import com.aurea.testgenerator.source.SourceFilter
 import com.aurea.testgenerator.symbolsolver.SymbolSolver
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
+import org.junit.Rule
+import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 import java.nio.file.Path
@@ -13,18 +19,17 @@ import java.nio.file.Paths
 
 class IsPureFunctionSpec extends Specification {
 
-    static final SourceFilter NO_FILTER = new SourceFilter() {
-        @Override
-        boolean test(Path path) {
-            true
-        }
-    }
-
     IsPureFunction matcher
 
+    @Rule
+    TemporaryFolder folder = new TemporaryFolder()
+
     def setup() {
-        JavaSourceFinder finder = new JavaSourceFinder()
-        SymbolSolver solver = new SymbolSolver(finder, Paths.get(""), NO_FILTER)
+        JavaParserFacade solver = JavaParserFacade.get(new CombinedTypeSolver(
+                new ReflectionTypeSolver(),
+                new JavaParserTypeSolver(folder.root)
+        ))
+
         matcher = new IsPureFunction(solver)
     }
 
@@ -155,7 +160,7 @@ class IsPureFunctionSpec extends Specification {
 
     def "getting static constant field without referencing class should be pure"() {
         expect:
-        !runOnClass('''
+        runOnClass('''
             class Foo {
                 private static final int i = 123;
              
@@ -260,14 +265,51 @@ class IsPureFunctionSpec extends Specification {
         '''
     }
 
+    def "calling method by class + method name is impure"() {
+        expect:
+        !runOnMethod('''
+            int foo() {
+                return Collections.emptyMap();
+            }
+        ''')
+    }
+
     boolean runOnMethod(String code) {
-        MethodDeclaration md = UnitHelper.getMethodFromSource(code)
+        runOnMethod(code, UnitHelper.TEST_CLASS_NAME, UnitHelper.PACKAGE_NAME)
+    }
+
+    boolean runOnMethod(String code, String className, String packageName) {
+        String javaText = """
+            package $packageName;
+            
+            class $className {
+                $code 
+            }
+        """
+        File file = folder.newFile("${className}.java")
+        file.text = javaText
+        CompilationUnit cu = UnitHelper.getUnitForCode(file).get()
+        MethodDeclaration md = cu.findAll(MethodDeclaration).first()
 
         matcher.test(md)
     }
 
     boolean runOnClass(String code) {
-        CompilationUnit cu = UnitHelper.getUnitForCode(code)
+        runOnClass(code, 'Foo', UnitHelper.PACKAGE_NAME)
+    }
+
+    boolean runOnClass(String code, String className) {
+        runOnClass(code, className, UnitHelper.PACKAGE_NAME)
+    }
+
+    boolean runOnClass(String code, String className, String packageName) {
+        String javaText = """
+            package $packageName;
+            $code
+        """
+        File file = folder.newFile("${className}.java")
+        file.text = javaText
+        CompilationUnit cu = UnitHelper.getUnitForCode(file).get()
         MethodDeclaration md = cu.findAll(MethodDeclaration).first()
 
         matcher.test(md)

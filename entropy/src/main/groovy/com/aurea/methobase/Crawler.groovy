@@ -5,6 +5,7 @@ import com.aurea.methobase.meta.MetaInformationRepository
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.jasongoodwin.monads.Try
+import groovy.util.logging.Log4j2
 import one.util.streamex.IntStreamEx
 import one.util.streamex.StreamEx
 
@@ -15,6 +16,7 @@ import java.util.concurrent.Executors
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit
 
+@Log4j2
 abstract class Crawler<T extends MetaInformation> {
 
     CopyOnWriteArrayList<File> failedToParse = []
@@ -37,7 +39,7 @@ abstract class Crawler<T extends MetaInformation> {
                                       .toList()
 
         List<Map.Entry<Integer, List<File>>> entries = StreamEx.ofSubLists(files, Math.min(config.numberOfFilesInChunk, files.size()))
-                                                               .mapToEntry({config.chunkProgress.incrementAndGet()}, { it })
+                                                               .mapToEntry({ config.chunkProgress.incrementAndGet() }, { it })
                                                                .toList()
         StreamEx.of(entries).each { entry ->
             Try.ofFailable {
@@ -65,16 +67,16 @@ abstract class Crawler<T extends MetaInformation> {
         List<T> metas = []
         try {
             metas = StreamEx.of(javaFiles)
-                                    .parallel()
-                                    .map { toUnit it }
-                                    .flatMap { it.stream() }
-                                    .map { toMetaInformations it }
-                                    .flatMap { it.stream() }
-                                    .toList()
+                            .parallel()
+                            .map { toUnit it }
+                            .flatMap { it.stream() }
+                            .map { toMetaInformations it }
+                            .flatMap { it.stream() }
+                            .toList()
         } catch (Exception e) {
-            println "Failed to crawl chunk $count"
+            log.error "Failed to crawl chunk $count", e
         } catch (StackOverflowError stackOverflowError) {
-            println "Failed parsing $count with stack overflow"
+            log.error "Failed parsing $count with stack overflow", stackOverflowError
         }
         println "Finished chunk ${count} / ${config.chunkProgress}. It has ${metas.size()} metas."
         metas

@@ -7,6 +7,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.Parameter
 import com.github.javaparser.ast.body.VariableDeclarator
+import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import groovy.transform.Canonical
 
 @Canonical
@@ -15,8 +16,9 @@ class MethodContext {
     NodeList<Parameter> methodParameters
     List<VariableDeclarator> classVariables
 
-    static MethodContext buildForMethod(MethodDeclaration md) {
+    static MethodContext buildForMethod(MethodDeclaration md, JavaParserFacade solver) {
         List<VariableDeclarator> classVariables = []
+        
 
         findAllFieldNames(md, classVariables)
 

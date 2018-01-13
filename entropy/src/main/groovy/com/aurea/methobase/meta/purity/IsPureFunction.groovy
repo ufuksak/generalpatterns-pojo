@@ -1,8 +1,8 @@
 package com.aurea.methobase.meta.purity
 
-import com.aurea.testgenerator.symbolsolver.SymbolSolver
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.*
+import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
 
@@ -12,14 +12,25 @@ import java.util.function.Predicate
 /*
  * https://www.sitepoint.com/functional-programming-pure-functions/
  */
+
 @Log4j2
 class IsPureFunction implements Predicate<MethodDeclaration> {
 
-    static final Map<Class<? extends Expression>, BiPredicate<? extends Expression, MethodContext>> PURITY_FUNCTIONS
+    static final Map<Class<? extends Expression>, BiPredicate<? extends Expression, JavaParserFacade>> PURITY_FUNCTIONS
 
     static {
-        def PURE = { expr, context -> true }
-        def IMPURE = { expr, context -> false }
+        def PURE = new BiPredicate<? extends Expression, JavaParserFacade>() {
+            @Override
+            boolean test(Expression o, JavaParserFacade javaParserFacade) {
+                true
+            }
+        }
+        def IMPURE = new BiPredicate<? extends Expression, JavaParserFacade>() {
+            @Override
+            boolean test(Expression o, JavaParserFacade javaParserFacade) {
+                false
+            }
+        }
         PURITY_FUNCTIONS = [
                 (AnnotationExpr)            : PURE,
                 (BinaryExpr)                : PURE,
@@ -37,7 +48,7 @@ class IsPureFunction implements Predicate<MethodDeclaration> {
                 (IntegerLiteralExpr)        : PURE,
                 (LongLiteralExpr)           : PURE,
                 (MarkerAnnotationExpr)      : PURE,
-                (NameExpr)                  : PURE,
+                (NameExpr)                  : new NameExprPureFunctionPredicate(),
                 (NormalAnnotationExpr)      : PURE,
                 (NullLiteralExpr)           : PURE,
                 (SingleMemberAnnotationExpr): PURE,
@@ -59,27 +70,25 @@ class IsPureFunction implements Predicate<MethodDeclaration> {
         ]
     }
 
-    SymbolSolver solver
+    JavaParserFacade solver
 
-    IsPureFunction(SymbolSolver solver) {
+    IsPureFunction(JavaParserFacade solver) {
         this.solver = solver
     }
 
     @Override
     boolean test(MethodDeclaration n) {
-        List<Expression> expressions = n.findAll(Expression)
-        MethodContext context = MethodContext.buildForMethod(n)
+        boolean pure = StreamEx.of(n.findAll(Expression)).allMatch { isPure it }
+        log.debug(n.findCompilationUnit()
+                   .flatMap { it.storage }
+                   .map { "${it.path}::${n.nameAsString} is ${pure ? "pure" : "impure"}" }
+                   .orElse("${n.nameAsString} is ${pure ? "pure" : "impure"}"))
+        pure
+    }
 
-        Map<Boolean, List<Expression>> partitionedExpressions = StreamEx.of(expressions).partitioningBy { Expression e ->
-            BiPredicate<? extends Expression, MethodContext> tester = PURITY_FUNCTIONS.get(e.getClass())
-            tester.test(e, context)
-        }
-        List<Expression> pureExpressions = partitionedExpressions[true]
-        List<Expression> impureExpressions = partitionedExpressions[false]
-
-        log.debug("Pure expressions: " + System.lineSeparator() + pureExpressions.join(System.lineSeparator()))
-        log.debug("Impure expressions: " + System.lineSeparator() + impureExpressions.join(System.lineSeparator()))
-
-        impureExpressions.empty
+    boolean isPure(Expression expr) {
+        boolean pure = PURITY_FUNCTIONS.get(expr.class).test(expr, solver)
+        log.trace "${expr.class.simpleName}: ${expr} is ${pure ? "pure" : "impure"}"
+        pure
     }
 }
