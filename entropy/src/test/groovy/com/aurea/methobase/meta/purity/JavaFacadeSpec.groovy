@@ -166,7 +166,7 @@ class JavaFacadeSpec extends Specification {
         JavaParserFacade facade = getFacade()
 
         when:
-        ResolvedReferenceTypeDeclaration typeDecl = facade.typeSolver.solveType('Bar')
+        ResolvedReferenceTypeDeclaration typeDecl = facade.typeSolver.solveType('bar.Bar')
 
         then:
         println typeDecl
