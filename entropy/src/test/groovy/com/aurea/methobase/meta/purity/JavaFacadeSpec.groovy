@@ -139,7 +139,7 @@ class JavaFacadeSpec extends Specification {
 
     def "java facade can resolve static method calls from another class from different package"() {
         given:
-        File fooFile = fileWithCode '''
+        fileWithCode '''
             package foo;
 
             import foo.bar.Bar;
@@ -188,7 +188,7 @@ class JavaFacadeSpec extends Specification {
     }
 
     private static MethodDeclaration getFirstMethodDeclaration(File classFile) {
-        CompilationUnit cu = UnitHelper.getUnitForCode(classFile).get()
+        CompilationUnit cu = UnitHelper.getUnitForCode(classFile)
         MethodDeclaration md = cu.findAll(MethodDeclaration).first()
         md
     }

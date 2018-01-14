@@ -23,7 +23,7 @@ class MethodCrawlerSpec extends Specification {
                 reportIntervalSeconds: 1,
                 fileSizeLimit: 1_000_000,
                 saveToFolder: outputFolder
-        ))
+        ), [])
 
         when:
         crawler.run([
@@ -51,7 +51,7 @@ class Foo {
                 reportIntervalSeconds: 1,
                 fileSizeLimit: 1_000_000,
                 saveToFolder: outputFolder
-        ))
+        ), [])
 
         when:
         crawler.run([

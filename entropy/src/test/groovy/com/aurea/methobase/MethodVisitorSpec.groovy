@@ -31,8 +31,7 @@ class MethodVisitorSpec extends Specification {
     }
 
     MethodMetaInformation fromMethod(String methodCode) {
-        Optional<CompilationUnit> maybeUnit = UnitHelper.getUnitForMethod(methodCode)
-        CompilationUnit unit = maybeUnit.orElseThrow { throw new IllegalArgumentException("Faled to parse code: $methodCode") }
+        CompilationUnit unit = UnitHelper.getUnitForMethod(methodCode)
         MethodDeclaration md = unit.findAll(MethodDeclaration).first()
         JavaParserFacadeFactory factory = new JavaParserFacadeFactory([])
         MethodVisitor visitor = new MethodVisitor(factory)
