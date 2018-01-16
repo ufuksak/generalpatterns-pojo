@@ -1,76 +1,28 @@
 group 'com.aurea.bigcode'
-version version
+
+buildscript {
+    repositories {
+        maven { url 'https://repo.spring.io/plugins-snapshot' }
+    }
+    dependencies {
+        classpath 'io.spring.gradle:dependency-management-plugin:1.0.5.BUILD-SNAPSHOT'
+    }
+}
 
 subprojects {
-    apply plugin: 'java-library'
-    apply plugin: 'groovy'
-    apply plugin: 'maven-publish'
-
     repositories {
-        jcenter()
         mavenCentral()
         maven {
             url "https://scm.devfactory.com/nexus/content/repositories/EngUnitTests"
         }
     }
 
-    /** Not sure what does this do, but without it class from :common is not available in other projects
-     *  pasted from here: https://docs.gradle.org/current/userguide/java_library_plugin.html             **/
-    configurations {
-        apiElements {
-            outgoing.variants.getByName('classes').artifact(
-                    file: compileGroovy.destinationDir,
-                    type: ArtifactTypeDefinition.JVM_CLASS_DIRECTORY,
-                    builtBy: compileGroovy)
-        }
-    }
+    apply from: "${rootDir}/compilation.gradle"
+    apply from: "${rootDir}/dependencies.gradle"
+    apply from: "${rootDir}/publishing.gradle"
 
-    dependencies {
-        implementation group: 'org.codehaus.groovy', name: 'groovy-all', version: '2.4.12'
-        implementation group: 'com.github.javaparser', name: 'javaparser-core', version: '3.5.10'
-        implementation group: 'com.github.javaparser', name: 'java-symbol-solver-core', version: '0.6.6'
-        implementation group: 'junit', name: 'junit', version: '4.12'
-        implementation group: 'org.codehaus.janino', name: 'janino', version: '3.0.8'
-        implementation group: 'pl.pragmatists', name: 'JUnitParams', version: '1.1.1'
-        implementation group: 'com.jason-goodwin', name: 'better-monads', version: '0.4.1'
-        implementation group: 'com.aurea', name: 'test-generator', version: '1.0'
-        implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.10.0'
-        implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.10.0'
-        implementation group: 'org.apache.commons', name: 'commons-lang3', version: '3.7'
-        implementation group: 'one.util', name: 'streamex', version: '0.6.6'
+}
 
-        testImplementation group: 'junit', name: 'junit', version: '4.12'
-        testImplementation group: 'org.spockframework', name: 'spock-core', version: '1.1-groovy-2.4'
-        testImplementation group: 'org.mockito', name: 'mockito-core', version: '2.10.0'
-        testImplementation group: 'org.assertj', name: 'assertj-core', version: '3.8.0'
-    }
-
-
-    sourceCompatibility = "1.9"
-    targetCompatibility = "1.9"
-
-    sourceSets {
-        main {
-            java { srcDirs = [] }    // no source dirs for the java compiler
-            groovy { //noinspection GroovyAssignabilityCheck
-                srcDirs = ["src/main/java", "src/main/groovy"] }  // compile   everything in src/ with groovy
-        }
-    }
-
-    publishing {
-        publications {
-            maven(MavenPublication) {
-                groupId 'com.aurea.bigcode'
-                artifactId 'bigcode'
-                version version
-
-                from components.java
-            }
-        }
-        repositories {
-            maven {
-                url 'https://scm.devfactory.com/nexus/content/repositories/EngUnitTests'
-            }
-        }
-    }
+task createWrapper(type: Wrapper) {
+    gradleVersion = "4.4.1"
 }

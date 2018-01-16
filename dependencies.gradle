@@ -1,0 +1,56 @@
+apply plugin: 'io.spring.dependency-management'
+
+def DEPENDENCY_RESOLUTION_STRATEGY = {
+    preferProjectModules()
+}
+
+dependencyManagement {
+    // Forbid override in subprojects for consistency reasons
+    overriddenByDependencies(false)
+    // Apply common resolution strategy in dependency management
+    resolutionStrategy DEPENDENCY_RESOLUTION_STRATEGY
+
+    // Consistent Dependency Management configuration across all subprojects
+    dependencies {
+        dependency 'org.codehaus.groovy:groovy-all:2.4.12'
+        dependency 'com.github.javaparser:javaparser-core:3.5.10'
+        dependency 'com.github.javaparser:java-symbol-solver-core:0.6.6'
+        dependency 'junit:junit:4.12'
+        dependency 'org.codehaus.janino:janino:3.0.8'
+        dependency 'pl.pragmatists:JUnitParams:1.1.1'
+        dependency 'com.jason-goodwin:better-monads:0.4.1'
+        dependency 'com.aurea:test-generator:1.0'
+        dependency 'org.apache.logging.log4j:log4j-api:2.10.0'
+        dependency 'org.apache.logging.log4j:log4j-core:2.10.0'
+        dependency 'org.apache.commons:commons-lang3:3.7'
+        dependency 'one.util:streamex:0.6.6'
+        dependency 'com.esotericsoftware.yamlbeans:yamlbeans:1.12'
+
+        dependency 'junit:junit:4.12'
+        dependency 'org.spockframework:spock-core:1.1-groovy-2.4'
+        dependency 'org.mockito:mockito-core:2.10.0'
+        dependency 'org.assertj:assertj-core:3.8.0'
+        dependency 'pl.pragmatists:JUnitParams:1.1.1'
+    }
+}
+
+dependencies {
+    implementation 'org.codehaus.groovy:groovy-all'
+    implementation 'com.github.javaparser:javaparser-core'
+    implementation 'com.github.javaparser:java-symbol-solver-core'
+    implementation 'com.jason-goodwin:better-monads'
+    implementation 'org.apache.logging.log4j:log4j-api'
+    implementation 'org.apache.logging.log4j:log4j-core'
+    implementation 'org.apache.commons:commons-lang3'
+    implementation 'one.util:streamex'
+
+    testImplementation 'junit:junit'
+    testImplementation 'pl.pragmatists:JUnitParams'
+    testImplementation 'org.spockframework:spock-core'
+    testImplementation 'org.mockito:mockito-core'
+    testImplementation 'org.assertj:assertj-core'
+}
+
+dependencies {
+    implementation 'com.aurea:test-generator:1.0'
+}

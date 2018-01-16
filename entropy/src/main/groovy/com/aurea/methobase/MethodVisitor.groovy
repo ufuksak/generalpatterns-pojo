@@ -2,7 +2,7 @@ package com.aurea.methobase
 
 import com.aurea.methobase.meta.JavaParserFacadeFactory
 import com.aurea.methobase.meta.MethodMetaInformation
-import com.aurea.methobase.meta.purity.IsPureFunction
+
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.type.Type
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
@@ -59,6 +59,6 @@ class MethodVisitor extends VoidVisitorAdapter<Unit> {
     }
 
     private static boolean isPure(MethodDeclaration n, JavaParserFacade solver) {
-        new IsPureFunction(solver).test(n)
+        false
     }
 }

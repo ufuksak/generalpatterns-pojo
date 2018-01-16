@@ -1,0 +1,45 @@
+apply plugin: 'java-library'
+apply plugin: 'groovy'
+
+/** Not sure what does this do, but without it class from :common is not available in other projects
+ *  pasted from here: https://docs.gradle.org/current/userguide/java_library_plugin.html             **/
+configurations {
+    apiElements {
+        outgoing.variants.getByName('classes').artifact(
+                file: compileGroovy.destinationDir,
+                type: ArtifactTypeDefinition.JVM_CLASS_DIRECTORY,
+                builtBy: compileGroovy)
+    }
+}
+
+sourceCompatibility = "1.9"
+targetCompatibility = "1.9"
+
+sourceSets {
+    main {
+        java { srcDirs = [] }    // no source dirs for the java compiler
+        groovy { //noinspection GroovyAssignabilityCheck
+            srcDirs = ["src/main/java", "src/main/groovy"] }  // compile   everything in src/ with groovy
+    }
+}
+
+compileGroovy {
+    // Allow Groovy to do its grooviness
+    options.forkOptions.jvmArgs << "--add-opens=java.base/java.lang=ALL-UNNAMED"
+    options.forkOptions.jvmArgs << "--add-opens=java.base/java.lang.invoke=ALL-UNNAMED"
+}
+
+test {
+    jvmArgs = ["--add-opens=java.base/java.lang=ALL-UNNAMED",
+               "--add-opens=java.base/java.lang.invoke=ALL-UNNAMED",
+               "--add-opens=java.base/java.lang.reflect=ALL-UNNAMED",
+               "--add-opens=java.base/java.io=ALL-UNNAMED",
+               "--add-opens=java.base/java.util=ALL-UNNAMED",
+               "--add-opens=java.base/java.util.concurrent=ALL-UNNAMED",
+               "--add-opens=java.base/java.util.concurrent.atomic=ALL-UNNAMED",
+               "--add-opens=java.base/java.util.function=ALL-UNNAMED",
+               "--add-opens=java.base/java.util.stream=ALL-UNNAMED",
+               "--add-opens=java.base/java.nio.file=ALL-UNNAMED",
+               "--add-opens=java.base/sun.nio.fs=ALL-UNNAMED",
+    ]
+}

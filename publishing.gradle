@@ -1,0 +1,18 @@
+apply plugin: 'maven-publish'
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            groupId 'com.aurea.bigcode'
+            artifactId 'bigcode'
+            version version
+
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url 'https://scm.devfactory.com/nexus/content/repositories/EngUnitTests'
+        }
+    }
+}
