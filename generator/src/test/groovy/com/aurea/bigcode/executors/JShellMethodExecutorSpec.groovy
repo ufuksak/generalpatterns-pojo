@@ -8,6 +8,7 @@ import com.aurea.bigcode.executors.jshell.JShellContext
 import com.aurea.bigcode.executors.jshell.JShellMethodExecutor
 import com.aurea.methobase.MethodVisitor
 import com.aurea.methobase.Unit
+import com.aurea.methobase.meta.JavaParserFacadeFactory
 import com.aurea.methobase.meta.MethodMetaInformation
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.MethodDeclaration
@@ -120,7 +121,7 @@ class JShellMethodExecutorSpec extends Specification {
     private static TestedMethod createUTAMethod(String methodCode) {
         CompilationUnit cu = UnitHelper.getUnitForMethod(methodCode)
         MethodDeclaration methodDeclaration = cu.findFirst(MethodDeclaration).get()
-        MethodVisitor visitor = new MethodVisitor()
+        MethodVisitor visitor = new MethodVisitor(new JavaParserFacadeFactory([]))
         visitor.visit(methodDeclaration, new Unit(cu, UnitHelper.TEST_CLASS_NAME, Paths.get("dummy")))
         MethodMetaInformation meta = visitor.getMethodMetaInformations().first()
         return new TestedMethod(meta, methodDeclaration)
