@@ -44,7 +44,6 @@ class JavaFacadeSpec extends Specification {
         reference.getCorrespondingDeclaration().isField()
         ResolvedFieldDeclaration rfd = reference.getCorrespondingDeclaration().asField()
         rfd.isStatic()
-        rfd.isFinal()
     }
 
     def "with java paraser facade it is possible to say whether field declared in parent class is being referenced"() {
@@ -74,7 +73,6 @@ class JavaFacadeSpec extends Specification {
         reference.getCorrespondingDeclaration().isField()
         ResolvedFieldDeclaration rfd = reference.getCorrespondingDeclaration().asField()
         rfd.isStatic()
-        rfd.isFinal()
     }
 
 

@@ -20,8 +20,10 @@ dependencyManagement {
         dependency 'pl.pragmatists:JUnitParams:1.1.1'
         dependency 'com.jason-goodwin:better-monads:0.4.1'
         dependency 'com.aurea:test-generator:1.0'
-        dependency 'org.apache.logging.log4j:log4j-api:2.10.0'
-        dependency 'org.apache.logging.log4j:log4j-core:2.10.0'
+        dependencySet(group: 'org.apache.logging.log4j', version: '2.10.0') {
+            entry 'log4j-api'
+            entry 'log4j-core'
+        }
         dependency 'org.apache.commons:commons-lang3:3.7'
         dependency 'one.util:streamex:0.6.6'
         dependency 'com.esotericsoftware.yamlbeans:yamlbeans:1.12'
