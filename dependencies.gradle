@@ -27,7 +27,20 @@ dependencyManagement {
         dependency 'org.apache.commons:commons-lang3:3.7'
         dependency 'one.util:streamex:0.6.6'
         dependency 'com.esotericsoftware.yamlbeans:yamlbeans:1.12'
+        dependency 'com.google.guava:guava:21.0'
+        dependency 'com.fasterxml.jackson.core:jackson-databind:2.8.9'
+        dependency 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.8.9'
+        dependencySet(group: 'org.springframework', version: '5.0.2.RELEASE') {
+            entry 'spring-core'
+            entry 'spring-beans'
+            entry 'spring-context'
+            entry 'spring-aspects'
+        }
+        dependency 'com.aurea:jacoco-parser:2.1.0'
 
+
+
+        //Test dependencies
         dependency 'junit:junit:4.12'
         dependency 'org.spockframework:spock-core:1.1-groovy-2.4'
         dependency 'org.mockito:mockito-core:2.10.0'
@@ -45,6 +58,10 @@ dependencies {
     implementation 'org.apache.logging.log4j:log4j-core'
     implementation 'org.apache.commons:commons-lang3'
     implementation 'one.util:streamex'
+    implementation 'org.springframework:spring-core'
+    implementation 'org.springframework:spring-beans'
+    implementation 'org.springframework:spring-context'
+    implementation 'org.springframework:spring-aspects'
 
     testImplementation 'junit:junit'
     testImplementation 'pl.pragmatists:JUnitParams'
