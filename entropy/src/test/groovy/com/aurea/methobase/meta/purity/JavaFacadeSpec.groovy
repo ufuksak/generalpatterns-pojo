@@ -73,6 +73,7 @@ class JavaFacadeSpec extends Specification {
         reference.getCorrespondingDeclaration().isField()
         ResolvedFieldDeclaration rfd = reference.getCorrespondingDeclaration().asField()
         rfd.isStatic()
+        rfd.isFinal()
     }
 
 
@@ -104,7 +105,7 @@ class JavaFacadeSpec extends Specification {
 
     def "java facade can resolve static method calls from another class in the same directory"() {
         given:
-        File fooFile = fileWithCode '''
+        fileWithCode '''
             package foo;
 
             import foo.Bar;
