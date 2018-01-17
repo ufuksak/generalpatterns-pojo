@@ -1,6 +1,6 @@
 dependencies {
     implementation project(":commons")
-    implementation project(":dao")
+    implementation project(":source-code")
 
     implementation 'com.aurea:jacoco-parser'
     implementation 'com.github.javafaker:javafaker'

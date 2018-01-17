@@ -22,15 +22,16 @@ import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+import one.util.streamex.StreamEx;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Bean;
+
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import one.util.streamex.StreamEx;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
 
 public abstract class SingleModuleConfig {
 
@@ -98,7 +99,9 @@ public abstract class SingleModuleConfig {
     }
 
     @Bean
-    public SourceFilter sourceFilter() { return p -> true; }
+    public SourceFilter sourceFilter() {
+        return p -> true;
+    }
 
     @Bean
     public String projectName() {
@@ -106,7 +109,9 @@ public abstract class SingleModuleConfig {
     }
 
     protected abstract Path src();
+
     protected abstract Class<? extends PatternMatcher> matcherClass();
+
     protected abstract MatchCollector collector();
 
     protected List<PipelineBuilder> pipelineBuilders() {

@@ -1,6 +1,6 @@
 rootProject.name = 'BigCode'
 
-include 'dao'
+include 'source-code'
 include 'commons'
 //include 'generator'
 include 'patterns'

@@ -1,6 +1,6 @@
 dependencies {
     implementation project(":commons")
-    implementation project(":dao")
+    implementation project(":source-code")
     implementation project(":patterns")
 
     implementation('com.github:javacode-to-xml-converter') {
