@@ -1,0 +1,5 @@
+dependencies {
+    implementation project(":source-code")
+
+    implementation 'com.aurea:jacoco-parser'
+}

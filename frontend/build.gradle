@@ -1,6 +1,7 @@
 dependencies {
     implementation project(":commons")
     implementation project(":source-code")
+    implementation project(":coverage")
     implementation project(":patterns")
 
     implementation('com.github:javacode-to-xml-converter') {

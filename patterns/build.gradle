@@ -1,5 +1,6 @@
 dependencies {
     implementation project(":commons")
+    implementation project(":coverage")
     implementation project(":source-code")
 
     implementation 'com.aurea:jacoco-parser'
