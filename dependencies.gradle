@@ -35,10 +35,12 @@ dependencyManagement {
             entry 'spring-beans'
             entry 'spring-context'
             entry 'spring-aspects'
+            entry 'spring-test'
         }
         dependency 'com.aurea:jacoco-parser:2.1.0'
-
-
+        dependency 'com.github.javafaker:javafaker:0.13'
+        dependency 'pl.allegro.finance:tradukisto:0.5.1'
+        dependency 'com.github:javacode-to-xml-converter:2.0'
 
         //Test dependencies
         dependency 'junit:junit:4.12'
@@ -46,13 +48,16 @@ dependencyManagement {
         dependency 'org.mockito:mockito-core:2.10.0'
         dependency 'org.assertj:assertj-core:3.8.0'
         dependency 'pl.pragmatists:JUnitParams:1.1.1'
+        dependency 'org.spockframework:spock-spring:1.1-groovy-2.4'
     }
 }
 
 dependencies {
     implementation 'org.codehaus.groovy:groovy-all'
     implementation 'com.github.javaparser:aurea-javaparser-core'
-    implementation 'com.github.javaparser:java-symbol-solver-core'
+    implementation('com.github.javaparser:java-symbol-solver-core') {
+        exclude group: 'com.github.javaparser', module: 'javaparser-core'
+    }
     implementation 'com.jason-goodwin:better-monads'
     implementation 'org.apache.logging.log4j:log4j-api'
     implementation 'org.apache.logging.log4j:log4j-core'
@@ -68,4 +73,6 @@ dependencies {
     testImplementation 'org.spockframework:spock-core'
     testImplementation 'org.mockito:mockito-core'
     testImplementation 'org.assertj:assertj-core'
+    testImplementation 'org.spockframework:spock-spring'
+    testImplementation 'org.springframework:spring-test'
 }

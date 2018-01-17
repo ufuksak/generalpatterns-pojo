@@ -1,0 +1,13 @@
+dependencies {
+    implementation project(":commons")
+    implementation project(":dao")
+
+    implementation 'com.aurea:jacoco-parser'
+    implementation 'com.github.javafaker:javafaker'
+    implementation('com.github:javacode-to-xml-converter') {
+        exclude group: 'com.github.javaparser', module: 'javaparser-core'
+    }
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'pl.allegro.finance:tradukisto'
+}

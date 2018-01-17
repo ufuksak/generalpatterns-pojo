@@ -27,6 +27,7 @@ compileGroovy {
     // Allow Groovy to do its grooviness
     options.forkOptions.jvmArgs << "--add-opens=java.base/java.lang=ALL-UNNAMED"
     options.forkOptions.jvmArgs << "--add-opens=java.base/java.lang.invoke=ALL-UNNAMED"
+    options.forkOptions.jvmArgs << "--add-modules=java.xml.ws.annotation"
 }
 
 test {

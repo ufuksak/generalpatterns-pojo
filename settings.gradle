@@ -2,7 +2,7 @@ rootProject.name = 'BigCode'
 
 include 'dao'
 include 'commons'
-include 'common'
-include 'entropy'
-include 'generator'
+//include 'generator'
+include 'patterns'
+include 'frontend'
 

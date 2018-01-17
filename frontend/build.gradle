@@ -1,0 +1,9 @@
+dependencies {
+    implementation project(":commons")
+    implementation project(":dao")
+    implementation project(":patterns")
+
+    implementation('com.github:javacode-to-xml-converter') {
+        exclude group: 'com.github.javaparser', module: 'javaparser-core'
+    }
+}

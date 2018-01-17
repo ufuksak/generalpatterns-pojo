@@ -1,2 +1,0 @@
-# BigCodeEntropy
-Finding patterns

@@ -1,6 +1,6 @@
 package com.aurea.bigcode
 
-import com.aurea.ast.common.UnitHelper
+import UnitHelper
 import com.aurea.bigcode.executors.MethodInput
 import com.aurea.bigcode.executors.MethodOutput
 import com.aurea.bigcode.source.SingleUnitTestBuilder

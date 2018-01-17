@@ -1,5 +1,0 @@
-dependencies {
-    implementation project(':common')
-
-    implementation 'com.esotericsoftware.yamlbeans:yamlbeans'
-}

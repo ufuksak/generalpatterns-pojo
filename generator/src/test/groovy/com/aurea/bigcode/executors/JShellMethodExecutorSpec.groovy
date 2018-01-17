@@ -1,6 +1,6 @@
 package com.aurea.bigcode.executors
 
-import com.aurea.ast.common.UnitHelper
+import UnitHelper
 
 import com.aurea.bigcode.TestedMethod
 import com.aurea.bigcode.Value
