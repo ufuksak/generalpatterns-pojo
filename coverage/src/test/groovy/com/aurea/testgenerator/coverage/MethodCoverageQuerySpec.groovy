@@ -1,8 +1,6 @@
 package com.aurea.testgenerator.coverage
 
-import com.aurea.testgenerator.coverage.MethodCoverageCriteria
 import spock.lang.Specification
-
 
 class MethodCoverageQuerySpec extends Specification {
 

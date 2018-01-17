@@ -4,7 +4,6 @@ import com.aurea.coverage.unit.MethodCoverage
 import spock.lang.Specification
 
 import java.nio.file.Path
-import java.nio.file.Paths
 
 class JacocoCoverageRepositorySpec extends Specification {
 
