@@ -29,7 +29,7 @@ class PathUtilsSpec extends Specification {
         ofName("org.example") | get("org", "example")
     }
 
-    private PackageDeclaration ofName(String name) {
+    private static PackageDeclaration ofName(String name) {
         new PackageDeclaration(new Name(name))
     }
 }

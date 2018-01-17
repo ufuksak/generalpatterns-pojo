@@ -1,4 +1,4 @@
-package com.aurea.common
+package com.aurea.testgenerator
 
 import groovy.transform.Memoized
 import groovy.util.logging.Log4j2

@@ -1,4 +1,4 @@
-package com.aurea.testgenerator.dao
+package com.aurea.testgenerator.coverage
 
 import com.aurea.testgenerator.coverage.MethodCoverageCriteria
 import spock.lang.Specification

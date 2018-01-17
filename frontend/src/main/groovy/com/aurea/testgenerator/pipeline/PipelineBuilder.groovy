@@ -1,6 +1,6 @@
 package com.aurea.testgenerator.pipeline
 
-import com.aurea.common.IterationLogger
+import com.aurea.testgenerator.IterationLogger
 import com.aurea.testgenerator.pattern.PatternMatcher
 import com.aurea.testgenerator.pattern.UnitToMatchMapper
 import com.aurea.testgenerator.prescans.PreScan
