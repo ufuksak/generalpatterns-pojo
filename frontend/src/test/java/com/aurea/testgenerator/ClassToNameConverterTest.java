@@ -1,6 +1,5 @@
 package com.aurea.testgenerator;
 
-import com.aurea.testgenerator.source.PathUtils;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -12,7 +11,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.aurea.testgenerator.source.PathUtils.nthParent;
+import static com.aurea.testgenerator.PathUtils.nthParent;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ClassToNameConverterTest {

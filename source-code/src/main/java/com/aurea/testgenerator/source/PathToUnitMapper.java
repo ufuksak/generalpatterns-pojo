@@ -1,5 +1,6 @@
 package com.aurea.testgenerator.source;
 
+import com.aurea.testgenerator.PathUtils;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.ast.CompilationUnit;

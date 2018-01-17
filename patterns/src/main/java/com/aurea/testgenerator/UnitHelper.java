@@ -1,7 +1,6 @@
 package com.aurea.testgenerator;
 
 import com.aurea.testgenerator.source.PathToUnitMapper;
-import com.aurea.testgenerator.source.PathUtils;
 import com.aurea.testgenerator.source.Unit;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
