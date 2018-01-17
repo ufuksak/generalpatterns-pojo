@@ -5,9 +5,9 @@ import com.aurea.testgenerator.pattern.PatternMatcher
 import com.aurea.testgenerator.pattern.UnitToMatchMapper
 import com.aurea.testgenerator.prescans.PreScan
 import com.aurea.testgenerator.source.PathUnitSource
-import com.aurea.testgenerator.source.SourceFilter
+
 import com.aurea.testgenerator.source.SourceFinder
-import com.aurea.testgenerator.source.UnitSource
+
 import com.aurea.testgenerator.template.MatchCollector
 import groovy.transform.TupleConstructor
 import groovy.util.logging.Log4j2

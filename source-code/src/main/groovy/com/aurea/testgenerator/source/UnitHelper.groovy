@@ -18,7 +18,7 @@ final class UnitHelper {
     }
 
     static CompilationUnit getUnitForMethod(String code) {
-        def javaFileCode = """
+        String javaFileCode = """
 package ${TEST_CLASS.package};
 
 public class ${TEST_CLASS.name} {
@@ -27,24 +27,6 @@ $code
 
 }
 """
-        getUnitForCode(javaFileCode)
-    }
-
-    static CompilationUnit getUnitForCode(String code) {
-        try {
-            JavaParser.parse(code)
-        } catch (Exception e) {
-            log.error("Failed to parse code: $code", e)
-            throw new IllegalArgumentException(e)
-        }
-    }
-
-    static CompilationUnit getUnitForCode(File file) {
-        try {
-            JavaParser.parse(file)
-        } catch (Exception e) {
-            log.error("Failed to parse file: $file", e)
-            throw new IllegalArgumentException(e)
-        }
+        JavaParser.parse(javaFileCode)
     }
 }

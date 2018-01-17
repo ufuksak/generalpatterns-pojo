@@ -1,4 +1,4 @@
-package com.aurea.testgenerator.source
+package com.aurea.testgenerator
 
 
 import com.github.javaparser.ast.PackageDeclaration

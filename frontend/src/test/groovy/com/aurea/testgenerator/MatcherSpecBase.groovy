@@ -7,7 +7,7 @@ import com.aurea.testgenerator.prescans.PreScan
 import com.aurea.testgenerator.prescans.PreScans
 import com.aurea.testgenerator.source.JavaSourceFinder
 import com.aurea.testgenerator.source.PathUnitSource
-import com.aurea.testgenerator.source.SourceFilter
+
 import com.aurea.testgenerator.source.Unit
 import one.util.streamex.StreamEx
 import org.springframework.beans.factory.annotation.Autowired

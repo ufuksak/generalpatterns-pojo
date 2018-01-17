@@ -1,6 +1,5 @@
 package com.aurea.testgenerator.pattern;
 
-import com.aurea.testgenerator.source.SourceFilter;
 import com.aurea.testgenerator.source.Unit;
 import com.google.common.base.Joiner;
 import java.util.ArrayList;
