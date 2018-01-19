@@ -41,6 +41,8 @@ test {
                "--add-opens=java.base/java.util.stream=ALL-UNNAMED",
                "--add-opens=java.base/java.nio.file=ALL-UNNAMED",
                "--add-opens=java.base/java.net=ALL-UNNAMED",          
+               "--add-opens=java.base/java.text=ALL-UNNAMED",
+               "--add-opens=java.desktop/java.awt.font=ALL-UNNAMED",
                "--add-opens=java.base/sun.nio.fs=ALL-UNNAMED"
     ]
 }

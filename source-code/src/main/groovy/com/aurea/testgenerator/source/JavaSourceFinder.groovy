@@ -20,7 +20,7 @@ class JavaSourceFinder implements SourceFinder {
                 .filter { Files.isDirectory(it) }
                 .parallel()
                 .map { toClasses(it) }
-                .flatMap(Function.identity())
+                .flatMap { it }
                 .toList()
     }
 

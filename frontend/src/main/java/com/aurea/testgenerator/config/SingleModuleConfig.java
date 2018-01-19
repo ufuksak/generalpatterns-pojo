@@ -1,10 +1,7 @@
 package com.aurea.testgenerator.config;
 
-import com.aurea.testgenerator.coverage.CoverageRepository;
 import com.aurea.testgenerator.coverage.CoverageService;
-import com.aurea.testgenerator.coverage.EmptyCoverageRepository;
 import com.aurea.testgenerator.coverage.EmptyCoverageService;
-import com.aurea.testgenerator.pattern.MatcherRepository;
 import com.aurea.testgenerator.pattern.PatternMatcher;
 import com.aurea.testgenerator.pipeline.Pipeline;
 import com.aurea.testgenerator.pipeline.PipelineBuilder;
@@ -43,11 +40,8 @@ public abstract class SingleModuleConfig {
     @Autowired
     protected SourceFinder sourceFinder;
 
-    @Autowired
-    protected MatcherRepository matcherRepository;
-
-    @Autowired
-    protected Map<String, PreScan> preScansByName;
+    @Autowired(required = false)
+    protected PreScans preScans;
 
     @Bean
     public List<? extends Pipeline> pipelines() {
@@ -72,11 +66,6 @@ public abstract class SingleModuleConfig {
     @Bean
     public CoverageService coverageService() {
         return new EmptyCoverageService();
-    }
-
-    @Bean
-    public CoverageRepository coverageRepository() {
-        return new EmptyCoverageRepository();
     }
 
     @Bean
@@ -110,7 +99,7 @@ public abstract class SingleModuleConfig {
 
     protected abstract Path src();
 
-    protected abstract Class<? extends PatternMatcher> matcherClass();
+    protected abstract PatternMatcher patternMatcher();
 
     protected abstract MatchCollector collector();
 
@@ -119,7 +108,7 @@ public abstract class SingleModuleConfig {
                 .fromSource(srcRoot())
                 .withPreScans(preScans().getPreScans())
                 .withFilter(sourceFilter())
-                .mappingTo(matcherRepository.ofClass(matcherClass()))
+                .mappingTo(patternMatcher())
                 .collectTo(collector()));
     }
 }

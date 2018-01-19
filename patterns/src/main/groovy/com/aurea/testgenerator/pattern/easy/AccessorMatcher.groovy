@@ -15,6 +15,7 @@ import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserParameterDeclaration
 import com.github.javaparser.symbolsolver.model.resolution.SymbolReference
 import one.util.streamex.StreamEx
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import static com.aurea.testgenerator.ast.ASTNodeUtils.*
@@ -22,6 +23,7 @@ import static com.aurea.testgenerator.ast.ASTNodeUtils.*
 @Component
 class AccessorMatcher extends AbstractSubjectMethodMatcher {
 
+    @Autowired
     AccessorMatcher(CoverageService coverageService, JavaParserFacade javaParserFacade) {
         this.coverageService = coverageService
         this.solver = javaParserFacade

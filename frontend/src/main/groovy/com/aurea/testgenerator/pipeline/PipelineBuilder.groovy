@@ -89,7 +89,7 @@ class PipelineBuilder {
                                            .flatMap { it.stream() }
                                            .groupingBy { it.description() }
 
-            matchCollector.collect(classesToMatches)
+            matchCollector.accept(classesToMatches)
         }
     }
 }

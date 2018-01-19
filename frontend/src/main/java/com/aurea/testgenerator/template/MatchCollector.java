@@ -5,8 +5,8 @@ import com.aurea.testgenerator.pattern.PatternMatch;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
-public interface MatchCollector {
-
-    void collect(Map<ClassDescription, List<PatternMatch>> classesToMatches);
+@FunctionalInterface
+public interface MatchCollector extends Consumer<Map<ClassDescription, List<PatternMatch>>> {
 }

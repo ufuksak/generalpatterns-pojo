@@ -14,17 +14,13 @@ class LiteralAccessorMatcher extends AccessorMatcher {
 
     LiteralResolver resolver = new LiteralResolver()
 
-    LiteralAccessorMatcher() {
-        super()
-    }
-
     LiteralAccessorMatcher(CoverageService coverageService, JavaParserFacade javaParserFacade) {
         super(coverageService, javaParserFacade)
     }
 
     @Override
     Optional<? extends AccessorMatch> createMatch(Unit unit, MethodDeclaration n, JavaParserFacade facade) {
-        ReturnStmt returnStmt = findChildOf(ReturnStmt.class, n).get()
+        ReturnStmt returnStmt = findChildOf(ReturnStmt, n).get()
         Optional<String> expression = resolver.tryFindLiteralExpression(returnStmt)
         return expression.map { it -> new LiteralAccessorMatch(unit, n, it) }
     }

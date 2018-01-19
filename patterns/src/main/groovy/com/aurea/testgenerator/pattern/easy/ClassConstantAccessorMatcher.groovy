@@ -26,10 +26,6 @@ class ClassConstantAccessorMatcher extends AccessorMatcher {
 
     LiteralResolver resolver = new LiteralResolver()
 
-    ClassConstantAccessorMatcher() {
-        super()
-    }
-
     ClassConstantAccessorMatcher(CoverageService coverageService, JavaParserFacade javaParserFacade) {
         super(coverageService, javaParserFacade)
     }

@@ -28,10 +28,6 @@ class ConstructorAccessorMatcher extends AccessorMatcher {
 
     LiteralResolver resolver = new LiteralResolver()
 
-    ConstructorAccessorMatcher() {
-        super()
-    }
-
     ConstructorAccessorMatcher(CoverageService coverageService, JavaParserFacade javaParserFacade) {
         super(coverageService, javaParserFacade)
     }

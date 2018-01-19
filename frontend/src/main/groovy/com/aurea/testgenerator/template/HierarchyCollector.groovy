@@ -3,6 +3,7 @@ package com.aurea.testgenerator.template
 import com.aurea.testgenerator.pattern.ClassDescription
 
 import com.aurea.testgenerator.pattern.PatternMatch
+import com.aurea.testgenerator.pattern.general.HierarchyMatch
 import com.google.common.collect.ArrayListMultimap
 import com.google.common.collect.Multimap
 import groovy.transform.Memoized
@@ -20,10 +21,10 @@ class HierarchyCollector implements MatchCollector {
     }
 
     @Override
-    void collect(Map<ClassDescription, List<PatternMatch>> classesToMatches) {
+    void accept(Map<ClassDescription, List<PatternMatch>> classesToMatches) {
         StreamEx.of(classesToMatches.values())
                 .map{it.get(0)}
-                .select(HierarchyMatch.class)
+                .select(HierarchyMatch)
                 .each {kidsToParents.put(it.declaration, it.parent)}
 
         Tree tree = new Tree(null, StreamEx.of(kidsToParents.values())
