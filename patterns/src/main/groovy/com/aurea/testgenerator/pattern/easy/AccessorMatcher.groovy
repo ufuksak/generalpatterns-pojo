@@ -22,12 +22,9 @@ import static com.aurea.testgenerator.ast.ASTNodeUtils.*
 @Component
 class AccessorMatcher extends AbstractSubjectMethodMatcher {
 
-    AccessorMatcher() {
-    }
-
     AccessorMatcher(CoverageService coverageService, JavaParserFacade javaParserFacade) {
         this.coverageService = coverageService
-        this.javaParserFacade = javaParserFacade
+        this.solver = javaParserFacade
     }
 
     @Override
@@ -222,13 +219,8 @@ class AccessorMatcher extends AbstractSubjectMethodMatcher {
 
     @Override
     boolean shouldBeVisited(Unit unit) {
-        List<TypeDeclaration> types = findChildsSubTypesOf(TypeDeclaration.class, unit.cu)
-        return super.shouldBeVisited(unit) && !types.isEmpty() && !types.get(0).isAbstract() && unit.className.contains('AttributeApiParamType')
-    }
-
-    @Override
-    boolean shouldMethodBeVisited(Unit unit, MethodDeclaration n) {
-        return super.shouldMethodBeVisited(unit, n)
+        List<ClassOrInterfaceDeclaration> types = findChildsSubTypesOf(ClassOrInterfaceDeclaration, unit.cu)
+        return super.shouldBeVisited(unit) && !types.isEmpty() && !types.first().isAbstract()
     }
 
     private boolean isUncoveredGetter(Unit unit, MethodDeclaration n, JavaParserFacade facade) {

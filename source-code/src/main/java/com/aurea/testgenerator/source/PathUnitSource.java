@@ -1,13 +1,15 @@
 package com.aurea.testgenerator.source;
 
 import groovy.transform.Memoized;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Optional;
-import java.util.stream.Stream;
 import one.util.streamex.StreamEx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
+import java.nio.file.Path;
+import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 public class PathUnitSource implements UnitSource {
 
@@ -15,10 +17,10 @@ public class PathUnitSource implements UnitSource {
 
     private final SourceFinder sourceFinder;
     private final PathToUnitMapper pathToUnitMapper;
-    private final SourceFilter filter;
+    private final Predicate<Path> filter;
     private final Path root;
 
-    public PathUnitSource(SourceFinder sourceFinder, Path srcRoot, SourceFilter filter) {
+    public PathUnitSource(SourceFinder sourceFinder, Path srcRoot, Predicate<Path> filter) {
         this.sourceFinder = sourceFinder;
         this.pathToUnitMapper = new PathToUnitMapper(srcRoot);
         this.filter = filter;
@@ -26,7 +28,7 @@ public class PathUnitSource implements UnitSource {
     }
 
     @Override
-    public Stream<Unit> units(SourceFilter anotherFilter) {
+    public Stream<Unit> units(Predicate<Path> anotherFilter) {
         try {
             return sources(anotherFilter)
                     .map(pathToUnitMapper)
@@ -38,7 +40,7 @@ public class PathUnitSource implements UnitSource {
         }
     }
 
-    private StreamEx<Path> sources(SourceFilter anotherFilter) throws IOException {
+    private StreamEx<Path> sources(Predicate<Path> anotherFilter) throws IOException {
         return StreamEx.of(sourceFinder.javaClasses(root))
                 .parallel()
                 .filter(filter.and(anotherFilter));
@@ -46,7 +48,7 @@ public class PathUnitSource implements UnitSource {
 
     @Override
     @Memoized
-    public long size(SourceFilter anotherFilter) {
+    public long size(Predicate<Path> anotherFilter) {
         try {
             return sources(anotherFilter).count();
         } catch (IOException e) {

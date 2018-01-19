@@ -12,6 +12,7 @@ import com.aurea.testgenerator.prescans.PreScan;
 import com.aurea.testgenerator.prescans.PreScans;
 import com.aurea.testgenerator.source.PathUnitSource;
 import com.aurea.testgenerator.source.SourceFinder;
+import com.aurea.testgenerator.source.UnitSource;
 import com.aurea.testgenerator.template.MatchCollector;
 import com.aurea.testgenerator.template.path.SingleModuleTestNameResolver;
 import com.aurea.testgenerator.template.path.TestNameResolver;
@@ -30,6 +31,7 @@ import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 public abstract class SingleModuleConfig {
 
@@ -97,7 +99,7 @@ public abstract class SingleModuleConfig {
     }
 
     @Bean
-    public SourceFilter sourceFilter() {
+    public Predicate<Path> sourceFilter() {
         return p -> true;
     }
 

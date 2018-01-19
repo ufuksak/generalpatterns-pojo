@@ -40,7 +40,7 @@ dependencyManagement {
         dependency 'com.aurea:jacoco-parser:2.1.0'
         dependency 'com.github.javafaker:javafaker:0.13'
         dependency 'pl.allegro.finance:tradukisto:0.5.1'
-        dependency 'com.github:javacode-to-xml-converter:2.0'
+        dependency 'com.github:javacode-to-xml-converter:3.0'
 
         //Test dependencies
         dependency 'junit:junit:4.12'

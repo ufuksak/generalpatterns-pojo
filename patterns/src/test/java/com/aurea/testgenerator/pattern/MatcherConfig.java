@@ -12,11 +12,6 @@ import javax.xml.xpath.XPathFactory;
 public class MatcherConfig {
 
     @Bean
-    public MatcherRepository matcherRepository() {
-        return new MatcherRepositoryImpl();
-    }
-
-    @Bean
     public NodeToXmlConverter xmlConverter() {
         return Converters.newConverter();
     }

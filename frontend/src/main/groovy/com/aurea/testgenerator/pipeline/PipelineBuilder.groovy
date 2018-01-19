@@ -5,23 +5,23 @@ import com.aurea.testgenerator.pattern.PatternMatcher
 import com.aurea.testgenerator.pattern.UnitToMatchMapper
 import com.aurea.testgenerator.prescans.PreScan
 import com.aurea.testgenerator.source.PathUnitSource
-
 import com.aurea.testgenerator.source.SourceFinder
-
+import com.aurea.testgenerator.source.UnitSource
 import com.aurea.testgenerator.template.MatchCollector
 import groovy.transform.TupleConstructor
 import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
 
 import java.nio.file.Path
+import java.util.function.Predicate
 
 class PipelineBuilder {
 
     private final Path src
     private PatternMatcher patternMatcher
     private MatchCollector collector
-    private SourceFilter filter = SourceFilter.empty()
-    private List<PreScan> preScans = new ArrayList<>()
+    private Predicate<Path> filter = { true }
+    private List<PreScan> preScans = []
 
     private PipelineBuilder(Path src) {
         this.src = src
@@ -41,7 +41,7 @@ class PipelineBuilder {
         this
     }
 
-    PipelineBuilder withFilter(SourceFilter filter) {
+    PipelineBuilder withFilter(Predicate<Path> filter) {
         this.filter = filter
         this
     }
@@ -85,9 +85,9 @@ class PipelineBuilder {
             log.info("")
 
             def classesToMatches = StreamEx.of(unitSource.units(matcherMapper.getSourceFilter()))
-                    .map(matcherMapper)
-                    .flatMap{ it.stream() }
-                    .groupingBy{ it.description() }
+                                           .map(matcherMapper)
+                                           .flatMap { it.stream() }
+                                           .groupingBy { it.description() }
 
             matchCollector.collect(classesToMatches)
         }
