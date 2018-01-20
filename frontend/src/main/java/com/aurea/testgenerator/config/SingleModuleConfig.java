@@ -44,7 +44,7 @@ public abstract class SingleModuleConfig {
     protected PreScans preScans;
 
     @Bean
-    public List<? extends Pipeline> pipelines() {
+    public List<Pipeline> pipelines() {
         return StreamEx.of(pipelineBuilders()).map(builder -> builder.build(sourceFinder)).toList();
     }
 

@@ -1,18 +1,13 @@
 package com.aurea.testgenerator.config;
 
-import com.aurea.testgenerator.coverage.CoverageService;
-import com.aurea.testgenerator.coverage.EmptyCoverageService;
 import com.github.generator.xml.Converters;
 import com.github.generator.xml.NodeToXmlConverter;
-import com.github.javaparser.JavaParser;
-import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
-import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+import javax.annotation.PostConstruct;
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathFactory;
 
@@ -20,16 +15,12 @@ import javax.xml.xpath.XPathFactory;
 @ComponentScan(value = "com.aurea.testgenerator")
 public class CommonConfig {
 
-    @Bean
-    public CoverageService noCoverage() {
-        return new EmptyCoverageService();
-    }
+    @Value("${name}")
+    private String name;
 
-    @Bean
-    public JavaParserFacade javaParserFacade() {
-        return JavaParserFacade.get(new CombinedTypeSolver(
-                new ReflectionTypeSolver()
-        ));
+    @PostConstruct
+    public void s() {
+        System.out.println("NAME: " + name);
     }
 
     @Bean

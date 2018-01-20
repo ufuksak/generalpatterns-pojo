@@ -3,9 +3,11 @@ group 'com.aurea.bigcode'
 buildscript {
     repositories {
         maven { url 'https://repo.spring.io/plugins-snapshot' }
+        mavenCentral()
     }
     dependencies {
         classpath 'io.spring.gradle:dependency-management-plugin:1.0.5.BUILD-SNAPSHOT'
+        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.9.RELEASE'
     }
 }
 

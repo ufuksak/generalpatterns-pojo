@@ -1,5 +1,6 @@
 apply plugin: 'java-library'
 apply plugin: 'groovy'
+apply plugin: 'org.springframework.boot'
 
 /** Not sure what does this do, but without it class from :common is not available in other projects
  *  pasted from here: https://docs.gradle.org/current/userguide/java_library_plugin.html             **/
