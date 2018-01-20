@@ -1,6 +1,6 @@
 package com.aurea.testgenerator
 
-import com.aurea.testgenerator.pipeline.Pipeline
+import com.aurea.testgenerator.config.PipelineProperties
 import com.google.common.base.Stopwatch
 import groovy.util.logging.Log4j2
 import org.springframework.beans.factory.annotation.Autowired
@@ -15,8 +15,11 @@ import java.util.concurrent.TimeUnit
 @SpringBootApplication
 class Main implements CommandLineRunner {
 
+//    @Autowired
+//    List<Pipeline> pipelines
+
     @Autowired
-    List<Pipeline> pipelines
+    PipelineProperties props
 
     static void main(String[] args) {
         Stopwatch stopwatch = Stopwatch.createStarted()
@@ -28,7 +31,8 @@ class Main implements CommandLineRunner {
 
     @Override
     void run(String... args) throws Exception {
-        pipelines.each { it.start() }
-        System.exit(0)
+        log.info "Props: $props"
+//        pipelines.each { it.start() }
+//        System.exit(0)
     }
 }

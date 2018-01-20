@@ -34,8 +34,8 @@ public abstract class SingleModuleConfig {
 
     public static final Path OUT = Paths.get("out");
 
-    @Value("${source.root}")
-    protected String root;
+//    @Value("${source.root}")
+    protected String root = "D:/crossover/repos";
 
     @Autowired
     protected SourceFinder sourceFinder;

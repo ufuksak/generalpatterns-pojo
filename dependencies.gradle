@@ -17,13 +17,12 @@ dependencyManagement {
     // Consistent Dependency Management configuration across all subprojects
     dependencies {
         dependency 'org.codehaus.groovy:groovy-all:2.4.12'
-        dependency 'com.github.javaparser:aurea-javaparser-core:3.5.10'
-        dependency 'com.github.javaparser:java-symbol-solver-core:0.6.6'
+        dependency 'com.github.javaparser:aurea-javaparser-core:3.5.11'
+        dependency 'com.github.javaparser:aurea-java-symbol-solver-core:0.6.7'
         dependency 'junit:junit:4.12'
         dependency 'org.codehaus.janino:janino:3.0.8'
         dependency 'pl.pragmatists:JUnitParams:1.1.1'
         dependency 'com.jason-goodwin:better-monads:0.4.1'
-        dependency 'com.aurea:test-generator:1.0'
         dependencySet(group: 'org.apache.logging.log4j', version: '2.10.0') {
             entry 'log4j-api'
             entry 'log4j-core'
@@ -38,6 +37,9 @@ dependencyManagement {
         dependency 'pl.allegro.finance:tradukisto:0.5.1'
         dependency 'com.github:javacode-to-xml-converter:3.0'
         dependency 'org.aspectj:aspectjweaver:1.8.8'
+        dependency 'javax.validation:validation-api:2.0.1.Final'
+        dependency 'org.hibernate.validator:hibernate-validator:6.0.7.Final'
+
 
         //Test dependencies
         dependency 'junit:junit:4.12'
@@ -54,13 +56,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.aspectj:aspectjweaver'
     implementation 'com.github.javaparser:aurea-javaparser-core'
-    implementation('com.github.javaparser:java-symbol-solver-core') {
-        exclude group: 'com.github.javaparser', module: 'javaparser-core'
-    }
+    implementation 'com.github.javaparser:aurea-java-symbol-solver-core'
     implementation 'com.jason-goodwin:better-monads'
     implementation 'org.apache.logging.log4j:log4j-api'
     implementation 'org.apache.logging.log4j:log4j-core'
     implementation 'org.apache.commons:commons-lang3'
+    implementation 'com.google.guava:guava'
     implementation 'one.util:streamex'
 
     testImplementation 'junit:junit'

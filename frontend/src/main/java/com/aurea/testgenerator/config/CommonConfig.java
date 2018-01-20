@@ -15,14 +15,6 @@ import javax.xml.xpath.XPathFactory;
 @ComponentScan(value = "com.aurea.testgenerator")
 public class CommonConfig {
 
-    @Value("${name}")
-    private String name;
-
-    @PostConstruct
-    public void s() {
-        System.out.println("NAME: " + name);
-    }
-
     @Bean
     public NodeToXmlConverter xmlConverter() {
         return Converters.newConverter();

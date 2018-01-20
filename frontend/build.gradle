@@ -3,6 +3,8 @@ dependencies {
     implementation project(":source-code")
     implementation project(":coverage")
     implementation project(":patterns")
+    implementation 'javax.validation:validation-api'
+    implementation 'org.hibernate.validator:hibernate-validator'
 
     implementation('com.github:javacode-to-xml-converter') {
         exclude group: 'com.github.javaparser', module: 'javaparser-core'

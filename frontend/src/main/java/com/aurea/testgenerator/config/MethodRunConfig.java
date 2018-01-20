@@ -22,6 +22,9 @@ public class MethodRunConfig extends SingleModuleConfig {
     @Autowired
     HierarchyMatcher hierarchyMatcher;
 
+    @Autowired
+    PipelineProperties pipelineProperties;
+
     @Override
     protected Path src() {
         return Paths.get("Sandbox/src/main/java");
