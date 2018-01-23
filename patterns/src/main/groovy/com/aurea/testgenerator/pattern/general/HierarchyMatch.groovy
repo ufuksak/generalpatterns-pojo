@@ -1,8 +1,9 @@
 package com.aurea.testgenerator.pattern.general
 
 import com.aurea.testgenerator.pattern.ClassDescription
+import com.aurea.testgenerator.pattern.MatchType
 import com.aurea.testgenerator.pattern.PatternMatch
-import com.aurea.testgenerator.pattern.PatternType
+
 import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.NodeList
 
@@ -37,7 +38,7 @@ class HierarchyMatch implements PatternMatch {
     }
 
     @Override
-    PatternType type() {
-        return null
+    MatchType type() {
+        return MatchType.NO_MATCH
     }
 }

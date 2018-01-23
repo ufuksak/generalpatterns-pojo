@@ -5,7 +5,6 @@ import com.aurea.testgenerator.pattern.PatternMatch;
 import com.aurea.testgenerator.pattern.PatternMatcher;
 import com.aurea.testgenerator.pattern.SandboxMatcher;
 import com.aurea.testgenerator.pattern.general.HierarchyMatcher;
-import com.aurea.testgenerator.template.HierarchyCollector;
 import com.aurea.testgenerator.template.MatchCollector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -23,7 +22,7 @@ public class MethodRunConfig extends SingleModuleConfig {
     HierarchyMatcher hierarchyMatcher;
 
     @Autowired
-    PipelineProperties pipelineProperties;
+    PipelineConfiguration pipelineProperties;
 
     @Override
     protected Path src() {

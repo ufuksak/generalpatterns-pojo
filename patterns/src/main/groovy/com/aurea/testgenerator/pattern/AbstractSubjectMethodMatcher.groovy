@@ -18,14 +18,14 @@ abstract class AbstractSubjectMethodMatcher extends XPathPatternMatcher {
     @Autowired(required = false)
     JavaParserFacade solver
 
-    MatchVisitor newVisitor(Unit unit) {
-        shouldBeVisited(unit) ? new UnitMatchVisitor(unit, solver) {
+    Optional<MatchVisitor> newVisitor(Unit unit) {
+        shouldBeVisited(unit) ? Optional.ofNullable(new UnitMatchVisitor(unit, solver) {
             @Override
             void visit(final MethodDeclaration n, JavaParserFacade solver) {
                 if (shouldMethodBeVisited(unit, n)) {
                     try {
                         Optional<? extends PatternMatch> maybeMatch = matchMethod(unit, n)
-                        if (maybeMatch.isPresent() ) {
+                        if (maybeMatch.present ) {
                             PatternMatch match = maybeMatch.get()
                             ClassDescription cd = new ClassDescription(unit)
                             if (match instanceof ExpandablePatternMatch) {
@@ -44,7 +44,7 @@ abstract class AbstractSubjectMethodMatcher extends XPathPatternMatcher {
                     }
                 }
             }
-        } : EmptyMatchVisitor.get()
+        }) : Optional.empty()
     }
 
     boolean isNotCovered(Unit unit, MethodDeclaration n) {

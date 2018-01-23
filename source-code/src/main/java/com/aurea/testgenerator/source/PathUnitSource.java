@@ -28,7 +28,7 @@ public class PathUnitSource implements UnitSource {
     }
 
     @Override
-    public Stream<Unit> units(Predicate<Path> anotherFilter) {
+    public StreamEx<Unit> units(Predicate<Path> anotherFilter) {
         try {
             return sources(anotherFilter)
                     .map(pathToUnitMapper)
@@ -36,14 +36,12 @@ public class PathUnitSource implements UnitSource {
                     .map(Optional::get);
         } catch (IOException e) {
             logger.error("Failed to fetch units", e);
-            return Stream.empty();
+            return StreamEx.empty();
         }
     }
 
     private StreamEx<Path> sources(Predicate<Path> anotherFilter) throws IOException {
-        return StreamEx.of(sourceFinder.javaClasses(root))
-                .parallel()
-                .filter(filter.and(anotherFilter));
+        return sourceFinder.javaClasses().parallel().filter(filter.and(anotherFilter));
     }
 
     @Override

@@ -39,7 +39,7 @@ abstract class AccesorMatcherBaseSpec<T extends AccessorMatch> extends Specifica
         matcher.xmlConverter = Converters.newConverter()
         matcher.evaluator = new XPathEvaluatorImpl(XPathFactory.newInstance().newXPath())
 
-        Collection<PatternMatch> matches = matcher.getMatches(getUnitForCode(code).get())
+        Collection<PatternMatch> matches = matcher.matches(getUnitForCode(code).get())
         ++matches.iterator() as T
     }
 

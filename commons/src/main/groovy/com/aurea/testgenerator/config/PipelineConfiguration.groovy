@@ -10,17 +10,18 @@ import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.NotNull
 import java.nio.file.Path
 
-
 @Configuration
 @ConfigurationProperties
 @EnableConfigurationProperties
 @Canonical
 @Validated
-class PipelineProperties {
+class PipelineConfiguration {
     @NotEmpty
-    String src
+    Path src
     @NotEmpty
-    String testSrc
+    Path testSrc
     @NotNull
     Path out
+
+    Path jacoco
 }

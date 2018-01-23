@@ -1,0 +1,4 @@
+dependencies {
+    implementation 'javax.validation:validation-api'
+    implementation 'org.hibernate.validator:hibernate-validator'
+}

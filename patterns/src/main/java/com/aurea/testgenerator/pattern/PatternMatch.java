@@ -4,5 +4,5 @@ public interface PatternMatch {
 
     ClassDescription description();
 
-    PatternType type();
+    MatchType type();
 }

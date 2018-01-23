@@ -1,8 +1,9 @@
 package com.aurea.testgenerator.pattern.easy
 
+import com.aurea.testgenerator.pattern.MatchType
 import com.aurea.testgenerator.source.Unit
 import com.aurea.testgenerator.pattern.PatternMatchImpl
-import com.aurea.testgenerator.pattern.PatternType
+
 import com.github.javaparser.ast.body.ConstructorDeclaration
 import com.github.javaparser.ast.body.EnumConstantDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
@@ -28,8 +29,8 @@ class AccessorMatch extends PatternMatchImpl implements LineCounter {
     }
 
     @Override
-    PatternType type() {
-        return null
+    MatchType type() {
+        return MatchType.ACCESSOR
     }
 
     boolean isConstructor() {

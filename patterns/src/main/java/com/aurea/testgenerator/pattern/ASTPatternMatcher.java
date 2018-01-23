@@ -1,6 +1,7 @@
 package com.aurea.testgenerator.pattern;
 
 import com.aurea.testgenerator.source.Unit;
+import one.util.streamex.StreamEx;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.apache.logging.log4j.LogManager;
@@ -15,11 +16,11 @@ public abstract class ASTPatternMatcher implements PatternMatcher {
     private static final Logger logger = LogManager.getLogger(ASTPatternMatcher.class.getSimpleName());
 
     @Override
-    public Collection<PatternMatch> getMatches(Unit unit) {
+    public StreamEx<PatternMatch> matches(Unit unit) {
         UnitMatchVisitor visitor = newVisitor(unit);
         try {
             visitor.visit(unit.getCu(), null);
-            return visitor.getMatches();
+            return visitor.matches();
         } catch (Exception e) {
             logger.error("Failed to visit " + unit.getClassName());
             throw e;

@@ -21,7 +21,6 @@ class PipelineBuilder {
     private PatternMatcher patternMatcher
     private MatchCollector collector
     private Predicate<Path> filter = { true }
-    private List<PreScan> preScans = []
 
     private PipelineBuilder(Path src) {
         this.src = src
@@ -43,11 +42,6 @@ class PipelineBuilder {
 
     PipelineBuilder withFilter(Predicate<Path> filter) {
         this.filter = filter
-        this
-    }
-
-    PipelineBuilder withPreScans(List<PreScan> preScans) {
-        this.preScans.addAll(preScans)
         this
     }
 

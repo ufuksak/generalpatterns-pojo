@@ -1,10 +1,10 @@
 package com.aurea.testgenerator.pattern;
 
-import java.util.Collection;
+import one.util.streamex.StreamEx;
 
 public interface MatchVisitor {
 
     void visit();
 
-    Collection<PatternMatch> getMatches();
+    StreamEx<PatternMatch> matches();
 }

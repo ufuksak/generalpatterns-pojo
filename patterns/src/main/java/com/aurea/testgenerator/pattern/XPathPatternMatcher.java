@@ -3,13 +3,14 @@ package com.aurea.testgenerator.pattern;
 import com.aurea.testgenerator.source.Unit;
 import com.aurea.testgenerator.xml.XPathEvaluator;
 import com.github.generator.xml.NodeToXmlConverter;
+import one.util.streamex.StreamEx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 
 @Component
 public abstract class XPathPatternMatcher implements PatternMatcher {
@@ -23,18 +24,16 @@ public abstract class XPathPatternMatcher implements PatternMatcher {
     public XPathEvaluator evaluator;
 
     @Override
-    public Collection<PatternMatch> getMatches(Unit unit) {
-        MatchVisitor visitor = newVisitor(unit);
+    public StreamEx<PatternMatch> matches(Unit unit) {
         try {
-            visitor.visit();
-            return visitor.getMatches();
+            return newVisitor(unit).map(MatchVisitor::matches).orElse(StreamEx.empty());
         } catch (Exception e) {
             logger.error("Failed to visit " + unit.getClassName(), e);
-            return Collections.emptyList();
+            return StreamEx.empty();
         }
     }
 
-    protected abstract MatchVisitor newVisitor(Unit unit);
+    protected abstract Optional<MatchVisitor> newVisitor(Unit unit);
 
     @Override
     public PatternType getType() {

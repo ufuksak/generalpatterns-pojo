@@ -79,6 +79,6 @@ abstract class MatcherSpecBase<T extends PatternMatcher> extends Specification {
             Stream<Unit> allUnits = unitSource.units(SourceFilter.empty())
             preScans.preScans.each {it.preScan(allUnits)}
         }
-        matcher.getMatches(unit)[0] as ExpandablePatternMatch
+        matcher.matches(unit)[0] as ExpandablePatternMatch
     }
 }

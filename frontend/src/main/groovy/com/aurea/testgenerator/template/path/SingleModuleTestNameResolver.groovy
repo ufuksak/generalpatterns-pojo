@@ -1,5 +1,6 @@
 package com.aurea.testgenerator.template.path
 
+import com.aurea.testgenerator.PathUtils
 import com.aurea.testgenerator.pattern.ClassDescription
 
 import java.nio.file.Path
