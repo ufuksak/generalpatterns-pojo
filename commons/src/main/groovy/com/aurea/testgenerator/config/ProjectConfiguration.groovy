@@ -6,16 +6,15 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration
 import org.springframework.validation.annotation.Validated
 
-import javax.validation.constraints.NotEmpty
 import javax.validation.constraints.NotNull
 import java.nio.file.Path
 
 @Configuration
-@ConfigurationProperties
+@ConfigurationProperties(prefix = "project")
 @EnableConfigurationProperties
 @Canonical
 @Validated
-class PipelineConfiguration {
+class ProjectConfiguration {
     @NotNull
     Path src
 

@@ -6,7 +6,6 @@ import com.aurea.testgenerator.coverage.JacocoCoverageRepository;
 import com.aurea.testgenerator.coverage.JacocoCoverageService;
 import com.aurea.testgenerator.pattern.PatternMatcher;
 import com.aurea.testgenerator.pipeline.PipelineBuilder;
-import com.aurea.testgenerator.prescans.PreScans;
 import com.aurea.testgenerator.source.PathUnitSource;
 import com.aurea.testgenerator.source.SourceFinder;
 import com.aurea.testgenerator.source.UnitSource;
@@ -18,15 +17,11 @@ import com.github.javaparser.symbolsolver.model.resolution.TypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
-import one.util.streamex.StreamEx;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Predicate;
 
 public abstract class SingleModuleConfig {
 
@@ -36,7 +31,7 @@ public abstract class SingleModuleConfig {
     }
 
     @Bean
-    public CoverageService coverageService(PipelineConfiguration cfg) {
+    public CoverageService coverageService(ProjectConfiguration cfg) {
         if (cfg.getJacoco() != null) {
             Path jacocoXml = cfg.getJacoco();
             JacocoCoverageRepository repository = JacocoCoverageRepository.fromFile(jacocoXml);
@@ -47,12 +42,12 @@ public abstract class SingleModuleConfig {
     }
 
     @Bean
-    public UnitSource unitSource(PipelineConfiguration cfg, SourceFinder sourceFinder) {
+    public UnitSource unitSource(ProjectConfiguration cfg, SourceFinder sourceFinder) {
         return new PathUnitSource(sourceFinder, cfg.getSrc(), p -> true);
     }
 
     @Bean
-    public JavaParserFacade javaParserFacade(PipelineConfiguration cfg) {
+    public JavaParserFacade javaParserFacade(ProjectConfiguration cfg) {
         TypeSolver solver = new CombinedTypeSolver(
                 new ReflectionTypeSolver(),
                 new JavaParserTypeSolver(cfg.getTestSrc().toFile())

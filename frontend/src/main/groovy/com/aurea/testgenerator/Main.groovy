@@ -1,6 +1,6 @@
 package com.aurea.testgenerator
 
-import com.aurea.testgenerator.config.PipelineConfiguration
+import com.aurea.testgenerator.config.ProjectConfiguration
 import com.google.common.base.Stopwatch
 import groovy.util.logging.Log4j2
 import org.springframework.beans.factory.annotation.Autowired
@@ -19,7 +19,7 @@ class Main implements CommandLineRunner {
 //    List<Pipeline> pipelines
 
     @Autowired
-    PipelineConfiguration props
+    ProjectConfiguration props
 
     static void main(String[] args) {
         Stopwatch stopwatch = Stopwatch.createStarted()

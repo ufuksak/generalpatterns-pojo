@@ -22,7 +22,7 @@ public class MethodRunConfig extends SingleModuleConfig {
     HierarchyMatcher hierarchyMatcher;
 
     @Autowired
-    PipelineConfiguration pipelineProperties;
+    ProjectConfiguration pipelineProperties;
 
     @Override
     protected Path src() {

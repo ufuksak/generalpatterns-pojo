@@ -23,3 +23,13 @@ sourceSets {
             srcDirs = ["src/main/java", "src/main/groovy"] }  // compile   everything in src/ with groovy
     }
 }
+
+springBoot {
+    mainClass 'com.aurea.testgenerator.Main'
+    executable true
+}
+
+jar {
+    baseName 'big-code'
+    version '0.1'
+}

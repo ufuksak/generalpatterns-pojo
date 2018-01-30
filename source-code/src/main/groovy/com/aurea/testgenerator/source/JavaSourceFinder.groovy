@@ -1,6 +1,6 @@
 package com.aurea.testgenerator.source
 
-import com.aurea.testgenerator.config.PipelineConfiguration
+import com.aurea.testgenerator.config.ProjectConfiguration
 import groovy.transform.Memoized
 import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
@@ -18,7 +18,7 @@ class JavaSourceFinder implements SourceFinder {
     final Path src
 
     @Autowired
-    JavaSourceFinder(PipelineConfiguration cfg) {
+    JavaSourceFinder(ProjectConfiguration cfg) {
         src = cfg.src
         log.info "Source classes are in $src"
     }
