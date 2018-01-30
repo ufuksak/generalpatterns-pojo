@@ -10,6 +10,7 @@ import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
+import org.assertj.core.api.Assertions
 import spock.lang.Specification
 
 import javax.xml.xpath.XPathFactory
@@ -39,7 +40,8 @@ abstract class AccesorMatcherBaseSpec<T extends AccessorMatch> extends Specifica
         matcher.xmlConverter = Converters.newConverter()
         matcher.evaluator = new XPathEvaluatorImpl(XPathFactory.newInstance().newXPath())
 
-        Collection<PatternMatch> matches = matcher.matches(getUnitForCode(code).get())
+        Collection<PatternMatch> matches = matcher.matches(getUnitForCode(code).get()).toList()
+        Assertions.assertThat(matches).hasSize(1)
         ++matches.iterator() as T
     }
 

@@ -16,12 +16,15 @@ import java.nio.file.Path
 @Canonical
 @Validated
 class PipelineConfiguration {
-    @NotEmpty
+    @NotNull
     Path src
-    @NotEmpty
+
+    @NotNull
     Path testSrc
+
     @NotNull
     Path out
 
+    @NotNull
     Path jacoco
 }

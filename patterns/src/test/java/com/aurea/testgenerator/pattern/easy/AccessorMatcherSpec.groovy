@@ -55,7 +55,7 @@ class Foo {
 }
 """)
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -87,7 +87,7 @@ class Foo {
 """)
 
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -109,7 +109,7 @@ class Foo {
 """)
 
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -135,7 +135,7 @@ class Foo {
 """)
 
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -157,7 +157,7 @@ class Foo {
 """)
 
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -186,7 +186,7 @@ class Foo {
 """)
 
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -213,7 +213,7 @@ class Foo {
 """)
 
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -236,7 +236,7 @@ class Foo {
 """)
 
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -270,7 +270,7 @@ class Foo {
 """)
 
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -298,7 +298,7 @@ class Foo {
 """)
 
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -326,7 +326,7 @@ class Foo {
 """)
 
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -354,7 +354,7 @@ class Foo {
 """)
 
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -386,7 +386,7 @@ class Foo {
 """)
 
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.empty
@@ -416,7 +416,7 @@ class Foo {
 """)
 
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -439,7 +439,7 @@ class Foo {
 }
 """)
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -461,7 +461,7 @@ class Foo {
 }
 """)
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -481,7 +481,7 @@ class Foo {
 }
 """)
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -500,7 +500,7 @@ class Foo {
 }
 """)
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.isEmpty()
@@ -517,7 +517,7 @@ class Foo {
 }
 """)
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.isEmpty()
@@ -534,7 +534,7 @@ class Foo {
 }
 """)
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -555,7 +555,7 @@ class Foo {
 }
 """)
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -574,7 +574,7 @@ class Foo {
 }
 """)
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -595,7 +595,7 @@ class Foo {
 }
 """)
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.isEmpty()
@@ -622,7 +622,7 @@ enum Foo {
         )
 
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1
@@ -648,7 +648,7 @@ enum Foo {
         )
 
         when:
-        Collection<PatternMatch> matches = matcher.matches(unit.get())
+        Collection<PatternMatch> matches = matcher.matches(unit.get()).toList()
 
         then:
         matches.size() == 1

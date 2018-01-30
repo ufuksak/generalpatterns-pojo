@@ -45,7 +45,7 @@ class JacocoCoverageRepositorySpec extends Specification {
 
     Optional<MethodCoverage> getMethodCoverage(String jacocoXmlName, String packageName, String className, String methodName) {
         Path xml = new File(getClass().getResource(jacocoXmlName).file).toPath()
-        new JacocoCoverageRepository(xml).getMethodCoverage(MethodCoverageCriteria.of(
+        JacocoCoverageRepository.fromFile(xml).getMethodCoverage(MethodCoverageCriteria.of(
                 packageName, className, methodName))
     }
 }

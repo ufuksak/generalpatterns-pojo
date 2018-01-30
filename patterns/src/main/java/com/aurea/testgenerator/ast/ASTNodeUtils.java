@@ -336,7 +336,7 @@ public final class ASTNodeUtils {
     }
 
     public static StreamEx<AssignExpr> findFieldAssignmentsInGivenNodeByName(Node node, SimpleName name) {
-        return StreamEx.of(node.getNodesByType(AssignExpr.class)).filter(ae -> {
+        return StreamEx.of(node.findAll(AssignExpr.class)).filter(ae -> {
             if (NameExpr.class.isAssignableFrom(ae.getTarget().getClass())) {
                 return ((NameExpr)ae.getTarget()).getName().equals(name);
             } else if (FieldAccessExpr.class.isAssignableFrom(ae.getTarget().getClass())) {
