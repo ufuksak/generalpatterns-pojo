@@ -12,6 +12,8 @@ import org.springframework.stereotype.Component;
 import java.util.Collections;
 import java.util.Optional;
 
+import static com.aurea.testgenerator.pattern.PatternType.SPECIFIC;
+
 @Component
 public abstract class XPathPatternMatcher implements PatternMatcher {
 
@@ -37,7 +39,7 @@ public abstract class XPathPatternMatcher implements PatternMatcher {
 
     @Override
     public PatternType getType() {
-        return ClassNamePatternType.of(this);
+        return SPECIFIC;
     }
 
     public void setXmlConverter(NodeToXmlConverter xmlConverter) {

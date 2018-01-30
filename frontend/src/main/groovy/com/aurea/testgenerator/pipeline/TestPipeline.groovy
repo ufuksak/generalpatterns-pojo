@@ -1,11 +1,9 @@
 package com.aurea.testgenerator.pipeline
 
-import com.aurea.testgenerator.config.PipelineConfiguration
 import com.aurea.testgenerator.generation.TestGenerator
 import com.aurea.testgenerator.pattern.MatchType
 import com.aurea.testgenerator.pattern.MethodMatchCollector
 import com.aurea.testgenerator.pattern.PatternMatch
-import com.aurea.testgenerator.source.PathUnitSource
 import com.aurea.testgenerator.source.Unit
 import com.aurea.testgenerator.source.UnitSource
 import groovy.util.logging.Log4j2
@@ -16,8 +14,6 @@ import org.springframework.stereotype.Component
 
 import java.nio.file.Path
 import java.util.function.Predicate
-import java.util.stream.Stream
-
 
 @Component
 @Log4j2

@@ -76,8 +76,8 @@ public class JacocoCoverageRepository implements CoverageRepository {
         }
     });
 
-    public JacocoCoverageRepository(Path pathToJacoco) {
-        this(JacocoParsers.fromXml(pathToJacoco));
+    public static JacocoCoverageRepository fromFile(Path pathToJacoco) {
+        return new JacocoCoverageRepository(JacocoParsers.fromXml(pathToJacoco));
     }
 
     public JacocoCoverageRepository(CoverageIndex index) {

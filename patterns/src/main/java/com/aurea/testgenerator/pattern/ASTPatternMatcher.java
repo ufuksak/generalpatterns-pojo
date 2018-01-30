@@ -31,7 +31,7 @@ public abstract class ASTPatternMatcher implements PatternMatcher {
 
     @Override
     public PatternType getType() {
-        return ClassNamePatternType.of(this);
+        return PatternType.SPECIFIC;
     }
 
     @Override

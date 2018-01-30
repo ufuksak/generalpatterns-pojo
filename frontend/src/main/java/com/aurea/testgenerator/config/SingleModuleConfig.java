@@ -38,7 +38,9 @@ public abstract class SingleModuleConfig {
     @Bean
     public CoverageService coverageService(PipelineConfiguration cfg) {
         if (cfg.getJacoco() != null) {
-            return new JacocoCoverageService(new JacocoCoverageRepository(cfg.getJacoco()));
+            Path jacocoXml = cfg.getJacoco();
+            JacocoCoverageRepository repository = JacocoCoverageRepository.fromFile(jacocoXml);
+            return new JacocoCoverageService(repository);
         } else {
             return new EmptyCoverageService();
         }
@@ -65,11 +67,12 @@ public abstract class SingleModuleConfig {
     protected abstract MatchCollector collector();
 
     protected List<PipelineBuilder> pipelineBuilders() {
-        return Collections.singletonList(PipelineBuilder
-                .fromSource(srcRoot())
-                .withPreScans(preScans().getPreScans())
-                .withFilter(sourceFilter())
-                .mappingTo(patternMatcher())
-                .collectTo(collector()));
+        return Collections.emptyList();
+//        return Collections.singletonList(PipelineBuilder
+//                .fromSource(srcRoot())
+//                .withPreScans(preScans().getPreScans())
+//                .withFilter(sourceFilter())
+//                .mappingTo(patternMatcher())
+//                .collectTo(collector()));
     }
 }

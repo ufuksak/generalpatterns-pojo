@@ -45,45 +45,8 @@ class PipelineBuilder {
         this
     }
 
-    Pipeline build(SourceFinder sourceFinder) {
+    void build(SourceFinder sourceFinder) {
         PathUnitSource unitSource = new PathUnitSource(sourceFinder, src, filter)
         UnitToMatchMapper unitToMatchMapper = new UnitToMatchMapper(patternMatcher)
-
-        new PipelineImpl(unitSource, unitToMatchMapper, collector, preScans)
-    }
-
-    @Log4j2
-    @TupleConstructor
-    private static class PipelineImpl implements Pipeline {
-
-        UnitSource unitSource
-        UnitToMatchMapper matcherMapper
-        MatchCollector matchCollector
-        List<PreScan> preScans
-
-        @Override
-        void start() {
-            log.info("[{}] ⇒ [{}] ⇒ [{}]", unitSource, matcherMapper, matchCollector)
-            log.info("Starting prescans")
-            preScans.each {
-                log.info("")
-                log.info("Next: " + it)
-
-                IterationLogger iterationLogger = new IterationLogger(unitSource.size(it.filter), "units processed")
-                def unitsStream = unitSource.units(it.filter).peek { iterationLogger.iterate() }
-                it.preScan(unitsStream)
-                iterationLogger.finish()
-            }
-            log.info("")
-            log.info("Pre scans done")
-            log.info("")
-
-            def classesToMatches = StreamEx.of(unitSource.units(matcherMapper.getSourceFilter()))
-                                           .map(matcherMapper)
-                                           .flatMap { it.stream() }
-                                           .groupingBy { it.description() }
-
-            matchCollector.accept(classesToMatches)
-        }
     }
 }

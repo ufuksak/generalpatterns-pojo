@@ -14,13 +14,13 @@ class ExpandablePatternMatch extends Expando implements PatternMatch {
         return checkNotNull(result, "%s must be provided", "Class description")
     }
 
-    PatternType type() {
-        PatternType result = (PatternType) getProperty("type")
+    MatchType type() {
+        MatchType result = (MatchType) getProperty("type")
         return checkNotNull(result, "%s must be provided", "Type")
     }
 
     String typeAsString() {
-        return type().name
+        return type().name()
     }
 
     @Override

@@ -11,7 +11,7 @@ import one.util.streamex.StreamEx
 import org.springframework.stereotype.Component
 
 @Component
-class HierarchyTestGenerator implements TestGenerator<HierarchyMatch> {
+class HierarchyTestGenerator extends TestGenerator<HierarchyMatch> {
     private int sizeFilter
     private Map<String, String> kidsToParents = new HashMap<>()
 
