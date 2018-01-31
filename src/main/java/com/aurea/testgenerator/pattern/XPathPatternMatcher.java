@@ -25,7 +25,11 @@ public abstract class XPathPatternMatcher implements PatternMatcher {
     @Override
     public StreamEx<PatternMatch> apply(Unit unit) {
         try {
-            return newVisitor(unit).map(MatchVisitor::matches).orElse(StreamEx.empty());
+            return newVisitor(unit)
+                    .map(visitor -> {
+                        visitor.visit();
+                        return visitor.matches();
+                    }).orElse(StreamEx.empty());
         } catch (Exception e) {
             logger.error("Failed to visit " + unit.getClassName(), e);
             return StreamEx.empty();
