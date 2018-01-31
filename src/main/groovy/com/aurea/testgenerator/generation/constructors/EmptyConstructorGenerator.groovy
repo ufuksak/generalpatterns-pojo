@@ -9,9 +9,11 @@ import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.PackageDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
+import groovy.transform.ToString
 import org.springframework.stereotype.Component
 
 @Component
+@ToString
 class EmptyConstructorGenerator implements UnitTestGenerator {
     @Override
     List<UnitTest> apply(PatternMatch patternMatch) {
@@ -27,14 +29,14 @@ class EmptyConstructorGenerator implements UnitTestGenerator {
         MethodDeclaration typeIsInstantiableTest = JavaParser.parseBodyDeclaration("""
             @Test
             public void test_${className}_IsInstantiable() throws Exception {
-                new $className(); 
+                new ${className}(); 
             }
         """).asMethodDeclaration()
         typeIsInstantiable.method = typeIsInstantiableTest
 
-        typeIsInstantiable.imports << JavaParser.parseImport(pd.nameAsString + "." + declaredInType.nameAsString)
+        typeIsInstantiable.imports << Imports.parse(pd.nameAsString + "." + declaredInType.nameAsString)
         typeIsInstantiable.imports << Imports.JUNIT_TEST
-        typeIsInstantiable.imports << JavaParser.parseImport("java.lang.Exception")
+        typeIsInstantiable.imports << Imports.parse("java.lang.Exception")
 
         [typeIsInstantiable]
     }
