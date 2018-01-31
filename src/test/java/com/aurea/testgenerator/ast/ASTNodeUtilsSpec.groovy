@@ -19,40 +19,6 @@ import static com.aurea.testgenerator.UnitHelper.getUnitForCode
 class ASTNodeUtilsSpec extends Specification {
     private JavaParserFacade facade
 
-    def "getAllAccessibleFields() should find fields of parent class"() {
-        setup:
-        ClassOrInterfaceDeclaration fooDeclaration = fromCode(
-                """
-package example;
-
-class Foo extends Parent {
-    public String setFoo() {
-        this.key = key;
-    }
-    
-    public String getFoo() {
-        return key;
-    }
-}
-""", """        
-package example;
-
-class Parent {
-    private String foo;
-}
-"""
-        )
-
-        when:
-        FieldResolver resolver = new FieldResolver(facade)
-        List<FieldDeclaration> fields = resolver.getAllAccessibleFields(fooDeclaration)
-
-        then:
-        fields.size() == 1
-        fields.get(0).variables.size() == 1
-        fields.get(0).variables.get(0).nameAsString == 'foo'
-    }
-
     ClassOrInterfaceDeclaration fromCode(String fooClassCode, String parentClassCode) {
         CompilationUnit cu = getUnitForCode(fooClassCode).get().cu
 
