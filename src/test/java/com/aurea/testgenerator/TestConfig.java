@@ -5,8 +5,6 @@ import com.aurea.testgenerator.coverage.CoverageService;
 import com.aurea.testgenerator.coverage.EmptyCoverageRepository;
 import com.aurea.testgenerator.coverage.EmptyCoverageService;
 import com.aurea.testgenerator.template.MatchCollector;
-import com.aurea.testgenerator.template.path.TestNameResolver;
-import com.aurea.testgenerator.template.path.TestNameResolverImpl;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,11 +18,6 @@ import static org.mockito.Mockito.mock;
 public class TestConfig {
 
     public static final String PATTERN_CASES = "cases";
-
-    @Bean
-    public TestNameResolver testNameResolver() {
-        return new TestNameResolverImpl();
-    }
 
     @Bean
     public MatchCollector testGenerator() {

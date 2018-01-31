@@ -1,9 +1,8 @@
 package com.aurea.testgenerator.pipeline
 
 import com.aurea.testgenerator.generation.TestGenerator
-import com.aurea.testgenerator.pattern.MatchType
-import com.aurea.testgenerator.pattern.TestCaseGenerator
-import com.aurea.testgenerator.pattern.PatternMatch
+import com.aurea.testgenerator.testcase.TestCaseGenerator
+import com.aurea.testgenerator.testcase.TestCase
 import com.aurea.testgenerator.source.SourceFilter
 import com.aurea.testgenerator.source.Unit
 import com.aurea.testgenerator.source.UnitSource
@@ -39,7 +38,7 @@ class TestPipeline {
         """
         log.info "Total units after filtering: ${source.size(sourceFilter)}"
         StreamEx<Unit> filteredUnits = source.units(sourceFilter)
-        Map<MatchType, List<PatternMatch>> matchesGroupedByType = collector.generate(filteredUnits)
+        Map<Unit, List<TestCase>> matchesGroupedByType = collector.generate(filteredUnits)
 
         String statistics = EntryStream.of(matchesGroupedByType).mapValues {it.size()}.join(": ", "\r\n\t", "")
         log.info """Matching statistics: $statistics"""

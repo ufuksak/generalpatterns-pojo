@@ -228,13 +228,6 @@ public final class ASTNodeUtils {
         return n.getParameters().stream().map(p -> p.getType().toString()).collect(Collectors.toList());
     }
 
-    public static String getImportByName(String name, CompilationUnit cu) {
-        return cu.getImports().stream()
-                .filter(id -> name.equals(id.getNameAsString()))
-                .map(id -> ImportWrapper.asImportStatement(id.getName().toString()))
-                .findFirst().orElse("");
-    }
-
     public static String getFullClassName(String name, CompilationUnit cu) {
         return cu.getImports().stream()
                 .filter(id -> id.getNameAsString().endsWith(name))
@@ -388,5 +381,17 @@ public final class ASTNodeUtils {
 
         return findParents(childNode, clazzOfParent).filter(condition);
 
+    }
+
+    private static class FieldVariableDeclaratorNotFoundException extends RuntimeException {
+        FieldVariableDeclaratorNotFoundException(String msg) {
+            super(msg);
+        }
+    }
+
+    private static class MethodDeclarationNotFoundException extends RuntimeException {
+        MethodDeclarationNotFoundException(String msg) {
+            super(msg);
+        }
     }
 }

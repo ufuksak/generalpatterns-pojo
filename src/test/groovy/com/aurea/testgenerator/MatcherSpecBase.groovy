@@ -1,10 +1,10 @@
 package com.aurea.testgenerator
 
 import com.aurea.testgenerator.config.SourceConfig
-import com.aurea.testgenerator.pattern.PatternMatcher
-import com.aurea.testgenerator.pattern.ExpandablePatternMatch
-import com.aurea.testgenerator.prescans.PreScan
-import com.aurea.testgenerator.prescans.PreScans
+import com.aurea.testgenerator.source.SourceFilter
+import com.aurea.testgenerator.source.SourceFilters
+import com.aurea.testgenerator.testcase.TestCaseMatcher
+import com.aurea.testgenerator.testcase.ExpandableTestCase
 import com.aurea.testgenerator.source.JavaSourceFinder
 import com.aurea.testgenerator.source.PathUnitSource
 
@@ -23,7 +23,7 @@ import java.util.stream.Stream
 
 @ContextConfiguration(classes = [SourceConfig, TestConfig])
 @TestExecutionListeners([DependencyInjectionTestExecutionListener, DirtiesContextTestExecutionListener])
-abstract class MatcherSpecBase<T extends PatternMatcher> extends Specification {
+abstract class MatcherSpecBase<T extends TestCaseMatcher> extends Specification {
 
     private static final Path PATTERN_CASES = Paths.get(this.getResource("").toURI()).resolve(TestConfig.PATTERN_CASES)
 
@@ -33,24 +33,7 @@ abstract class MatcherSpecBase<T extends PatternMatcher> extends Specification {
     @Autowired
     JavaSourceFinder sourceFinder
 
-    @Autowired
-    Map<String, PreScan> preScansByName
-
-    private PreScans preScans
-
     abstract String getSampleLocation()
-
-    MatcherSpecBase withPreScan(String name) {
-        assert preScansByName[name] != null
-        if (null != preScans) {
-            List<PreScan> currentPreScans = new ArrayList<>(preScans.preScans)
-            currentPreScans.add(preScansByName[name])
-            preScans = PreScans.with(currentPreScans)
-        } else {
-            preScans = PreScans.with(preScansByName[name])
-        }
-        return this
-    }
 
     Unit withUnit(Path name) {
         UnitHelper.getUnit(PATTERN_CASES, PATTERN_CASES.resolve(Paths.get(getSampleLocation()).resolve(name)))
@@ -72,13 +55,13 @@ abstract class MatcherSpecBase<T extends PatternMatcher> extends Specification {
         StreamEx.of(Arrays.asList(names)).toMap({it}, {withUnit(it)})
     }
 
-    ExpandablePatternMatch getFirstMatch(Unit unit) {
+    ExpandableTestCase getFirstMatch(Unit unit) {
         if (preScans != null) {
             Path root = PATTERN_CASES.resolve(getSampleLocation())
-            PathUnitSource unitSource = new PathUnitSource(sourceFinder, root, SourceFilter.empty())
-            Stream<Unit> allUnits = unitSource.units(SourceFilter.empty())
+            PathUnitSource unitSource = new PathUnitSource(sourceFinder, root, SourceFilters.empty())
+            Stream<Unit> allUnits = unitSource.units(SourceFilters.empty())
             preScans.preScans.each {it.preScan(allUnits)}
         }
-        matcher.matches(unit)[0] as ExpandablePatternMatch
+        matcher.matches(unit)[0] as ExpandableTestCase
     }
 }

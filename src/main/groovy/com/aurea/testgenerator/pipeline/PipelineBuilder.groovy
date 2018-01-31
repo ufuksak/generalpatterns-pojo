@@ -1,16 +1,10 @@
 package com.aurea.testgenerator.pipeline
 
-import com.aurea.testgenerator.IterationLogger
-import com.aurea.testgenerator.pattern.PatternMatcher
-import com.aurea.testgenerator.pattern.UnitToMatchMapper
-import com.aurea.testgenerator.prescans.PreScan
+import com.aurea.testgenerator.testcase.TestCaseMatcher
+import com.aurea.testgenerator.testcase.UnitToTestCasesMapper
 import com.aurea.testgenerator.source.PathUnitSource
 import com.aurea.testgenerator.source.SourceFinder
-import com.aurea.testgenerator.source.UnitSource
 import com.aurea.testgenerator.template.MatchCollector
-import groovy.transform.TupleConstructor
-import groovy.util.logging.Log4j2
-import one.util.streamex.StreamEx
 
 import java.nio.file.Path
 import java.util.function.Predicate
@@ -18,7 +12,7 @@ import java.util.function.Predicate
 class PipelineBuilder {
 
     private final Path src
-    private PatternMatcher patternMatcher
+    private TestCaseMatcher patternMatcher
     private MatchCollector collector
     private Predicate<Path> filter = { true }
 
@@ -30,7 +24,7 @@ class PipelineBuilder {
         new PipelineBuilder(src)
     }
 
-    PipelineBuilder mappingTo(PatternMatcher patternMatcher) {
+    PipelineBuilder mappingTo(TestCaseMatcher patternMatcher) {
         this.patternMatcher = patternMatcher
         this
     }
@@ -47,6 +41,6 @@ class PipelineBuilder {
 
     void build(SourceFinder sourceFinder) {
         PathUnitSource unitSource = new PathUnitSource(sourceFinder, src, filter)
-        UnitToMatchMapper unitToMatchMapper = new UnitToMatchMapper(patternMatcher)
+        UnitToTestCasesMapper unitToMatchMapper = new UnitToTestCasesMapper(patternMatcher)
     }
 }

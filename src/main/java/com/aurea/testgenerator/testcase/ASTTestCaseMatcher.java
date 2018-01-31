@@ -1,0 +1,34 @@
+package com.aurea.testgenerator.testcase;
+
+import com.aurea.testgenerator.source.Unit;
+import one.util.streamex.StreamEx;
+import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
+
+@Component
+public abstract class ASTTestCaseMatcher implements TestCaseMatcher {
+
+    private static final Logger logger = LogManager.getLogger(ASTTestCaseMatcher.class.getSimpleName());
+
+    @Override
+    public StreamEx<TestCase> matches(Unit unit) {
+        UnitMatchVisitor visitor = newVisitor(unit);
+        try {
+            visitor.visit(unit.getCu(), null);
+            return visitor.matches();
+        } catch (Exception e) {
+            logger.error("Failed to visit " + unit.getClassName());
+            throw e;
+        }
+    }
+
+    protected abstract UnitMatchVisitor newVisitor(Unit unit);
+
+    @Override
+    public String toString() {
+        return ToStringBuilder.reflectionToString(this, ToStringStyle.SIMPLE_STYLE);
+    }
+}

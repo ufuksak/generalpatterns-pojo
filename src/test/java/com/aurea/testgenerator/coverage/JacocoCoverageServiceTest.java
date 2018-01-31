@@ -11,6 +11,7 @@ import com.aurea.coverage.unit.MethodCoverage;
 import com.aurea.coverage.unit.ModuleCoverage;
 import com.aurea.coverage.unit.PackageCoverage;
 import com.aurea.testgenerator.source.Unit;
+import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
@@ -60,7 +61,7 @@ public class JacocoCoverageServiceTest {
     public void methodCoverageIsFoundForMethodWithFullySpecifiedParameter() throws Exception {
         MethodDeclaration md = new MethodDeclaration();
         md.setName("bar");
-        ReferenceType classOrInterfaceType = new ArrayType(new ClassOrInterfaceType(new ClassOrInterfaceType(new ClassOrInterfaceType("org"), "example"), "Dinosaur"));
+        ReferenceType classOrInterfaceType = new ArrayType(new ClassOrInterfaceType(new ClassOrInterfaceType(JavaParser.parseClassOrInterfaceType("org"), "example"), "Dinosaur"));
         Parameter parameter = new Parameter(classOrInterfaceType, "id");
         md.setParameters(nodeList(parameter));
         MethodCoverageQuery query = queryForFooClass(md);
@@ -76,8 +77,8 @@ public class JacocoCoverageServiceTest {
         MethodDeclaration md = new MethodDeclaration();
         md.setName("bar");
         md.setTypeParameters(nodeList(new TypeParameter("T")));
-        ClassOrInterfaceType classOrInterfaceType = new ClassOrInterfaceType("List");
-        classOrInterfaceType.setTypeArguments(nodeList(new ClassOrInterfaceType("T")));
+        ClassOrInterfaceType classOrInterfaceType = JavaParser.parseClassOrInterfaceType("List");
+        classOrInterfaceType.setTypeArguments(nodeList(JavaParser.parseClassOrInterfaceType("T")));
         Parameter parameter = new Parameter(classOrInterfaceType, "id");
         md.setParameters(nodeList(parameter));
 
@@ -124,7 +125,7 @@ public class JacocoCoverageServiceTest {
     private MethodDeclaration simpleMethodDeclaration() {
         MethodDeclaration md = new MethodDeclaration();
         md.setName("bar");
-        ReferenceType type = new ArrayType(new ClassOrInterfaceType("Dinosaur"));
+        ReferenceType type = new ArrayType(JavaParser.parseClassOrInterfaceType("Dinosaur"));
         md.setParameters(nodeList(new Parameter(type, "id")));
         return md;
     }
