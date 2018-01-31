@@ -4,7 +4,6 @@ import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
-import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.expr.NameExpr
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
@@ -89,13 +88,13 @@ class ASTNodeUtilsSpec extends Specification {
         Node nestedMethodCall = unit.get().cu.getNodesByType(MethodCallExpr)[1]
 
         when:
-        List<MethodCallExpr> parents = ASTNodeUtils.findParents(nestedMethodCall, MethodCallExpr, {it.nameAsString == "chomp"}).toList()
+        List<MethodCallExpr> parents = ASTNodeUtils.findParents(nestedMethodCall, MethodCallExpr, { it.nameAsString == "chomp" }).toList()
 
         then:
         parents.size() == 1
         parents[0] == nestedMethodCall.parentNode.get()
         parents[0].nameAsString == "chomp"
-        ((NameExpr)parents[0].scope.get()).nameAsString == "StringUtils"
+        ((NameExpr) parents[0].scope.get()).nameAsString == "StringUtils"
 
     }
 }

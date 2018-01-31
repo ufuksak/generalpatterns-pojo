@@ -1,6 +1,6 @@
 package com.aurea.testgenerator
 
-
+import com.aurea.testgenerator.source.PathUtils
 import com.github.javaparser.ast.PackageDeclaration
 import com.github.javaparser.ast.expr.Name
 import spock.lang.Specification

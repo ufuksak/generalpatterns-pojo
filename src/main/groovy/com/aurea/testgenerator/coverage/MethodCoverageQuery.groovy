@@ -1,7 +1,7 @@
 package com.aurea.testgenerator.coverage
 
-import com.aurea.testgenerator.source.Unit
 import com.aurea.testgenerator.ast.ASTNodeUtils
+import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.expr.ObjectCreationExpr

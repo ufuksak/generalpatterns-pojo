@@ -1,9 +1,5 @@
 package com.aurea.testgenerator.coverage;
 
-import static com.github.javaparser.ast.NodeList.nodeList;
-import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.assertThat;
-
 import com.aurea.coverage.CoverageIndex;
 import com.aurea.coverage.unit.ClassCoverage;
 import com.aurea.coverage.unit.ClassCoverageImpl;
@@ -22,10 +18,15 @@ import com.github.javaparser.ast.type.ArrayType;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.type.TypeParameter;
+import org.junit.Test;
+
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.EnumSet;
-import org.junit.Test;
+
+import static com.github.javaparser.ast.NodeList.nodeList;
+import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class JacocoCoverageServiceTest {
 

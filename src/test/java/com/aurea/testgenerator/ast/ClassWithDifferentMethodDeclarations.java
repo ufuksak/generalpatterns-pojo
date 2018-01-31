@@ -38,9 +38,6 @@ public class ClassWithDifferentMethodDeclarations {
     public void listType(List<String> foo) {
     }
 
-    private static class Foo {
-    }
-
     public enum innerEnum {
         UNO;
 
@@ -51,5 +48,8 @@ public class ClassWithDifferentMethodDeclarations {
 
     public interface Inter {
         void callMe(BigDecimal numeroUno);
+    }
+
+    private static class Foo {
     }
 }

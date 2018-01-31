@@ -72,7 +72,7 @@ public class JacocoCoverageService implements CoverageService {
         return query.getMethod().getModifiers().contains(Modifier.ABSTRACT) ||
                 ((query.getType() instanceof ClassOrInterfaceDeclaration) && (
                         (ClassOrInterfaceDeclaration) query
-                        .getType()).isInterface());
+                                .getType()).isInterface());
     }
 
     private String toJacocoMethodNameRegex(MethodCoverageQuery query) {

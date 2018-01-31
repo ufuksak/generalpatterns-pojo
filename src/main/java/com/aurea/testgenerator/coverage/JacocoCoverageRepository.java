@@ -52,36 +52,36 @@ public class JacocoCoverageRepository implements CoverageRepository {
 
     private final Supplier<ImmutableMap<String, Map<String, Map<String, MethodCoverage>>>> moduleIndex =
             Suppliers.memoize(new Supplier<ImmutableMap<String, Map<String, Map<String, MethodCoverage>>>>() {
-        @Override
-        public ImmutableMap<String, Map<String, Map<String, MethodCoverage>>> get() {
-            Stream<PackageCoverage> packageCoverages = index.getModuleCoverage().packageCoverages();
-            Collector<PackageCoverage, ?, Map<String, Map<String, Map<String, MethodCoverage>>>> mapPackageCoveragesToNames =
-                    toMap(Named::getName, pc -> {
-                        Collector<ClassCoverage, ?, Map<String, Map<String, MethodCoverage>>> mapClassCoveragesToMethodCoverages =
-                                toMap(Named::getName, cc -> {
-                                    Collector<MethodCoverage, ?, Map<String, MethodCoverage>> mapMethodCoveragesToNames = toMap(Named::getName, Function.identity(),
-                                            (mc1, mc2) -> {
-                                                if (mc1.getTotal() > mc2.getTotal()) {
-                                                    return mc1;
-                                                } else {
-                                                    return mc2;
-                                                }
-                                            });
-                                    return cc.methodCoverages().distinct().collect(mapMethodCoveragesToNames);
-                                });
-                        return pc.classCoverages().collect(mapClassCoveragesToMethodCoverages);
-                    });
-            Map<String, Map<String, Map<String, MethodCoverage>>> collected = packageCoverages.collect(mapPackageCoveragesToNames);
-            return ImmutableMap.copyOf(collected);
-        }
-    });
-
-    public static JacocoCoverageRepository fromFile(Path pathToJacoco) {
-        return new JacocoCoverageRepository(JacocoParsers.fromXml(pathToJacoco));
-    }
+                @Override
+                public ImmutableMap<String, Map<String, Map<String, MethodCoverage>>> get() {
+                    Stream<PackageCoverage> packageCoverages = index.getModuleCoverage().packageCoverages();
+                    Collector<PackageCoverage, ?, Map<String, Map<String, Map<String, MethodCoverage>>>> mapPackageCoveragesToNames =
+                            toMap(Named::getName, pc -> {
+                                Collector<ClassCoverage, ?, Map<String, Map<String, MethodCoverage>>> mapClassCoveragesToMethodCoverages =
+                                        toMap(Named::getName, cc -> {
+                                            Collector<MethodCoverage, ?, Map<String, MethodCoverage>> mapMethodCoveragesToNames = toMap(Named::getName, Function.identity(),
+                                                    (mc1, mc2) -> {
+                                                        if (mc1.getTotal() > mc2.getTotal()) {
+                                                            return mc1;
+                                                        } else {
+                                                            return mc2;
+                                                        }
+                                                    });
+                                            return cc.methodCoverages().distinct().collect(mapMethodCoveragesToNames);
+                                        });
+                                return pc.classCoverages().collect(mapClassCoveragesToMethodCoverages);
+                            });
+                    Map<String, Map<String, Map<String, MethodCoverage>>> collected = packageCoverages.collect(mapPackageCoveragesToNames);
+                    return ImmutableMap.copyOf(collected);
+                }
+            });
 
     public JacocoCoverageRepository(CoverageIndex index) {
         this.index = index;
+    }
+
+    public static JacocoCoverageRepository fromFile(Path pathToJacoco) {
+        return new JacocoCoverageRepository(JacocoParsers.fromXml(pathToJacoco));
     }
 
     @Override

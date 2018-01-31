@@ -7,9 +7,10 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy
 
 @Configuration
 @EnableAspectJAutoProxy
+
 class BaseConfig {
     @Bean
-    public StopWatchAspect stopWatchAspect() {
-        return new StopWatchAspect()
+    StopWatchAspect stopWatchAspect() {
+        new StopWatchAspect()
     }
 }

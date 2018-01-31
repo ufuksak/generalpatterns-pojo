@@ -1,381 +1,381 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?><!DOCTYPE report PUBLIC "-//JACOCO//DTD Report 1.0//EN" "report.dtd">
 <report name="sandbox">
-    <sessioninfo id="HADZU-2beb4e69" start="1490079139429" dump="1490079140227"/>
-    <sessioninfo id="HADZU-8b8f7dc6" start="1490079139428" dump="1490079140285"/>
-    <package name="org/example/equals">
-        <class name="org/example/equals/EqualsExample">
-            <method name="&lt;init&gt;" desc="()V" line="3">
-                <counter type="INSTRUCTION" missed="3" covered="0"/>
-                <counter type="LINE" missed="1" covered="0"/>
-                <counter type="COMPLEXITY" missed="1" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <method name="equals" desc="(Ljava/lang/Object;)Z" line="9">
-                <counter type="INSTRUCTION" missed="33" covered="0"/>
-                <counter type="BRANCH" missed="10" covered="0"/>
-                <counter type="LINE" missed="4" covered="0"/>
-                <counter type="COMPLEXITY" missed="6" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <counter type="INSTRUCTION" missed="36" covered="0"/>
-            <counter type="BRANCH" missed="10" covered="0"/>
-            <counter type="LINE" missed="5" covered="0"/>
-            <counter type="COMPLEXITY" missed="7" covered="0"/>
-            <counter type="METHOD" missed="2" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </class>
-        <sourcefile name="EqualsExample.java">
-            <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
-            <line nr="9" mi="5" ci="0" mb="2" cb="0"/>
-            <line nr="10" mi="9" ci="0" mb="4" cb="0"/>
-            <line nr="12" mi="3" ci="0" mb="0" cb="0"/>
-            <line nr="14" mi="16" ci="0" mb="4" cb="0"/>
-            <counter type="INSTRUCTION" missed="36" covered="0"/>
-            <counter type="BRANCH" missed="10" covered="0"/>
-            <counter type="LINE" missed="5" covered="0"/>
-            <counter type="COMPLEXITY" missed="7" covered="0"/>
-            <counter type="METHOD" missed="2" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </sourcefile>
-        <counter type="INSTRUCTION" missed="36" covered="0"/>
-        <counter type="BRANCH" missed="10" covered="0"/>
-        <counter type="LINE" missed="5" covered="0"/>
-        <counter type="COMPLEXITY" missed="7" covered="0"/>
-        <counter type="METHOD" missed="2" covered="0"/>
-        <counter type="CLASS" missed="1" covered="0"/>
-    </package>
-    <package name="org/example/innerness">
-        <class name="org/example/innerness/Library$Librarian">
-            <method name="&lt;init&gt;" desc="()V" line="26">
-                <counter type="INSTRUCTION" missed="0" covered="3"/>
-                <counter type="LINE" missed="0" covered="1"/>
-                <counter type="COMPLEXITY" missed="0" covered="1"/>
-                <counter type="METHOD" missed="0" covered="1"/>
-            </method>
-            <counter type="INSTRUCTION" missed="0" covered="3"/>
-            <counter type="LINE" missed="0" covered="1"/>
-            <counter type="COMPLEXITY" missed="0" covered="1"/>
-            <counter type="METHOD" missed="0" covered="1"/>
-            <counter type="CLASS" missed="0" covered="1"/>
-        </class>
-        <class name="org/example/innerness/Library$Shelf$Book">
-            <method name="&lt;init&gt;" desc="(Ljava/lang/String;)V" line="12">
-                <counter type="INSTRUCTION" missed="0" covered="6"/>
-                <counter type="LINE" missed="0" covered="3"/>
-                <counter type="COMPLEXITY" missed="0" covered="1"/>
-                <counter type="METHOD" missed="0" covered="1"/>
-            </method>
-            <counter type="INSTRUCTION" missed="0" covered="6"/>
-            <counter type="LINE" missed="0" covered="3"/>
-            <counter type="COMPLEXITY" missed="0" covered="1"/>
-            <counter type="METHOD" missed="0" covered="1"/>
-            <counter type="CLASS" missed="0" covered="1"/>
-        </class>
-        <class name="org/example/innerness/Library">
-            <method name="&lt;init&gt;" desc="()V" line="6">
-                <counter type="INSTRUCTION" missed="0" covered="3"/>
-                <counter type="LINE" missed="0" covered="2"/>
-                <counter type="COMPLEXITY" missed="0" covered="1"/>
-                <counter type="METHOD" missed="0" covered="1"/>
-            </method>
-            <method name="getBookFromTopShelf" desc="(Lorg/example/innerness/Library$Librarian;)Lorg/example/innerness/Library$Shelf$Book;" line="30">
-                <counter type="INSTRUCTION" missed="0" covered="5"/>
-                <counter type="LINE" missed="0" covered="1"/>
-                <counter type="COMPLEXITY" missed="0" covered="1"/>
-                <counter type="METHOD" missed="0" covered="1"/>
-            </method>
-            <counter type="INSTRUCTION" missed="0" covered="8"/>
-            <counter type="LINE" missed="0" covered="3"/>
-            <counter type="COMPLEXITY" missed="0" covered="2"/>
-            <counter type="METHOD" missed="0" covered="2"/>
-            <counter type="CLASS" missed="0" covered="1"/>
-        </class>
-        <class name="org/example/innerness/Library$Shelf">
-            <method name="&lt;init&gt;" desc="()V" line="8">
-                <counter type="INSTRUCTION" missed="3" covered="0"/>
-                <counter type="LINE" missed="2" covered="0"/>
-                <counter type="COMPLEXITY" missed="1" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <method name="repair" desc="(Lorg/example/innerness/Library$Librarian;)Ljava/util/List;" line="18">
-                <counter type="INSTRUCTION" missed="2" covered="0"/>
-                <counter type="LINE" missed="1" covered="0"/>
-                <counter type="COMPLEXITY" missed="1" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <method name="getAdministrator" desc="()Lorg/example/innerness/Library$Librarian;" line="22">
-                <counter type="INSTRUCTION" missed="4" covered="0"/>
-                <counter type="LINE" missed="1" covered="0"/>
-                <counter type="COMPLEXITY" missed="1" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <counter type="INSTRUCTION" missed="9" covered="0"/>
-            <counter type="LINE" missed="4" covered="0"/>
-            <counter type="COMPLEXITY" missed="3" covered="0"/>
-            <counter type="METHOD" missed="3" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </class>
-        <sourcefile name="Library.java">
-            <line nr="6" mi="0" ci="2" mb="0" cb="0"/>
-            <line nr="8" mi="2" ci="0" mb="0" cb="0"/>
-            <line nr="9" mi="1" ci="0" mb="0" cb="0"/>
-            <line nr="12" mi="0" ci="2" mb="0" cb="0"/>
-            <line nr="13" mi="0" ci="3" mb="0" cb="0"/>
-            <line nr="14" mi="0" ci="1" mb="0" cb="0"/>
-            <line nr="18" mi="2" ci="0" mb="0" cb="0"/>
-            <line nr="22" mi="4" ci="0" mb="0" cb="0"/>
-            <line nr="26" mi="0" ci="4" mb="0" cb="0"/>
-            <line nr="30" mi="0" ci="5" mb="0" cb="0"/>
-            <counter type="INSTRUCTION" missed="9" covered="17"/>
-            <counter type="LINE" missed="4" covered="6"/>
-            <counter type="COMPLEXITY" missed="3" covered="4"/>
-            <counter type="METHOD" missed="3" covered="4"/>
-            <counter type="CLASS" missed="1" covered="3"/>
-        </sourcefile>
-        <counter type="INSTRUCTION" missed="9" covered="17"/>
-        <counter type="LINE" missed="4" covered="6"/>
-        <counter type="COMPLEXITY" missed="3" covered="4"/>
-        <counter type="METHOD" missed="3" covered="4"/>
-        <counter type="CLASS" missed="1" covered="3"/>
-    </package>
-    <package name="org/example/getter">
-        <class name="org/example/getter/GetterExample">
-            <method name="&lt;init&gt;" desc="()V" line="3">
-                <counter type="INSTRUCTION" missed="3" covered="0"/>
-                <counter type="LINE" missed="1" covered="0"/>
-                <counter type="COMPLEXITY" missed="1" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <method name="getFoo" desc="()I" line="8">
-                <counter type="INSTRUCTION" missed="3" covered="0"/>
-                <counter type="LINE" missed="1" covered="0"/>
-                <counter type="COMPLEXITY" missed="1" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <counter type="INSTRUCTION" missed="6" covered="0"/>
-            <counter type="LINE" missed="2" covered="0"/>
-            <counter type="COMPLEXITY" missed="2" covered="0"/>
-            <counter type="METHOD" missed="2" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </class>
-        <sourcefile name="GetterExample.java">
-            <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
-            <line nr="8" mi="3" ci="0" mb="0" cb="0"/>
-            <counter type="INSTRUCTION" missed="6" covered="0"/>
-            <counter type="LINE" missed="2" covered="0"/>
-            <counter type="COMPLEXITY" missed="2" covered="0"/>
-            <counter type="METHOD" missed="2" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </sourcefile>
-        <counter type="INSTRUCTION" missed="6" covered="0"/>
-        <counter type="LINE" missed="2" covered="0"/>
-        <counter type="COMPLEXITY" missed="2" covered="0"/>
-        <counter type="METHOD" missed="2" covered="0"/>
-        <counter type="CLASS" missed="1" covered="0"/>
-    </package>
-    <package name="org/example/setter">
-        <class name="org/example/setter/SetterExample">
-            <method name="&lt;init&gt;" desc="()V" line="3">
-                <counter type="INSTRUCTION" missed="3" covered="0"/>
-                <counter type="LINE" missed="1" covered="0"/>
-                <counter type="COMPLEXITY" missed="1" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <method name="setBar" desc="(I)V" line="8">
-                <counter type="INSTRUCTION" missed="4" covered="0"/>
-                <counter type="LINE" missed="2" covered="0"/>
-                <counter type="COMPLEXITY" missed="1" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <counter type="INSTRUCTION" missed="7" covered="0"/>
-            <counter type="LINE" missed="3" covered="0"/>
-            <counter type="COMPLEXITY" missed="2" covered="0"/>
-            <counter type="METHOD" missed="2" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </class>
-        <sourcefile name="SetterExample.java">
-            <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
-            <line nr="8" mi="3" ci="0" mb="0" cb="0"/>
-            <line nr="9" mi="1" ci="0" mb="0" cb="0"/>
-            <counter type="INSTRUCTION" missed="7" covered="0"/>
-            <counter type="LINE" missed="3" covered="0"/>
-            <counter type="COMPLEXITY" missed="2" covered="0"/>
-            <counter type="METHOD" missed="2" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </sourcefile>
-        <counter type="INSTRUCTION" missed="7" covered="0"/>
-        <counter type="LINE" missed="3" covered="0"/>
-        <counter type="COMPLEXITY" missed="2" covered="0"/>
-        <counter type="METHOD" missed="2" covered="0"/>
-        <counter type="CLASS" missed="1" covered="0"/>
-    </package>
-    <package name="org/example/tostring">
-        <class name="org/example/tostring/ToStringExample">
-            <method name="&lt;init&gt;" desc="()V" line="3">
-                <counter type="INSTRUCTION" missed="3" covered="0"/>
-                <counter type="LINE" missed="1" covered="0"/>
-                <counter type="COMPLEXITY" missed="1" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <method name="toString" desc="()Ljava/lang/String;" line="9">
-                <counter type="INSTRUCTION" missed="14" covered="0"/>
-                <counter type="LINE" missed="1" covered="0"/>
-                <counter type="COMPLEXITY" missed="1" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <counter type="INSTRUCTION" missed="17" covered="0"/>
-            <counter type="LINE" missed="2" covered="0"/>
-            <counter type="COMPLEXITY" missed="2" covered="0"/>
-            <counter type="METHOD" missed="2" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </class>
-        <sourcefile name="ToStringExample.java">
-            <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
-            <line nr="9" mi="14" ci="0" mb="0" cb="0"/>
-            <counter type="INSTRUCTION" missed="17" covered="0"/>
-            <counter type="LINE" missed="2" covered="0"/>
-            <counter type="COMPLEXITY" missed="2" covered="0"/>
-            <counter type="METHOD" missed="2" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </sourcefile>
-        <counter type="INSTRUCTION" missed="17" covered="0"/>
-        <counter type="LINE" missed="2" covered="0"/>
-        <counter type="COMPLEXITY" missed="2" covered="0"/>
-        <counter type="METHOD" missed="2" covered="0"/>
-        <counter type="CLASS" missed="1" covered="0"/>
-    </package>
-    <package name="org/example/hash">
-        <class name="org/example/hash/HashCodeExample">
-            <method name="&lt;init&gt;" desc="()V" line="3">
-                <counter type="INSTRUCTION" missed="3" covered="0"/>
-                <counter type="LINE" missed="1" covered="0"/>
-                <counter type="COMPLEXITY" missed="1" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <method name="hashCode" desc="()I" line="9">
-                <counter type="INSTRUCTION" missed="9" covered="0"/>
-                <counter type="BRANCH" missed="2" covered="0"/>
-                <counter type="LINE" missed="1" covered="0"/>
-                <counter type="COMPLEXITY" missed="2" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <counter type="INSTRUCTION" missed="12" covered="0"/>
-            <counter type="BRANCH" missed="2" covered="0"/>
-            <counter type="LINE" missed="2" covered="0"/>
-            <counter type="COMPLEXITY" missed="3" covered="0"/>
-            <counter type="METHOD" missed="2" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </class>
-        <sourcefile name="HashCodeExample.java">
-            <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
-            <line nr="9" mi="9" ci="0" mb="2" cb="0"/>
-            <counter type="INSTRUCTION" missed="12" covered="0"/>
-            <counter type="BRANCH" missed="2" covered="0"/>
-            <counter type="LINE" missed="2" covered="0"/>
-            <counter type="COMPLEXITY" missed="3" covered="0"/>
-            <counter type="METHOD" missed="2" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </sourcefile>
-        <counter type="INSTRUCTION" missed="12" covered="0"/>
-        <counter type="BRANCH" missed="2" covered="0"/>
-        <counter type="LINE" missed="2" covered="0"/>
-        <counter type="COMPLEXITY" missed="3" covered="0"/>
-        <counter type="METHOD" missed="2" covered="0"/>
-        <counter type="CLASS" missed="1" covered="0"/>
-    </package>
-    <package name="org/example/singleton">
-        <class name="org/example/singleton/JtobDataAccessSingleton">
-            <method name="&lt;init&gt;" desc="()V" line="3">
-                <counter type="INSTRUCTION" missed="3" covered="0"/>
-                <counter type="LINE" missed="1" covered="0"/>
-                <counter type="COMPLEXITY" missed="1" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <counter type="INSTRUCTION" missed="3" covered="0"/>
-            <counter type="LINE" missed="1" covered="0"/>
-            <counter type="COMPLEXITY" missed="1" covered="0"/>
-            <counter type="METHOD" missed="1" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </class>
-        <class name="org/example/singleton/BaseSingleton">
-            <method name="&lt;init&gt;" desc="()V" line="3">
-                <counter type="INSTRUCTION" missed="3" covered="0"/>
-                <counter type="LINE" missed="1" covered="0"/>
-                <counter type="COMPLEXITY" missed="1" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <method name="getInstance" desc="()Lorg/example/singleton/JtobDataAccessSingleton;" line="8">
-                <counter type="INSTRUCTION" missed="9" covered="0"/>
-                <counter type="BRANCH" missed="2" covered="0"/>
-                <counter type="LINE" missed="2" covered="0"/>
-                <counter type="COMPLEXITY" missed="2" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <counter type="INSTRUCTION" missed="12" covered="0"/>
-            <counter type="BRANCH" missed="2" covered="0"/>
-            <counter type="LINE" missed="3" covered="0"/>
-            <counter type="COMPLEXITY" missed="3" covered="0"/>
-            <counter type="METHOD" missed="2" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </class>
-        <sourcefile name="JtobDataAccessSingleton.java">
-            <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
-            <counter type="INSTRUCTION" missed="3" covered="0"/>
-            <counter type="LINE" missed="1" covered="0"/>
-            <counter type="COMPLEXITY" missed="1" covered="0"/>
-            <counter type="METHOD" missed="1" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </sourcefile>
-        <sourcefile name="BaseSingleton.java">
-            <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
-            <line nr="8" mi="7" ci="0" mb="2" cb="0"/>
-            <line nr="9" mi="2" ci="0" mb="0" cb="0"/>
-            <counter type="INSTRUCTION" missed="12" covered="0"/>
-            <counter type="BRANCH" missed="2" covered="0"/>
-            <counter type="LINE" missed="3" covered="0"/>
-            <counter type="COMPLEXITY" missed="3" covered="0"/>
-            <counter type="METHOD" missed="2" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </sourcefile>
-        <counter type="INSTRUCTION" missed="15" covered="0"/>
-        <counter type="BRANCH" missed="2" covered="0"/>
-        <counter type="LINE" missed="4" covered="0"/>
-        <counter type="COMPLEXITY" missed="4" covered="0"/>
-        <counter type="METHOD" missed="3" covered="0"/>
-        <counter type="CLASS" missed="2" covered="0"/>
-    </package>
-    <package name="org/example">
-        <class name="org/example/App">
-            <method name="&lt;init&gt;" desc="()V" line="3">
-                <counter type="INSTRUCTION" missed="3" covered="0"/>
-                <counter type="LINE" missed="1" covered="0"/>
-                <counter type="COMPLEXITY" missed="1" covered="0"/>
-                <counter type="METHOD" missed="1" covered="0"/>
-            </method>
-            <counter type="INSTRUCTION" missed="3" covered="0"/>
-            <counter type="LINE" missed="1" covered="0"/>
-            <counter type="COMPLEXITY" missed="1" covered="0"/>
-            <counter type="METHOD" missed="1" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </class>
-        <sourcefile name="App.java">
-            <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
-            <counter type="INSTRUCTION" missed="3" covered="0"/>
-            <counter type="LINE" missed="1" covered="0"/>
-            <counter type="COMPLEXITY" missed="1" covered="0"/>
-            <counter type="METHOD" missed="1" covered="0"/>
-            <counter type="CLASS" missed="1" covered="0"/>
-        </sourcefile>
+  <sessioninfo id="HADZU-2beb4e69" start="1490079139429" dump="1490079140227"/>
+  <sessioninfo id="HADZU-8b8f7dc6" start="1490079139428" dump="1490079140285"/>
+  <package name="org/example/equals">
+    <class name="org/example/equals/EqualsExample">
+      <method name="&lt;init&gt;" desc="()V" line="3">
         <counter type="INSTRUCTION" missed="3" covered="0"/>
         <counter type="LINE" missed="1" covered="0"/>
         <counter type="COMPLEXITY" missed="1" covered="0"/>
         <counter type="METHOD" missed="1" covered="0"/>
-        <counter type="CLASS" missed="1" covered="0"/>
-    </package>
-    <counter type="INSTRUCTION" missed="105" covered="17"/>
-    <counter type="BRANCH" missed="14" covered="0"/>
-    <counter type="LINE" missed="23" covered="6"/>
-    <counter type="COMPLEXITY" missed="24" covered="4"/>
-    <counter type="METHOD" missed="17" covered="4"/>
-    <counter type="CLASS" missed="9" covered="3"/>
+      </method>
+      <method name="equals" desc="(Ljava/lang/Object;)Z" line="9">
+        <counter type="INSTRUCTION" missed="33" covered="0"/>
+        <counter type="BRANCH" missed="10" covered="0"/>
+        <counter type="LINE" missed="4" covered="0"/>
+        <counter type="COMPLEXITY" missed="6" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="36" covered="0"/>
+      <counter type="BRANCH" missed="10" covered="0"/>
+      <counter type="LINE" missed="5" covered="0"/>
+      <counter type="COMPLEXITY" missed="7" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <sourcefile name="EqualsExample.java">
+      <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="9" mi="5" ci="0" mb="2" cb="0"/>
+      <line nr="10" mi="9" ci="0" mb="4" cb="0"/>
+      <line nr="12" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="14" mi="16" ci="0" mb="4" cb="0"/>
+      <counter type="INSTRUCTION" missed="36" covered="0"/>
+      <counter type="BRANCH" missed="10" covered="0"/>
+      <counter type="LINE" missed="5" covered="0"/>
+      <counter type="COMPLEXITY" missed="7" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </sourcefile>
+    <counter type="INSTRUCTION" missed="36" covered="0"/>
+    <counter type="BRANCH" missed="10" covered="0"/>
+    <counter type="LINE" missed="5" covered="0"/>
+    <counter type="COMPLEXITY" missed="7" covered="0"/>
+    <counter type="METHOD" missed="2" covered="0"/>
+    <counter type="CLASS" missed="1" covered="0"/>
+  </package>
+  <package name="org/example/innerness">
+    <class name="org/example/innerness/Library$Librarian">
+      <method name="&lt;init&gt;" desc="()V" line="26">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="3"/>
+      <counter type="LINE" missed="0" covered="1"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="org/example/innerness/Library$Shelf$Book">
+      <method name="&lt;init&gt;" desc="(Ljava/lang/String;)V" line="12">
+        <counter type="INSTRUCTION" missed="0" covered="6"/>
+        <counter type="LINE" missed="0" covered="3"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="6"/>
+      <counter type="LINE" missed="0" covered="3"/>
+      <counter type="COMPLEXITY" missed="0" covered="1"/>
+      <counter type="METHOD" missed="0" covered="1"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="org/example/innerness/Library">
+      <method name="&lt;init&gt;" desc="()V" line="6">
+        <counter type="INSTRUCTION" missed="0" covered="3"/>
+        <counter type="LINE" missed="0" covered="2"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <method name="getBookFromTopShelf" desc="(Lorg/example/innerness/Library$Librarian;)Lorg/example/innerness/Library$Shelf$Book;" line="30">
+        <counter type="INSTRUCTION" missed="0" covered="5"/>
+        <counter type="LINE" missed="0" covered="1"/>
+        <counter type="COMPLEXITY" missed="0" covered="1"/>
+        <counter type="METHOD" missed="0" covered="1"/>
+      </method>
+      <counter type="INSTRUCTION" missed="0" covered="8"/>
+      <counter type="LINE" missed="0" covered="3"/>
+      <counter type="COMPLEXITY" missed="0" covered="2"/>
+      <counter type="METHOD" missed="0" covered="2"/>
+      <counter type="CLASS" missed="0" covered="1"/>
+    </class>
+    <class name="org/example/innerness/Library$Shelf">
+      <method name="&lt;init&gt;" desc="()V" line="8">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="repair" desc="(Lorg/example/innerness/Library$Librarian;)Ljava/util/List;" line="18">
+        <counter type="INSTRUCTION" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getAdministrator" desc="()Lorg/example/innerness/Library$Librarian;" line="22">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="9" covered="0"/>
+      <counter type="LINE" missed="4" covered="0"/>
+      <counter type="COMPLEXITY" missed="3" covered="0"/>
+      <counter type="METHOD" missed="3" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <sourcefile name="Library.java">
+      <line nr="6" mi="0" ci="2" mb="0" cb="0"/>
+      <line nr="8" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="9" mi="1" ci="0" mb="0" cb="0"/>
+      <line nr="12" mi="0" ci="2" mb="0" cb="0"/>
+      <line nr="13" mi="0" ci="3" mb="0" cb="0"/>
+      <line nr="14" mi="0" ci="1" mb="0" cb="0"/>
+      <line nr="18" mi="2" ci="0" mb="0" cb="0"/>
+      <line nr="22" mi="4" ci="0" mb="0" cb="0"/>
+      <line nr="26" mi="0" ci="4" mb="0" cb="0"/>
+      <line nr="30" mi="0" ci="5" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="9" covered="17"/>
+      <counter type="LINE" missed="4" covered="6"/>
+      <counter type="COMPLEXITY" missed="3" covered="4"/>
+      <counter type="METHOD" missed="3" covered="4"/>
+      <counter type="CLASS" missed="1" covered="3"/>
+    </sourcefile>
+    <counter type="INSTRUCTION" missed="9" covered="17"/>
+    <counter type="LINE" missed="4" covered="6"/>
+    <counter type="COMPLEXITY" missed="3" covered="4"/>
+    <counter type="METHOD" missed="3" covered="4"/>
+    <counter type="CLASS" missed="1" covered="3"/>
+  </package>
+  <package name="org/example/getter">
+    <class name="org/example/getter/GetterExample">
+      <method name="&lt;init&gt;" desc="()V" line="3">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getFoo" desc="()I" line="8">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="6" covered="0"/>
+      <counter type="LINE" missed="2" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <sourcefile name="GetterExample.java">
+      <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="8" mi="3" ci="0" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="6" covered="0"/>
+      <counter type="LINE" missed="2" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </sourcefile>
+    <counter type="INSTRUCTION" missed="6" covered="0"/>
+    <counter type="LINE" missed="2" covered="0"/>
+    <counter type="COMPLEXITY" missed="2" covered="0"/>
+    <counter type="METHOD" missed="2" covered="0"/>
+    <counter type="CLASS" missed="1" covered="0"/>
+  </package>
+  <package name="org/example/setter">
+    <class name="org/example/setter/SetterExample">
+      <method name="&lt;init&gt;" desc="()V" line="3">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="setBar" desc="(I)V" line="8">
+        <counter type="INSTRUCTION" missed="4" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="7" covered="0"/>
+      <counter type="LINE" missed="3" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <sourcefile name="SetterExample.java">
+      <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="8" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="9" mi="1" ci="0" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="7" covered="0"/>
+      <counter type="LINE" missed="3" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </sourcefile>
+    <counter type="INSTRUCTION" missed="7" covered="0"/>
+    <counter type="LINE" missed="3" covered="0"/>
+    <counter type="COMPLEXITY" missed="2" covered="0"/>
+    <counter type="METHOD" missed="2" covered="0"/>
+    <counter type="CLASS" missed="1" covered="0"/>
+  </package>
+  <package name="org/example/tostring">
+    <class name="org/example/tostring/ToStringExample">
+      <method name="&lt;init&gt;" desc="()V" line="3">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="toString" desc="()Ljava/lang/String;" line="9">
+        <counter type="INSTRUCTION" missed="14" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="17" covered="0"/>
+      <counter type="LINE" missed="2" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <sourcefile name="ToStringExample.java">
+      <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="9" mi="14" ci="0" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="17" covered="0"/>
+      <counter type="LINE" missed="2" covered="0"/>
+      <counter type="COMPLEXITY" missed="2" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </sourcefile>
+    <counter type="INSTRUCTION" missed="17" covered="0"/>
+    <counter type="LINE" missed="2" covered="0"/>
+    <counter type="COMPLEXITY" missed="2" covered="0"/>
+    <counter type="METHOD" missed="2" covered="0"/>
+    <counter type="CLASS" missed="1" covered="0"/>
+  </package>
+  <package name="org/example/hash">
+    <class name="org/example/hash/HashCodeExample">
+      <method name="&lt;init&gt;" desc="()V" line="3">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="hashCode" desc="()I" line="9">
+        <counter type="INSTRUCTION" missed="9" covered="0"/>
+        <counter type="BRANCH" missed="2" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="2" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="12" covered="0"/>
+      <counter type="BRANCH" missed="2" covered="0"/>
+      <counter type="LINE" missed="2" covered="0"/>
+      <counter type="COMPLEXITY" missed="3" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <sourcefile name="HashCodeExample.java">
+      <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="9" mi="9" ci="0" mb="2" cb="0"/>
+      <counter type="INSTRUCTION" missed="12" covered="0"/>
+      <counter type="BRANCH" missed="2" covered="0"/>
+      <counter type="LINE" missed="2" covered="0"/>
+      <counter type="COMPLEXITY" missed="3" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </sourcefile>
+    <counter type="INSTRUCTION" missed="12" covered="0"/>
+    <counter type="BRANCH" missed="2" covered="0"/>
+    <counter type="LINE" missed="2" covered="0"/>
+    <counter type="COMPLEXITY" missed="3" covered="0"/>
+    <counter type="METHOD" missed="2" covered="0"/>
+    <counter type="CLASS" missed="1" covered="0"/>
+  </package>
+  <package name="org/example/singleton">
+    <class name="org/example/singleton/JtobDataAccessSingleton">
+      <method name="&lt;init&gt;" desc="()V" line="3">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="3" covered="0"/>
+      <counter type="LINE" missed="1" covered="0"/>
+      <counter type="COMPLEXITY" missed="1" covered="0"/>
+      <counter type="METHOD" missed="1" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <class name="org/example/singleton/BaseSingleton">
+      <method name="&lt;init&gt;" desc="()V" line="3">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <method name="getInstance" desc="()Lorg/example/singleton/JtobDataAccessSingleton;" line="8">
+        <counter type="INSTRUCTION" missed="9" covered="0"/>
+        <counter type="BRANCH" missed="2" covered="0"/>
+        <counter type="LINE" missed="2" covered="0"/>
+        <counter type="COMPLEXITY" missed="2" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="12" covered="0"/>
+      <counter type="BRANCH" missed="2" covered="0"/>
+      <counter type="LINE" missed="3" covered="0"/>
+      <counter type="COMPLEXITY" missed="3" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <sourcefile name="JtobDataAccessSingleton.java">
+      <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="3" covered="0"/>
+      <counter type="LINE" missed="1" covered="0"/>
+      <counter type="COMPLEXITY" missed="1" covered="0"/>
+      <counter type="METHOD" missed="1" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </sourcefile>
+    <sourcefile name="BaseSingleton.java">
+      <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
+      <line nr="8" mi="7" ci="0" mb="2" cb="0"/>
+      <line nr="9" mi="2" ci="0" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="12" covered="0"/>
+      <counter type="BRANCH" missed="2" covered="0"/>
+      <counter type="LINE" missed="3" covered="0"/>
+      <counter type="COMPLEXITY" missed="3" covered="0"/>
+      <counter type="METHOD" missed="2" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </sourcefile>
+    <counter type="INSTRUCTION" missed="15" covered="0"/>
+    <counter type="BRANCH" missed="2" covered="0"/>
+    <counter type="LINE" missed="4" covered="0"/>
+    <counter type="COMPLEXITY" missed="4" covered="0"/>
+    <counter type="METHOD" missed="3" covered="0"/>
+    <counter type="CLASS" missed="2" covered="0"/>
+  </package>
+  <package name="org/example">
+    <class name="org/example/App">
+      <method name="&lt;init&gt;" desc="()V" line="3">
+        <counter type="INSTRUCTION" missed="3" covered="0"/>
+        <counter type="LINE" missed="1" covered="0"/>
+        <counter type="COMPLEXITY" missed="1" covered="0"/>
+        <counter type="METHOD" missed="1" covered="0"/>
+      </method>
+      <counter type="INSTRUCTION" missed="3" covered="0"/>
+      <counter type="LINE" missed="1" covered="0"/>
+      <counter type="COMPLEXITY" missed="1" covered="0"/>
+      <counter type="METHOD" missed="1" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </class>
+    <sourcefile name="App.java">
+      <line nr="3" mi="3" ci="0" mb="0" cb="0"/>
+      <counter type="INSTRUCTION" missed="3" covered="0"/>
+      <counter type="LINE" missed="1" covered="0"/>
+      <counter type="COMPLEXITY" missed="1" covered="0"/>
+      <counter type="METHOD" missed="1" covered="0"/>
+      <counter type="CLASS" missed="1" covered="0"/>
+    </sourcefile>
+    <counter type="INSTRUCTION" missed="3" covered="0"/>
+    <counter type="LINE" missed="1" covered="0"/>
+    <counter type="COMPLEXITY" missed="1" covered="0"/>
+    <counter type="METHOD" missed="1" covered="0"/>
+    <counter type="CLASS" missed="1" covered="0"/>
+  </package>
+  <counter type="INSTRUCTION" missed="105" covered="17"/>
+  <counter type="BRANCH" missed="14" covered="0"/>
+  <counter type="LINE" missed="23" covered="6"/>
+  <counter type="COMPLEXITY" missed="24" covered="4"/>
+  <counter type="METHOD" missed="17" covered="4"/>
+  <counter type="CLASS" missed="9" covered="3"/>
 </report>

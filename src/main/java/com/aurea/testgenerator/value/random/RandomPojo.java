@@ -1,11 +1,11 @@
 package com.aurea.testgenerator.value.random;
 
-import static com.aurea.testgenerator.source.ParsingUtils.isFullName;
-
 import com.aurea.testgenerator.source.ParsingUtils;
 import com.aurea.testgenerator.value.TestValue;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+
+import static com.aurea.testgenerator.source.ParsingUtils.isFullName;
 
 public class RandomPojo implements TestValue {
 

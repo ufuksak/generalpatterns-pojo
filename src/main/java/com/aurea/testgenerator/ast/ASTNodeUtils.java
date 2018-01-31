@@ -17,6 +17,9 @@ import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.ast.type.VoidType;
 import com.google.common.collect.ImmutableSet;
+import com.jasongoodwin.monads.Try;
+import one.util.streamex.StreamEx;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -26,10 +29,6 @@ import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import com.jasongoodwin.monads.Try;
-import one.util.streamex.StreamEx;
 
 public final class ASTNodeUtils {
     private ASTNodeUtils() {
@@ -76,17 +75,6 @@ public final class ASTNodeUtils {
             return Optional.empty();
         }
         return findAncestorSubTypeOf(clazz, node, null);
-    }
-
-    private static <T> Optional<T> findAncestorSubTypeOf(Class<T> clazz, Node node, T candidate) {
-        Optional<Node> maybeParent = node.getParentNode();
-        if (!maybeParent.isPresent()) {
-            return Optional.ofNullable(candidate);
-        } else {
-            Node parent = maybeParent.get();
-            return findAncestorSubTypeOf(clazz, parent,
-                    clazz.isAssignableFrom(parent.getClass()) ? clazz.cast(parent) : candidate);
-        }
     }
 
     public static VariableDeclarationExpr findVariableDeclarationByName(String variableName, Node parent) {
@@ -143,28 +131,6 @@ public final class ASTNodeUtils {
         return StreamEx.of(parent.getChildNodes()).filter(p -> p.getClass().equals(clazz)).map(clazz::cast).toList();
     }
 
-    private static <T> List<T> findChildsOf(Class<T> clazz, Node node, List<T> childs) {
-        if (node.getClass().equals(clazz)) {
-            childs.add(clazz.cast(node));
-        }
-
-        for (Node child : node.getChildNodes()) {
-            findChildsOf(clazz, child, childs);
-        }
-        return childs;
-    }
-
-    private static <T> List<T> findChildsSubTypesOf(Class<T> clazz, Node node, List<T> childs) {
-        if (clazz.isAssignableFrom(node.getClass())) {
-            childs.add(clazz.cast(node));
-        }
-
-        for (Node child : node.getChildNodes()) {
-            findChildsSubTypesOf(clazz, child, childs);
-        }
-        return childs;
-    }
-
     public static Node hasNamedExpr(Node node, NameExpr nameExpr) {
         if (node.equals(nameExpr)) {
             return node.getParentNode().get();
@@ -182,35 +148,8 @@ public final class ASTNodeUtils {
         return findAssignmentsForVariable(variableName, parent, new ArrayList<>());
     }
 
-    private static List<AssignExpr> findAssignmentsForVariable(NameExpr variableName, Node node, ArrayList<AssignExpr> assignExprs) {
-        if (node instanceof AssignExpr) {
-            if (((AssignExpr) node).getTarget().equals(variableName)) {
-                assignExprs.add((AssignExpr) node);
-            }
-        }
-
-        for (Node child : node.getChildNodes()) {
-            findAssignmentsForVariable(variableName, child, assignExprs);
-        }
-        return assignExprs;
-    }
-
     public static List<MethodCallExpr> findMethodCallsForVariable(NameExpr variable, Node parent) {
         return findMethodCallsForVariable(variable, parent, new ArrayList<MethodCallExpr>());
-    }
-
-    private static List<MethodCallExpr> findMethodCallsForVariable(NameExpr variable, Node node, ArrayList<MethodCallExpr> methodCallExprs) {
-        if (node instanceof MethodCallExpr) {
-            MethodCallExpr methodCallExpr = (MethodCallExpr) node;
-            if (methodCallExpr.getScope() != null && methodCallExpr.getScope().equals(variable)) {
-                methodCallExprs.add(methodCallExpr);
-            }
-        }
-
-        for (Node child : node.getChildNodes()) {
-            findMethodCallsForVariable(variable, child, methodCallExprs);
-        }
-        return methodCallExprs;
     }
 
     public static boolean isCollection(Type type) {
@@ -253,24 +192,10 @@ public final class ASTNodeUtils {
         return accumulator.intValue();
     }
 
-    private static void countNodes(Node n, LongAdder accumulator) {
-        accumulator.increment();
-        for (Node node : n.getChildNodes()) {
-            countNodes(node, accumulator);
-        }
-    }
-
     public static List<Node> getAllChilds(Node n) {
         List<Node> accumulator = new ArrayList<>();
         getAllChilds(n, accumulator);
         return accumulator;
-    }
-
-    private static void getAllChilds(Node n, List<Node> accumulator) {
-        for (Node node: n.getChildNodes()) {
-            accumulator.add(node);
-            getAllChilds(node, accumulator);
-        }
     }
 
     public static boolean hasOnlyChildsOf(Node n, Class<? extends Node> one) {
@@ -278,7 +203,7 @@ public final class ASTNodeUtils {
         return hasOnlyNodesOf(n, allowedClasses);
     }
 
-    public static boolean hasOnlyChildsOf(Node n,  Class<? extends Node> one, Class<? extends Node> two) {
+    public static boolean hasOnlyChildsOf(Node n, Class<? extends Node> one, Class<? extends Node> two) {
         Set<Class<? extends Node>> allowedClasses = ImmutableSet.of(one, two);
         return hasOnlyNodesOf(n, allowedClasses);
     }
@@ -288,9 +213,147 @@ public final class ASTNodeUtils {
         return hasOnlyChildsSubTypesOf(n, allowedClasses);
     }
 
-    public static boolean hasOnlyChildsSubTypesOf(Node n,  Class<? extends Node> one, Class<? extends Node> two) {
+    public static boolean hasOnlyChildsSubTypesOf(Node n, Class<? extends Node> one, Class<? extends Node> two) {
         Set<Class<? extends Node>> allowedClasses = ImmutableSet.of(one, two);
         return hasOnlyChildsSubTypesOf(n, allowedClasses);
+    }
+
+    public static String getFullName(ClassOrInterfaceDeclaration coid) {
+        CompilationUnit cu = findParentOf(CompilationUnit.class, coid);
+        Optional<PackageDeclaration> packageDeclaration = findChildOf(PackageDeclaration.class, cu);
+        return packageDeclaration
+                .map(pd -> pd.getNameAsString() + "." + coid.getNameAsString())
+                .orElse("");
+    }
+
+    public static StreamEx<AssignExpr> findFieldAssignmentsInGivenNodeByName(Node node, SimpleName name) {
+        return StreamEx.of(node.findAll(AssignExpr.class)).filter(ae -> {
+            if (NameExpr.class.isAssignableFrom(ae.getTarget().getClass())) {
+                return ((NameExpr) ae.getTarget()).getName().equals(name);
+            } else if (FieldAccessExpr.class.isAssignableFrom(ae.getTarget().getClass())) {
+                return ((FieldAccessExpr) ae.getTarget()).getName().equals(name);
+            }
+            return false;
+        });
+    }
+
+    public static MethodDeclaration findMethodOrFail(ClassOrInterfaceDeclaration n, final String name) {
+        return Try.ofFailable(() -> n.getMethodsByName(name).get(0)).orElseThrow(() -> new MethodDeclarationNotFoundException(
+                "Failed to find method '" + name + "' in '" + n.getNameAsString() + "'"));
+    }
+
+    public static MethodDeclaration findMethodOrNull(ClassOrInterfaceDeclaration n, final String name) {
+        return Try.ofFailable(() -> n.getMethodsByName(name).get(0)).orElse(null);
+    }
+
+    public static VariableDeclarator findFieldVariableOrFail(ClassOrInterfaceDeclaration n, final String name) {
+        return Try.ofFailable(() -> StreamEx.of(n.getFields()).flatMap(it -> it.getVariables().stream()).findAny(it -> it.getNameAsString().equals(name)).get())
+                .orElseThrow(() -> new FieldVariableDeclaratorNotFoundException("Failed to find variable declaration '" + name + "' in '" + n.getNameAsString() + "'"));
+    }
+
+    public static VariableDeclarator findFieldVariableOrNull(ClassOrInterfaceDeclaration n, final String name) {
+        return Try.ofFailable(() -> StreamEx.of(n.getFields()).flatMap(it -> it.getVariables().stream()).findAny(it -> it.getNameAsString().equals(name)).get())
+                .orElse(null);
+    }
+
+    public static StreamEx<Node> findParents(Node childNode) {
+        List<Node> nodes = new ArrayList<>();
+
+        Optional<Node> node = childNode.getParentNode();
+
+        while (node.isPresent()) {
+
+            nodes.add(node.get());
+
+            node = node.get().getParentNode();
+        }
+
+        return StreamEx.of(nodes);
+    }
+
+    public static <T extends Node> StreamEx<T> findParents(Node childNode, Class<T> clazzOfParent) {
+
+        return findParents(childNode).select(clazzOfParent);
+    }
+
+    public static <T extends Node> StreamEx<T> findParents(Node childNode, Class<T> clazzOfParent, Predicate<T> condition) {
+
+        return findParents(childNode, clazzOfParent).filter(condition);
+
+    }
+
+    private static <T> Optional<T> findAncestorSubTypeOf(Class<T> clazz, Node node, T candidate) {
+        Optional<Node> maybeParent = node.getParentNode();
+        if (!maybeParent.isPresent()) {
+            return Optional.ofNullable(candidate);
+        } else {
+            Node parent = maybeParent.get();
+            return findAncestorSubTypeOf(clazz, parent,
+                    clazz.isAssignableFrom(parent.getClass()) ? clazz.cast(parent) : candidate);
+        }
+    }
+
+    private static <T> List<T> findChildsOf(Class<T> clazz, Node node, List<T> childs) {
+        if (node.getClass().equals(clazz)) {
+            childs.add(clazz.cast(node));
+        }
+
+        for (Node child : node.getChildNodes()) {
+            findChildsOf(clazz, child, childs);
+        }
+        return childs;
+    }
+
+    private static <T> List<T> findChildsSubTypesOf(Class<T> clazz, Node node, List<T> childs) {
+        if (clazz.isAssignableFrom(node.getClass())) {
+            childs.add(clazz.cast(node));
+        }
+
+        for (Node child : node.getChildNodes()) {
+            findChildsSubTypesOf(clazz, child, childs);
+        }
+        return childs;
+    }
+
+    private static List<AssignExpr> findAssignmentsForVariable(NameExpr variableName, Node node, ArrayList<AssignExpr> assignExprs) {
+        if (node instanceof AssignExpr) {
+            if (((AssignExpr) node).getTarget().equals(variableName)) {
+                assignExprs.add((AssignExpr) node);
+            }
+        }
+
+        for (Node child : node.getChildNodes()) {
+            findAssignmentsForVariable(variableName, child, assignExprs);
+        }
+        return assignExprs;
+    }
+
+    private static List<MethodCallExpr> findMethodCallsForVariable(NameExpr variable, Node node, ArrayList<MethodCallExpr> methodCallExprs) {
+        if (node instanceof MethodCallExpr) {
+            MethodCallExpr methodCallExpr = (MethodCallExpr) node;
+            if (methodCallExpr.getScope() != null && methodCallExpr.getScope().equals(variable)) {
+                methodCallExprs.add(methodCallExpr);
+            }
+        }
+
+        for (Node child : node.getChildNodes()) {
+            findMethodCallsForVariable(variable, child, methodCallExprs);
+        }
+        return methodCallExprs;
+    }
+
+    private static void countNodes(Node n, LongAdder accumulator) {
+        accumulator.increment();
+        for (Node node : n.getChildNodes()) {
+            countNodes(node, accumulator);
+        }
+    }
+
+    private static void getAllChilds(Node n, List<Node> accumulator) {
+        for (Node node : n.getChildNodes()) {
+            accumulator.add(node);
+            getAllChilds(node, accumulator);
+        }
     }
 
     private static boolean hasOnlyNodesOf(Node n, Set<Class<? extends Node>> allowedClasses) {
@@ -318,69 +381,6 @@ public final class ASTNodeUtils {
             }
         }
         return false;
-    }
-
-    public static String getFullName(ClassOrInterfaceDeclaration coid) {
-        CompilationUnit cu = findParentOf(CompilationUnit.class, coid);
-        Optional<PackageDeclaration> packageDeclaration = findChildOf(PackageDeclaration.class, cu);
-        return packageDeclaration
-                .map(pd -> pd.getNameAsString() + "." + coid.getNameAsString())
-                .orElse("");
-    }
-
-    public static StreamEx<AssignExpr> findFieldAssignmentsInGivenNodeByName(Node node, SimpleName name) {
-        return StreamEx.of(node.findAll(AssignExpr.class)).filter(ae -> {
-            if (NameExpr.class.isAssignableFrom(ae.getTarget().getClass())) {
-                return ((NameExpr)ae.getTarget()).getName().equals(name);
-            } else if (FieldAccessExpr.class.isAssignableFrom(ae.getTarget().getClass())) {
-                return ((FieldAccessExpr)ae.getTarget()).getName().equals(name);
-            }
-            return false;
-        });
-    }
-
-    public static MethodDeclaration findMethodOrFail(ClassOrInterfaceDeclaration n, final String name) {
-        return Try.ofFailable(() -> n.getMethodsByName(name).get(0)).orElseThrow(() -> new MethodDeclarationNotFoundException(
-                "Failed to find method '" + name + "' in '" + n.getNameAsString() + "'"));
-    }
-
-    public static MethodDeclaration findMethodOrNull(ClassOrInterfaceDeclaration n, final String name) {
-        return Try.ofFailable(() -> n.getMethodsByName(name).get(0)).orElse(null);
-    }
-
-    public static VariableDeclarator findFieldVariableOrFail(ClassOrInterfaceDeclaration n, final String name) {
-        return Try.ofFailable(() -> StreamEx.of(n.getFields()).flatMap( it -> it.getVariables().stream()).findAny( it -> it.getNameAsString().equals(name)).get())
-                .orElseThrow(() -> new FieldVariableDeclaratorNotFoundException("Failed to find variable declaration '" + name + "' in '" + n.getNameAsString() + "'"));
-    }
-
-    public static VariableDeclarator findFieldVariableOrNull(ClassOrInterfaceDeclaration n, final String name) {
-        return Try.ofFailable(() -> StreamEx.of(n.getFields()).flatMap(it -> it.getVariables().stream()).findAny(it -> it.getNameAsString().equals(name)).get())
-                .orElse(null);
-    }
-
-    public static StreamEx<Node> findParents(Node childNode) {
-        List<Node> nodes = new ArrayList<>();
-
-        Optional<Node> node = childNode.getParentNode();
-
-        while(node.isPresent()) {
-
-            nodes.add(node.get());
-
-            node = node.get().getParentNode();
-        }
-
-        return StreamEx.of(nodes);
-    }
-    public static  <T extends Node> StreamEx<T> findParents(Node childNode, Class<T> clazzOfParent) {
-
-        return findParents(childNode).select(clazzOfParent);
-    }
-
-    public static <T extends Node> StreamEx<T> findParents(Node childNode, Class<T> clazzOfParent, Predicate<T> condition) {
-
-        return findParents(childNode, clazzOfParent).filter(condition);
-
     }
 
     private static class FieldVariableDeclaratorNotFoundException extends RuntimeException {

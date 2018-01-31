@@ -1,278 +1,227 @@
 package com.redknee.app.crm.bean;
 
-import com.redknee.app.crm.web.control.*;
-import com.redknee.framework.xhome.holder.*;
-import com.redknee.framework.xhome.webcontrol.*;
 import com.redknee.app.crm.bean.*;
 import com.redknee.app.crm.extension.*;
 import com.redknee.app.crm.extension.account.*;
 import com.redknee.app.crm.web.control.*;
-import com.redknee.util.snippet.webcontrol.*;
-import java.util.List;
-import java.util.ArrayList;
 import com.redknee.framework.xhome.beans.RemoteBeanSupport;
-import com.redknee.framework.xhome.beans.RemoteBean;
 import com.redknee.framework.xhome.context.*;
+import com.redknee.framework.xhome.holder.*;
+import com.redknee.framework.xhome.webcontrol.*;
+import com.redknee.util.snippet.webcontrol.*;
+
+import java.util.List;
 
 /**
  * {{{GENERATED_CODE}}} {{{PLEASE_DO_NO_MODIFY}}}
  **/
 public class RemoteAccountCreationTemplate
-        extends AbstractBean
-{
+        extends AbstractBean {
 
     protected final RemoteBeanSupport support_;
 
 
     //////////////////////////////////////////////////////// CONSTRUCTORS
 
-    public RemoteAccountCreationTemplate(Context ctx, String host, int port, String service)
-    {
+    public RemoteAccountCreationTemplate(Context ctx, String host, int port, String service) {
         support_ = new RemoteBeanSupport(ctx, this, host, port, service);
     }
 
-    public RemoteAccountCreationTemplate(Context ctx, String host, int port, String service, long delay)
-    {
+    public RemoteAccountCreationTemplate(Context ctx, String host, int port, String service, long delay) {
         support_ = new RemoteBeanSupport(ctx, this, host, port, service, delay);
     }
 
 
-
     /////////////////////////////////////////////////////// Property Identifier
 
-    public long getIdentifier()
-    {
+    public long getIdentifier() {
         support_.sync();
 
         return super.getIdentifier();
     }
 
 
-
     /////////////////////////////////////////////////////// Property Name
 
-    public String getName()
-    {
+    public String getName() {
         support_.sync();
 
         return super.getName();
     }
 
 
-
     /////////////////////////////////////////////////////// Property Spid
 
-    public int getSpid()
-    {
+    public int getSpid() {
         support_.sync();
 
         return super.getSpid();
     }
 
 
-
     /////////////////////////////////////////////////////// Property Type
 
-    public long getType()
-    {
+    public long getType() {
         support_.sync();
 
         return super.getType();
     }
 
 
-
     /////////////////////////////////////////////////////// Property GroupType
 
-    public GroupTypeEnum getGroupType()
-    {
+    public GroupTypeEnum getGroupType() {
         support_.sync();
 
         return super.getGroupType();
     }
 
 
-
     /////////////////////////////////////////////////////// Property SystemType
 
-    public SubscriberTypeEnum getSystemType()
-    {
+    public SubscriberTypeEnum getSystemType() {
         support_.sync();
 
         return super.getSystemType();
     }
 
 
-
     /////////////////////////////////////////////////////// Property Responsible
 
-    public boolean getResponsible()
-    {
+    public boolean getResponsible() {
         support_.sync();
 
         return super.getResponsible();
     }
 
 
-
     /////////////////////////////////////////////////////// Property CreditCategory
 
-    public int getCreditCategory()
-    {
+    public int getCreditCategory() {
         support_.sync();
 
         return super.getCreditCategory();
     }
 
 
-
     /////////////////////////////////////////////////////// Property DealerCode
 
-    public String getDealerCode()
-    {
+    public String getDealerCode() {
         support_.sync();
 
         return super.getDealerCode();
     }
 
 
-
     /////////////////////////////////////////////////////// Property DiscountClass
 
-    public int getDiscountClass()
-    {
+    public int getDiscountClass() {
         support_.sync();
 
         return super.getDiscountClass();
     }
 
 
-
     /////////////////////////////////////////////////////// Property TaxAuthority
 
-    public int getTaxAuthority()
-    {
+    public int getTaxAuthority() {
         support_.sync();
 
         return super.getTaxAuthority();
     }
 
 
-
     /////////////////////////////////////////////////////// Property TaxExemption
 
-    public boolean getTaxExemption()
-    {
+    public boolean getTaxExemption() {
         support_.sync();
 
         return super.getTaxExemption();
     }
 
 
-
     /////////////////////////////////////////////////////// Property Language
 
-    public String getLanguage()
-    {
+    public String getLanguage() {
         support_.sync();
 
         return super.getLanguage();
     }
 
 
-
     /////////////////////////////////////////////////////// Property BillCycleID
 
-    public int getBillCycleID()
-    {
+    public int getBillCycleID() {
         support_.sync();
 
         return super.getBillCycleID();
     }
 
 
-
     /////////////////////////////////////////////////////// Property BillingMsgPreference
 
-    public BillingMessagePreferenceEnum getBillingMsgPreference()
-    {
+    public BillingMessagePreferenceEnum getBillingMsgPreference() {
         support_.sync();
 
         return super.getBillingMsgPreference();
     }
 
 
-
     /////////////////////////////////////////////////////// Property BillingCountry
 
-    public String getBillingCountry()
-    {
+    public String getBillingCountry() {
         support_.sync();
 
         return super.getBillingCountry();
     }
 
 
-
     /////////////////////////////////////////////////////// Property BillingProvince
 
-    public String getBillingProvince()
-    {
+    public String getBillingProvince() {
         support_.sync();
 
         return super.getBillingProvince();
     }
 
 
-
     /////////////////////////////////////////////////////// Property PaymentMethodType
 
-    public long getPaymentMethodType()
-    {
+    public long getPaymentMethodType() {
         support_.sync();
 
         return super.getPaymentMethodType();
     }
 
 
-
     /////////////////////////////////////////////////////// Property InvoiceDeliveryOption
 
-    public long getInvoiceDeliveryOption()
-    {
+    public long getInvoiceDeliveryOption() {
         support_.sync();
 
         return super.getInvoiceDeliveryOption();
     }
 
 
-
     /////////////////////////////////////////////////////// Property AccountExtensions
 
-    public List getAccountExtensions()
-    {
+    public List getAccountExtensions() {
         support_.sync();
 
         return super.getAccountExtensions();
     }
 
 
-
     /////////////////////////////////////////////////////// Property MandatoryFields
 
-    public List getMandatoryFields()
-    {
+    public List getMandatoryFields() {
         support_.sync();
 
         return super.getMandatoryFields();
     }
 
 
-
-
-
-    public void sync(Object obj)
-    {
+    public void sync(Object obj) {
         AccountCreationTemplate source = (AccountCreationTemplate) obj;
         identifier_ = source.getIdentifier();
         name_ = source.getName();

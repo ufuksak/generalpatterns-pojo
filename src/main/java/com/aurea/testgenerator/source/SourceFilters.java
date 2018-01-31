@@ -4,7 +4,6 @@ import one.util.streamex.StreamEx;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.function.Predicate;
 
 import static com.aurea.testgenerator.source.ParsingUtils.parseJavaClassName;
 

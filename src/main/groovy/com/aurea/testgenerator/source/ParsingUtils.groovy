@@ -13,10 +13,6 @@ class ParsingUtils {
         name.contains(".")
     }
 
-    static String parsePackage(String name) {
-        StringUtils.substringBeforeLast(name, ".")
-    }
-
     static String parseJavaClassName(Path path) {
         StringUtils.removeEnd(path.fileName.toString(), '.java')
     }

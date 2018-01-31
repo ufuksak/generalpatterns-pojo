@@ -23,7 +23,6 @@ class JavaSourceFinder implements SourceFinder {
         log.info "Source classes are in $src"
     }
 
-    @Memoized
     StreamEx<Path> javaClasses() throws IOException {
         StreamEx.of(Files.walk(src))
                 .filter { Files.isDirectory it }

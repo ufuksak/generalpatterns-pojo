@@ -18,17 +18,6 @@ public final class NodeUtils {
         return Joiner.on(".").join(nameParts);
     }
 
-    private static void addClassOrInterfaceTypeName(Node node, List<String> nameParts) {
-        Node firstChild = node.getChildNodes().item(1);
-        if (null != firstChild && firstChild.getNodeName().equals("ClassOrInterfaceType")) {
-            addClassOrInterfaceTypeName(firstChild, nameParts);
-        }
-        Node name = node.getAttributes().getNamedItem("name");
-        if (null != name) {
-            nameParts.add(name.getNodeValue());
-        }
-    }
-
     public static int toModifiers(EnumSet<Modifier> modifiers) {
         int i = 0;
         for (Modifier modifier : modifiers) {
@@ -72,5 +61,16 @@ public final class NodeUtils {
             }
         }
         return i;
+    }
+
+    private static void addClassOrInterfaceTypeName(Node node, List<String> nameParts) {
+        Node firstChild = node.getChildNodes().item(1);
+        if (null != firstChild && firstChild.getNodeName().equals("ClassOrInterfaceType")) {
+            addClassOrInterfaceTypeName(firstChild, nameParts);
+        }
+        Node name = node.getAttributes().getNamedItem("name");
+        if (null != name) {
+            nameParts.add(name.getNodeValue());
+        }
     }
 }

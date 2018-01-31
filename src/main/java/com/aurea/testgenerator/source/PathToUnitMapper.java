@@ -1,18 +1,18 @@
 package com.aurea.testgenerator.source;
 
-import com.aurea.testgenerator.PathUtils;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.ast.CompilationUnit;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.function.Function;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class PathToUnitMapper implements Function<Path, Optional<Unit>> {
 
@@ -22,18 +22,6 @@ public class PathToUnitMapper implements Function<Path, Optional<Unit>> {
 
     public PathToUnitMapper(Path root) {
         this.root = root;
-    }
-
-    private static Path createModulePath(Path fullPath, Path pathInPackage) {
-        int nameCount = pathInPackage.getNameCount();
-        if (nameCount == fullPath.getNameCount()) {
-            return fullPath.subpath(0, fullPath.getNameCount() - 1);
-        }
-        try {
-            return fullPath.subpath(0, fullPath.getNameCount() - nameCount);
-        } catch (IllegalArgumentException iae) {
-            return Paths.get("");
-        }
     }
 
     public Path getRoot() {
@@ -65,5 +53,17 @@ public class PathToUnitMapper implements Function<Path, Optional<Unit>> {
         }
 
         return Optional.empty();
+    }
+
+    private static Path createModulePath(Path fullPath, Path pathInPackage) {
+        int nameCount = pathInPackage.getNameCount();
+        if (nameCount == fullPath.getNameCount()) {
+            return fullPath.subpath(0, fullPath.getNameCount() - 1);
+        }
+        try {
+            return fullPath.subpath(0, fullPath.getNameCount() - nameCount);
+        } catch (IllegalArgumentException iae) {
+            return Paths.get("");
+        }
     }
 }

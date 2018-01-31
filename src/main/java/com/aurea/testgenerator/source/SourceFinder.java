@@ -4,8 +4,6 @@ import one.util.streamex.StreamEx;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.stream.Stream;
 
 public interface SourceFinder {
 
