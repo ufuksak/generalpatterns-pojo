@@ -3,7 +3,7 @@ apply plugin: 'io.spring.dependency-management'
 ext { springBootVersion = '1.5.9.RELEASE' }
 
 dependencyManagement {
-    imports { mavenBom("org.springframework.boot:spring-boot-dependencies:1.5.9.RELEASE") }
+    imports { mavenBom("org.springframework.boot:spring-boot-dependencies:${springBootVersion}") }
 
     // Consistent Dependency Management configuration across all subprojects
     dependencies {
@@ -31,7 +31,6 @@ dependencyManagement {
         dependency 'javax.validation:validation-api:2.0.1.Final'
         dependency 'org.hibernate.validator:hibernate-validator:6.0.7.Final'
 
-
         //Test dependencies
         dependency 'junit:junit:4.12'
         dependency 'org.spockframework:spock-core:1.1-groovy-2.4'
@@ -54,6 +53,16 @@ dependencies {
     implementation 'org.apache.commons:commons-lang3'
     implementation 'com.google.guava:guava'
     implementation 'one.util:streamex'
+    implementation 'com.aurea:jacoco-parser'
+    implementation 'javax.validation:validation-api'
+    implementation 'org.hibernate.validator:hibernate-validator'
+    implementation('com.github:javacode-to-xml-converter') {
+        exclude group: 'com.github.javaparser', module: 'javaparser-core'
+    }
+    implementation 'com.github.javafaker:javafaker'
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
+    implementation 'com.fasterxml.jackson.core:jackson-databind'
+    implementation 'pl.allegro.finance:tradukisto'
 
     testImplementation 'junit:junit'
     testImplementation 'pl.pragmatists:JUnitParams'

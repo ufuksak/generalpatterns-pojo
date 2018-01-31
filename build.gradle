@@ -4,26 +4,24 @@ buildscript {
     repositories {
         maven { url 'https://repo.spring.io/plugins-snapshot' }
         mavenCentral()
+        jcenter()
     }
     dependencies {
         classpath 'io.spring.gradle:dependency-management-plugin:1.0.5.BUILD-SNAPSHOT'
-        classpath 'org.springframework.boot:spring-boot-gradle-plugin:1.5.9.RELEASE'
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
     }
 }
 
-subprojects {
-    repositories {
-        mavenCentral()
-        maven {
-            url "https://scm.devfactory.com/nexus/content/repositories/EngUnitTests"
-        }
+repositories {
+    mavenCentral()
+    maven {
+        url "https://scm.devfactory.com/nexus/content/repositories/EngUnitTests"
     }
-
-    apply from: "${rootDir}/compilation.gradle"
-    apply from: "${rootDir}/dependencies.gradle"
-    apply from: "${rootDir}/publishing.gradle"
-
 }
+
+apply from: "${rootDir}/compilation.gradle"
+apply from: "${rootDir}/dependencies.gradle"
+apply from: "${rootDir}/publishing.gradle"
 
 task createWrapper(type: Wrapper) {
     gradleVersion = "4.4.1"
