@@ -6,9 +6,9 @@ import org.springframework.stereotype.Component
 
 
 @Component
-class MethodMatchCollector {
+class TestCaseGenerator {
 
-    Map<MatchType, List<PatternMatch>> match(StreamEx<Unit> units) {
-
+    Map<Unit, List<TestCase>> generate(StreamEx<Unit> units) {
+        return Collections.emptyMap()
     }
 }

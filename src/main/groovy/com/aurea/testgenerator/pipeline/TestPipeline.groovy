@@ -2,7 +2,7 @@ package com.aurea.testgenerator.pipeline
 
 import com.aurea.testgenerator.generation.TestGenerator
 import com.aurea.testgenerator.pattern.MatchType
-import com.aurea.testgenerator.pattern.MethodMatchCollector
+import com.aurea.testgenerator.pattern.TestCaseGenerator
 import com.aurea.testgenerator.pattern.PatternMatch
 import com.aurea.testgenerator.source.SourceFilter
 import com.aurea.testgenerator.source.Unit
@@ -21,12 +21,12 @@ import java.util.function.Predicate
 class TestPipeline {
 
     final UnitSource source
-    final MethodMatchCollector collector
+    final TestCaseGenerator collector
     final TestGenerator generator
     final Predicate<Path> sourceFilter
 
     @Autowired
-    TestPipeline(UnitSource unitSource, MethodMatchCollector collector, TestGenerator generator, SourceFilter sourceFilter) {
+    TestPipeline(UnitSource unitSource, TestCaseGenerator collector, TestGenerator generator, SourceFilter sourceFilter) {
         this.source = unitSource
         this.collector = collector
         this.generator = generator
@@ -39,7 +39,7 @@ class TestPipeline {
         """
         log.info "Total units after filtering: ${source.size(sourceFilter)}"
         StreamEx<Unit> filteredUnits = source.units(sourceFilter)
-        Map<MatchType, List<PatternMatch>> matchesGroupedByType = collector.match(filteredUnits)
+        Map<MatchType, List<PatternMatch>> matchesGroupedByType = collector.generate(filteredUnits)
 
         String statistics = EntryStream.of(matchesGroupedByType).mapValues {it.size()}.join(": ", "\r\n\t", "")
         log.info """Matching statistics: $statistics"""
