@@ -27,6 +27,7 @@ sourceSets {
 springBoot {
     mainClass 'com.aurea.testgenerator.Main'
     executable true
+    classifier = 'tst'
 }
 
 jar {

@@ -1,18 +1,9 @@
 apply plugin: 'io.spring.dependency-management'
 
-def DEPENDENCY_RESOLUTION_STRATEGY = {
-    preferProjectModules()
-}
+ext { springBootVersion = '1.5.9.RELEASE' }
 
 dependencyManagement {
-    // Forbid override in subprojects for consistency reasons
-    overriddenByDependencies(false)
-    // Apply common resolution strategy in dependency management
-    resolutionStrategy DEPENDENCY_RESOLUTION_STRATEGY
-
-    imports {
-        mavenBom 'org.springframework.boot:spring-boot-starter-parent:1.5.9.RELEASE'
-    }
+    imports { mavenBom("org.springframework.boot:spring-boot-dependencies:1.5.9.RELEASE") }
 
     // Consistent Dependency Management configuration across all subprojects
     dependencies {
