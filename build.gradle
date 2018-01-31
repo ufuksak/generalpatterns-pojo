@@ -1,6 +1,8 @@
 group 'com.aurea.bigcode'
 
 buildscript {
+    ext { springBootVersion = '1.5.9.RELEASE' }
+    
     repositories {
         maven { url 'https://repo.spring.io/plugins-snapshot' }
         mavenCentral()
@@ -9,6 +11,7 @@ buildscript {
     dependencies {
         classpath 'io.spring.gradle:dependency-management-plugin:1.0.5.BUILD-SNAPSHOT'
         classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.2'
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
     }
 }
 
@@ -18,6 +21,8 @@ repositories {
         url "https://scm.devfactory.com/nexus/content/repositories/EngUnitTests"
     }
 }
+
+apply plugin: 'org.springframework.boot'
 
 apply from: "${rootDir}/compilation.gradle"
 apply from: "${rootDir}/dependencies.gradle"

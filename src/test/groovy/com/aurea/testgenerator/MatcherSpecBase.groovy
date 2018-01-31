@@ -1,6 +1,6 @@
 package com.aurea.testgenerator
 
-import com.aurea.testgenerator.config.CommonConfig
+import com.aurea.testgenerator.config.SourceConfig
 import com.aurea.testgenerator.pattern.PatternMatcher
 import com.aurea.testgenerator.pattern.ExpandablePatternMatch
 import com.aurea.testgenerator.prescans.PreScan
@@ -21,7 +21,7 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import java.util.stream.Stream
 
-@ContextConfiguration(classes = [CommonConfig, TestConfig])
+@ContextConfiguration(classes = [SourceConfig, TestConfig])
 @TestExecutionListeners([DependencyInjectionTestExecutionListener, DirtiesContextTestExecutionListener])
 abstract class MatcherSpecBase<T extends PatternMatcher> extends Specification {
 

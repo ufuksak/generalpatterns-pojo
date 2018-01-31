@@ -4,6 +4,7 @@ import com.aurea.testgenerator.generation.TestGenerator
 import com.aurea.testgenerator.pattern.MatchType
 import com.aurea.testgenerator.pattern.MethodMatchCollector
 import com.aurea.testgenerator.pattern.PatternMatch
+import com.aurea.testgenerator.source.SourceFilter
 import com.aurea.testgenerator.source.Unit
 import com.aurea.testgenerator.source.UnitSource
 import groovy.util.logging.Log4j2
@@ -25,7 +26,7 @@ class TestPipeline {
     final Predicate<Path> sourceFilter
 
     @Autowired
-    TestPipeline(UnitSource unitSource, MethodMatchCollector collector, TestGenerator generator, Predicate<Path> sourceFilter) {
+    TestPipeline(UnitSource unitSource, MethodMatchCollector collector, TestGenerator generator, SourceFilter sourceFilter) {
         this.source = unitSource
         this.collector = collector
         this.generator = generator

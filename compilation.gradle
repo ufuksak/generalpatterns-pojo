@@ -1,7 +1,5 @@
-apply plugin: 'java-library'
+apply plugin: 'java'
 apply plugin: 'groovy'
-apply plugin: 'application'
-apply plugin: 'com.github.johnrengelman.shadow'
 
 sourceCompatibility = "1.8"
 targetCompatibility = "1.8"
@@ -10,11 +8,10 @@ sourceSets {
     main {
         java { srcDirs = [] }    // no source dirs for the java compiler
         groovy { //noinspection GroovyAssignabilityCheck
-            srcDirs = ["src/main/java", "src/main/groovy"] }  // compile   everything in src/ with groovy
+            srcDirs = ["src/main/java", "src/main/groovy"]
+        }  // compile   everything in src/ with groovy
     }
 }
-
-mainClassName = 'com.aurea.testgenerator.Main'
 
 jar {
     baseName 'big-code'

@@ -24,6 +24,5 @@ class ProjectConfiguration {
     @NotNull
     Path out
 
-    @NotNull
     Path jacoco
 }
