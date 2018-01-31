@@ -12,6 +12,7 @@ import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.context.properties.ConfigurationPropertiesBinding
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.ComponentScan
 import org.springframework.context.annotation.Configuration
@@ -41,8 +42,14 @@ class SourceConfig {
     }
 
     @Bean
+    @ConfigurationPropertiesBinding
     Converter<String, Path> pathConverter() {
-        return { Paths.get(it) }
+        new Converter<String, Path>() {
+            @Override
+            Path convert(String source) {
+                Paths.get(source)
+            }
+        }
     }
 
     @Bean
