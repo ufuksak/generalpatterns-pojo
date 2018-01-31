@@ -47,5 +47,11 @@ class Pipeline {
 
         String unitTestStats = EntryStream.of(unitTestsByUnit).mapValues({ it.size() }).join(": ", "\r\n\t", "").joining("")
         log.info "Unit tests produced: ${unitTestStats}"
+
+        log.info "Post validation for UnitTest"
+        // Here we do post validation for UnitTest classes - check that names of fields are unique
+
+        log.info "Merging UnitTests..."
+        // Parse existing tests into CU and append all the blocks of UnitTest class
     }
 }
