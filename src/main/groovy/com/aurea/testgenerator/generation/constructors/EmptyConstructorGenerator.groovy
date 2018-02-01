@@ -9,6 +9,8 @@ import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.PackageDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
+import com.github.javaparser.ast.expr.Expression
+import com.github.javaparser.ast.stmt.Statement
 import groovy.transform.ToString
 import org.springframework.stereotype.Component
 
@@ -30,8 +32,10 @@ class EmptyConstructorGenerator implements UnitTestGenerator {
             @Test
             public void test_${className}_IsInstantiable() throws Exception {
                 new ${className}(); 
-            }
+            }                              
         """).asMethodDeclaration()
+
+
         typeIsInstantiable.method = typeIsInstantiableTest
 
         typeIsInstantiable.imports << Imports.parse(pd.nameAsString + "." + declaredInType.nameAsString)

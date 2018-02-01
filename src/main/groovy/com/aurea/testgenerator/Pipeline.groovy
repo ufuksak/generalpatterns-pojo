@@ -23,7 +23,10 @@ class Pipeline {
     final SourceFilter sourceFilter
 
     @Autowired
-    Pipeline(UnitSource unitSource, PatternMatchCollector collector, UnitTestCollector unitTestGenerator, SourceFilter sourceFilter) {
+    Pipeline(UnitSource unitSource,
+             PatternMatchCollector collector,
+             UnitTestCollector unitTestGenerator,
+             SourceFilter sourceFilter) {
         this.source = unitSource
         this.collector = collector
         this.unitTestGenerator = unitTestGenerator
@@ -48,10 +51,16 @@ class Pipeline {
         String unitTestStats = EntryStream.of(unitTestsByUnit).mapValues({ it.size() }).join(": ", "\r\n\t", "").joining("")
         log.info "Unit tests produced: ${unitTestStats}"
 
-        log.info "Post validation for UnitTest"
-        // Here we do post validation for UnitTest classes - check that names of fields are unique
+        log.info "Post validation for UnitTest..."
+        // Here we do post validation for UnitTest classes - check that names of fields are unique and other validations
+        // we can do before proceeding to creating CUs.
 
         log.info "Merging UnitTests..."
         // Parse existing tests into CU and append all the blocks of UnitTest class
+
+        log.info "Validation after merge..."
+        // Validate that fields are unique after merge
+
+
     }
 }
