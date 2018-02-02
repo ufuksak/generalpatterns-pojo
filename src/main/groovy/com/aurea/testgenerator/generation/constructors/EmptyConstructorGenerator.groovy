@@ -38,9 +38,7 @@ class EmptyConstructorGenerator implements UnitTestGenerator {
 
         typeIsInstantiable.method = typeIsInstantiableTest
 
-        typeIsInstantiable.imports << Imports.parse(pd.nameAsString + "." + declaredInType.nameAsString)
         typeIsInstantiable.imports << Imports.JUNIT_TEST
-        typeIsInstantiable.imports << Imports.parse("java.lang.Exception")
 
         [typeIsInstantiable]
     }

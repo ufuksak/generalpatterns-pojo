@@ -26,7 +26,7 @@ class ConstructorMatcher extends XPathPatternMatcher {
 
         @Override
         void visit(ConstructorDeclaration n, JavaParserFacade arg) {
-            if (n.nameAsString == 'EmptyConstructor') {
+            if (!n.private && n.body.empty) {
                 matches << new PatternMatch(match: n, type: ConstructorTypes.EMPTY)
             }
         }
