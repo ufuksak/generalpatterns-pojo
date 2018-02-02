@@ -34,7 +34,9 @@ class UnitTestCollector implements Function<Map<Unit, List<PatternMatch>>, Map<U
                        .orElse(Stream.empty())
                 }
             }.toList()
-        }.toMap()
+        }
+            .filterValues {!it.empty}
+            .toMap()
     }
 
     @Override

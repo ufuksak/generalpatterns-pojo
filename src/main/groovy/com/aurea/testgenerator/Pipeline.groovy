@@ -2,11 +2,15 @@ package com.aurea.testgenerator
 
 import com.aurea.testgenerator.generation.UnitTest
 import com.aurea.testgenerator.generation.UnitTestCollector
+import com.aurea.testgenerator.generation.UnitTestMergeEngine
+import com.aurea.testgenerator.generation.UnitTestMergeResult
 import com.aurea.testgenerator.pattern.PatternMatch
 import com.aurea.testgenerator.pattern.PatternMatchCollector
 import com.aurea.testgenerator.source.SourceFilter
 import com.aurea.testgenerator.source.Unit
 import com.aurea.testgenerator.source.UnitSource
+import com.aurea.testgenerator.source.UnitTestWriter
+import com.github.javaparser.ast.CompilationUnit
 import groovy.util.logging.Log4j2
 import one.util.streamex.EntryStream
 import one.util.streamex.StreamEx
@@ -21,16 +25,22 @@ class Pipeline {
     final PatternMatchCollector collector
     final UnitTestCollector unitTestGenerator
     final SourceFilter sourceFilter
+    final UnitTestMergeEngine mergeEngine
+    final UnitTestWriter unitTestWriter
 
     @Autowired
     Pipeline(UnitSource unitSource,
              PatternMatchCollector collector,
              UnitTestCollector unitTestGenerator,
-             SourceFilter sourceFilter) {
+             SourceFilter sourceFilter,
+             UnitTestMergeEngine mergeEngine,
+             UnitTestWriter writer) {
         this.source = unitSource
         this.collector = collector
         this.unitTestGenerator = unitTestGenerator
         this.sourceFilter = sourceFilter
+        this.mergeEngine = mergeEngine
+        this.unitTestWriter = writer
     }
 
     void start() {
@@ -52,15 +62,17 @@ class Pipeline {
         log.info "Unit tests produced: ${unitTestStats}"
 
         log.info "Post validation for UnitTest..."
-        // Here we do post validation for UnitTest classes - check that names of fields are unique and other validations
+        //TODO: Here we do post validation for UnitTest classes - check that names of fields are unique and other validations
         // we can do before proceeding to creating CUs.
 
         log.info "Merging UnitTests..."
-        // Parse existing tests into CU and append all the blocks of UnitTest class
+        Map<Unit, UnitTestMergeResult> merged = EntryStream.of(unitTestsByUnit).mapToValue{ k, v -> mergeEngine.merge(k, v)}.toMap()
 
         log.info "Validation after merge..."
-        // Validate that fields are unique after merge
+        //TODO: Validate that fields are unique after merge
+        Map<Unit, CompilationUnit> testsByUnit = EntryStream.of(merged).mapValues { it.unit }.toMap()
 
-
+        log.info "Generating .java files..."
+        unitTestWriter.write(testsByUnit)
     }
 }

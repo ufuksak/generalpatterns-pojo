@@ -12,7 +12,7 @@ class UnitTest {
     Set<AnnotationExpr> classAnnotations = []
     Set<ImportDeclaration> imports = []
     Set<FieldDeclaration> fields = []
-    Optional<BlockStmt> methodSetup = Optional.empty()
-    Optional<BlockStmt> classSetup = Optional.empty()
+    Optional<MethodDeclaration> methodSetup = Optional.empty()
+    Optional<MethodDeclaration> classSetup = Optional.empty()
     MethodDeclaration method
 }
