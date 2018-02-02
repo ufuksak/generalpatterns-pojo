@@ -1,5 +1,6 @@
 package com.aurea.testgenerator.pattern.general.constructors
 
+import com.aurea.testgenerator.ast.Callability
 import com.aurea.testgenerator.pattern.MatchVisitor
 import com.aurea.testgenerator.pattern.PatternMatch
 import com.aurea.testgenerator.pattern.UnitMatchVisitor
@@ -26,7 +27,7 @@ class ConstructorMatcher extends XPathPatternMatcher {
 
         @Override
         void visit(ConstructorDeclaration n, JavaParserFacade arg) {
-            if (!n.private && n.body.empty) {
+            if (Callability.isCallableFromTests(n) && n.body.empty) {
                 matches << new PatternMatch(match: n, type: ConstructorTypes.EMPTY)
             }
         }

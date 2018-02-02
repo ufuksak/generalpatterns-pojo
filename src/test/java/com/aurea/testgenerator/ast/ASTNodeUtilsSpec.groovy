@@ -59,7 +59,7 @@ class ASTNodeUtilsSpec extends Specification {
         Node nestedMethodCall = unit.get().cu.getNodesByType(MethodCallExpr)[1]
 
         when:
-        List<Node> parents = ASTNodeUtils.findParents(nestedMethodCall).toList()
+        List<Node> parents = ASTNodeUtils.parents(nestedMethodCall).toList()
 
         then:
         parents.size() == 6
@@ -88,7 +88,7 @@ class ASTNodeUtilsSpec extends Specification {
         Node nestedMethodCall = unit.get().cu.getNodesByType(MethodCallExpr)[1]
 
         when:
-        List<MethodCallExpr> parents = ASTNodeUtils.findParents(nestedMethodCall, MethodCallExpr, { it.nameAsString == "chomp" }).toList()
+        List<MethodCallExpr> parents = ASTNodeUtils.parents(nestedMethodCall, MethodCallExpr, { it.nameAsString == "chomp" }).toList()
 
         then:
         parents.size() == 1

@@ -12,14 +12,14 @@ import org.springframework.stereotype.Component
 @Log4j2
 class UnitTestMergeEngine {
 
-    UnitTestMergeResult merge(Unit unitUnderTest, List<UnitTest> uts) {
+    UnitTestMergeResult merge(Unit unitUnderTest, List<TestNodeMethod> uts) {
         new UnitTestMergeEngineProcess(unit: unitUnderTest, uts: uts)
                 .merge()
     }
 
     private static class UnitTestMergeEngineProcess {
         Unit unit
-        List<UnitTest> uts
+        List<TestNodeMethod> uts
         CompilationUnit cu = new CompilationUnit()
         List<UnitTestMergeConflict> conflicts = []
         ClassOrInterfaceDeclaration coid

@@ -1,6 +1,6 @@
 package com.aurea.testgenerator.generation.source
 
-import com.aurea.testgenerator.generation.UnitTest
+import com.aurea.testgenerator.generation.TestNodeMethod
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.type.Type
@@ -13,7 +13,7 @@ class Assertions {
     static final FLOATING_POINT_TYPES_FLOAT = ['float', 'Float', 'java.lang.Float']
     static final FLOATING_POINT_TYPES_DOUBLE = ['double', 'Double', 'java.lang.Double']
 
-    static MethodCallExpr appendPrimitiveAssertion(UnitTest ut, Type type, Expression actual, Expression expected) {
+    static MethodCallExpr appendPrimitiveAssertion(TestNodeMethod ut, Type type, Expression actual, Expression expected) {
         MethodCallExpr result
         switch (type.toString()) {
             case FLOATING_POINT_TYPES_FLOAT:

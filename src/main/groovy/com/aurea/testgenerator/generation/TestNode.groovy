@@ -1,18 +1,19 @@
 package com.aurea.testgenerator.generation
 
 import com.github.javaparser.ast.ImportDeclaration
+import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.AnnotationExpr
-import com.github.javaparser.ast.stmt.BlockStmt
 import groovy.transform.Canonical
 
+
 @Canonical
-class UnitTest {
+class TestNode<T extends Node> {
     Set<AnnotationExpr> classAnnotations = []
     Set<ImportDeclaration> imports = []
     Set<FieldDeclaration> fields = []
     Optional<MethodDeclaration> methodSetup = Optional.empty()
     Optional<MethodDeclaration> classSetup = Optional.empty()
-    MethodDeclaration method
+    T node
 }

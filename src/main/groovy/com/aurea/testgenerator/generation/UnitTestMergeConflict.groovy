@@ -4,6 +4,6 @@ import groovy.transform.Immutable
 
 @Immutable
 class UnitTestMergeConflict {
-    UnitTest left, right
+    TestNodeMethod left, right
     UnitTestMergeConflictReason reason
 }

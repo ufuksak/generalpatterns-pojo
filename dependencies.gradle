@@ -34,6 +34,8 @@ dependencyManagement {
         dependency 'org.assertj:assertj-core:3.8.0'
         dependency 'pl.pragmatists:JUnitParams:1.1.1'
         dependency 'org.spockframework:spock-spring:1.1-groovy-2.4'
+        dependency 'org.reflections:reflections:0.9.11'
+
     }
 }
 
@@ -67,4 +69,5 @@ dependencies {
     testCompile 'org.assertj:assertj-core'
     testCompile 'org.spockframework:spock-spring'
     testCompile 'org.springframework.boot:spring-boot-starter-test'
+    testCompile 'org.reflections:reflections'
 }

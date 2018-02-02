@@ -5,5 +5,5 @@ import com.aurea.testgenerator.pattern.PatternMatch
 import java.util.function.Function
 
 
-interface UnitTestGenerator extends Function<PatternMatch, List<UnitTest>> {
+interface UnitTestGenerator extends Function<PatternMatch, List<TestNodeMethod>> {
 }

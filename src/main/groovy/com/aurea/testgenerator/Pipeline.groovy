@@ -1,6 +1,6 @@
 package com.aurea.testgenerator
 
-import com.aurea.testgenerator.generation.UnitTest
+import com.aurea.testgenerator.generation.TestNodeMethod
 import com.aurea.testgenerator.generation.UnitTestCollector
 import com.aurea.testgenerator.generation.UnitTestMergeEngine
 import com.aurea.testgenerator.generation.UnitTestMergeResult
@@ -56,7 +56,7 @@ class Pipeline {
         log.info "Matching statistics: $matchingStats"
 
         log.info "Building unit tests"
-        Map<Unit, List<UnitTest>> unitTestsByUnit = unitTestGenerator.apply(matchesByUnit)
+        Map<Unit, List<TestNodeMethod>> unitTestsByUnit = unitTestGenerator.apply(matchesByUnit)
 
         String unitTestStats = EntryStream.of(unitTestsByUnit).mapValues({ it.size() }).join(": ", "\r\n\t", "").joining("")
         log.info "Unit tests produced: ${unitTestStats}"

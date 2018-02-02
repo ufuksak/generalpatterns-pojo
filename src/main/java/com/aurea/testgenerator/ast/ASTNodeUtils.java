@@ -3,8 +3,10 @@ package com.aurea.testgenerator.ast;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.PackageDeclaration;
+import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.AssignExpr;
 import com.github.javaparser.ast.expr.FieldAccessExpr;
@@ -12,6 +14,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr;
 import com.github.javaparser.ast.expr.NameExpr;
 import com.github.javaparser.ast.expr.SimpleName;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
+import com.github.javaparser.ast.nodeTypes.modifiers.NodeWithPrivateModifier;
 import com.github.javaparser.ast.type.ClassOrInterfaceType;
 import com.github.javaparser.ast.type.ReferenceType;
 import com.github.javaparser.ast.type.Type;
@@ -256,7 +259,7 @@ public final class ASTNodeUtils {
                 .orElse(null);
     }
 
-    public static StreamEx<Node> findParents(Node childNode) {
+    public static StreamEx<Node> parents(Node childNode) {
         List<Node> nodes = new ArrayList<>();
 
         Optional<Node> node = childNode.getParentNode();
@@ -271,15 +274,13 @@ public final class ASTNodeUtils {
         return StreamEx.of(nodes);
     }
 
-    public static <T extends Node> StreamEx<T> findParents(Node childNode, Class<T> clazzOfParent) {
+    public static <T extends Node> StreamEx<T> parents(Node childNode, Class<T> clazzOfParent) {
 
-        return findParents(childNode).select(clazzOfParent);
+        return parents(childNode).select(clazzOfParent);
     }
 
-    public static <T extends Node> StreamEx<T> findParents(Node childNode, Class<T> clazzOfParent, Predicate<T> condition) {
-
-        return findParents(childNode, clazzOfParent).filter(condition);
-
+    public static <T extends Node> StreamEx<T> parents(Node childNode, Class<T> clazzOfParent, Predicate<T> condition) {
+        return parents(childNode, clazzOfParent).filter(condition);
     }
 
     private static <T> Optional<T> findAncestorSubTypeOf(Class<T> clazz, Node node, T candidate) {

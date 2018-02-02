@@ -1,23 +1,18 @@
 package com.aurea.testgenerator
 
 import com.aurea.testgenerator.config.ProjectConfiguration
+import com.aurea.testgenerator.extensions.Extensions
 import com.aurea.testgenerator.generation.UnitTestCollector
 import com.aurea.testgenerator.generation.UnitTestGenerator
 import com.aurea.testgenerator.generation.UnitTestMergeEngine
 import com.aurea.testgenerator.pattern.PatternMatchCollector
 import com.aurea.testgenerator.pattern.PatternMatcher
-import com.aurea.testgenerator.source.JavaSourceFinder
-import com.aurea.testgenerator.source.PathUnitSource
-import com.aurea.testgenerator.source.SourceFilters
-import com.aurea.testgenerator.source.UnitSource
-import com.aurea.testgenerator.source.UnitTestWriter
-import org.assertj.core.api.Assertions
+import com.aurea.testgenerator.source.*
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 import static org.assertj.core.api.Assertions.assertThat
-
 
 abstract class MatcherPipelineTest extends Specification {
 
@@ -32,8 +27,11 @@ abstract class MatcherPipelineTest extends Specification {
     UnitTestCollector unitTestCollector
     PatternMatchCollector patternMatchCollector
 
+    void setupSpec() {
+        Extensions.enable()
+    }
+
     void setup() {
-        FileTreeBuilder tree = new FileTreeBuilder(folder.root)
         cfg.out = folder.newFolder("test-out").toPath()
         cfg.src = folder.newFolder("src").toPath()
         cfg.testSrc = folder.newFolder("test").toPath()
@@ -54,13 +52,7 @@ abstract class MatcherPipelineTest extends Specification {
     }
 
     String onClassCodeExpect(String code, String expectedTest) {
-        File testFile = new File(cfg.src.toFile().absolutePath + "/sample", 'Foo.java')
-        testFile.parentFile.mkdirs()
-        testFile.write """
-        package sample;
-
-        $code
-        """
+        createTestedCode(code)
 
         pipeline.start()
 
@@ -68,6 +60,27 @@ abstract class MatcherPipelineTest extends Specification {
 
         assertThat(resultingTest).isEqualToNormalizingWhitespace(expectedTest)
     }
+
+    void onClassCodeDoNotExpectTest(String code) {
+        createTestedCode(code)
+
+        pipeline.start()
+
+        File resultingTest = cfg.out.resolve('sample').resolve('FooTest.java').toFile()
+
+        assertThat(resultingTest).doesNotExist()
+    }
+
+    private void createTestedCode(String code) {
+        File testFile = new File(cfg.src.toFile().absolutePath + "/sample", 'Foo.java')
+        testFile.parentFile.mkdirs()
+        testFile.write """
+        package sample;
+
+        $code
+        """
+    }
+
 
     abstract PatternMatcher matcher()
     abstract UnitTestGenerator generator()

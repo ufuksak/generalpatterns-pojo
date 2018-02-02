@@ -14,7 +14,7 @@ import java.util.stream.Stream
 
 @Component
 @Log4j2
-class UnitTestCollector implements Function<Map<Unit, List<PatternMatch>>, Map<Unit, List<UnitTest>>> {
+class UnitTestCollector implements Function<Map<Unit, List<PatternMatch>>, Map<Unit, List<TestNodeMethod>>> {
 
     List<UnitTestGenerator> generators
 
@@ -25,7 +25,7 @@ class UnitTestCollector implements Function<Map<Unit, List<PatternMatch>>, Map<U
     }
 
     @Override
-    Map<Unit, List<UnitTest>> apply(Map<Unit, List<PatternMatch>> matchesByUnit) {
+    Map<Unit, List<TestNodeMethod>> apply(Map<Unit, List<PatternMatch>> matchesByUnit) {
         EntryStream.of(matchesByUnit).mapValues { matches ->
             StreamEx.of(matches).flatMap { match ->
                 StreamEx.of(generators).flatMap { generator ->

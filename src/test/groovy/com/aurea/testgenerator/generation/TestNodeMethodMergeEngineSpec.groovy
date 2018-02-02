@@ -4,7 +4,7 @@ import one.util.streamex.StreamEx
 import spock.lang.Specification
 
 
-class UnitTestMergeEngineSpec extends Specification {
+class TestNodeMethodMergeEngineSpec extends Specification {
 
     def "foo"() {
         expect:
