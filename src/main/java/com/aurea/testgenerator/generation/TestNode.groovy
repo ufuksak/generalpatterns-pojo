@@ -5,15 +5,24 @@ import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.AnnotationExpr
+import com.github.javaparser.ast.stmt.BlockStmt
 import groovy.transform.Canonical
 
 
-@Canonical
-class TestNode<T extends Node> {
-    Set<AnnotationExpr> classAnnotations = []
-    Set<ImportDeclaration> imports = []
-    Set<FieldDeclaration> fields = []
-    Optional<MethodDeclaration> methodSetup = Optional.empty()
-    Optional<MethodDeclaration> classSetup = Optional.empty()
-    T node
+interface TestNode<T extends Node> {
+
+    Dependency getDependency()
+    Optional<T> getNode()
+
+
+//    Optional<T> node
+//
+//    TestNode<T> addSetups(TestNode<? extends Node> n) {
+//        classAnnotations.addAll(n.classAnnotations)
+//        imports.addAll(n.imports)
+//        fields.addAll(n.fields)
+//        beforeMethods.addAll(n.beforeMethods)
+//        beforeClassMethods.addAll(n.beforeClassMethods)
+//        this
+//    }
 }

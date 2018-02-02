@@ -1,6 +1,7 @@
 package com.aurea.testgenerator.ast
 
 import com.aurea.testgenerator.value.ValueFactory
+import com.github.javaparser.ast.body.ConstructorDeclaration
 
 
 class InvocationBuilder {
@@ -9,6 +10,10 @@ class InvocationBuilder {
 
     InvocationBuilder(ValueFactory factory) {
         this.factory = factory
+    }
+
+    void createCall(ConstructorDeclaration cd) {
+
     }
 
 
