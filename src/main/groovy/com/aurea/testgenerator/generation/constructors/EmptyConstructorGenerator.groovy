@@ -34,7 +34,7 @@ class EmptyConstructorGenerator implements UnitTestGenerator {
         """).asMethodDeclaration()
 
 
-        typeIsInstantiable.method = typeIsInstantiableTest
+        typeIsInstantiable.node = typeIsInstantiableTest
 
         typeIsInstantiable.imports << Imports.JUNIT_TEST
 

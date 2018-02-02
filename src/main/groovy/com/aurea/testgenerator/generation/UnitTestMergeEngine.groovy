@@ -81,7 +81,7 @@ class UnitTestMergeEngine {
 
         private void addTests() {
             StreamEx.of(uts)
-                    .map { it.method }
+                    .map { it.node }
                     .forEach {
                 coid.addMember(it)
             }
