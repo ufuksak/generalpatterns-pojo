@@ -62,6 +62,7 @@ class EmptyConstructorSpec extends MatcherPipelineTest {
     }
 
     def "nested constructor of non static is being properly called"() {
+        expect:
         onClassCodeExpect """
         class Foo {
             class Bar {
@@ -84,6 +85,7 @@ class EmptyConstructorSpec extends MatcherPipelineTest {
     }
 
     def "nested constructor of static class is being properly called"() {
+        expect:
         onClassCodeExpect """
         class Foo {
             static class Bar {
