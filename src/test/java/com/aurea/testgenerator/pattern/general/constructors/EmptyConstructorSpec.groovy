@@ -74,7 +74,7 @@ class EmptyConstructorSpec extends MatcherPipelineTest {
         
         import org.junit.Test;
         
-        public class FooBarTest {
+        public class FooTest {
             
             @Test
             public void test_Bar_IsInstantiable() throws Exception {
@@ -97,7 +97,7 @@ class EmptyConstructorSpec extends MatcherPipelineTest {
         
         import org.junit.Test;
         
-        public class FooBarTest {
+        public class FooTest {
             
             @Test
             public void test_Bar_IsInstantiable() throws Exception {

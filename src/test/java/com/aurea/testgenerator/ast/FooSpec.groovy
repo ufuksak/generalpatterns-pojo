@@ -13,7 +13,7 @@ class FooSpec extends Specification {
         CompilationUnit cu = JavaParser.parse("""
             class Foo {
                 void foo() {                    
-             new Foo();
+             new Bar.Foo();
             }
                 
             }

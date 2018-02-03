@@ -7,7 +7,7 @@ import groovy.transform.Canonical
 
 @Canonical
 class TestNodeExpression implements TestNode<Expression> {
-    TestDependency dependency
+    TestDependency dependency = new TestDependency()
     Expression expr
 
     @Override

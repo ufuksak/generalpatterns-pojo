@@ -31,18 +31,18 @@ class InvocationBuilder {
         if (parents.size() == 1) {
             return Optional.of(buildConstructorInvocation(cd))
         } else {
-            boolean previousParentStatic = parents.first().static
+            boolean isPreviousStatic = parents.first().static
             TestNodeExpression expr = buildConstructorInvocation(cd)
             for (int i = 1; i < parents.size(); i++) {
                 TypeDeclaration parent = parents[i]
-                if (previousParentStatic) {
-                    prependWithScope(expr, parent.nameAsString)
+                if (isPreviousStatic) {
+                    prependWithType(expr, parent.nameAsString)
                 } else {
                     ConstructorDeclaration simplestConstructor = findSimplestConstructor(parent)
                     TestNodeExpression invocation = buildConstructorInvocation(simplestConstructor)
                     prependWithInvocation(invocation, expr)
                 }
-                previousParentStatic = parent.static
+                isPreviousStatic = parent.static
             }
             return Optional.of(expr)
         }
@@ -62,7 +62,7 @@ class InvocationBuilder {
         expr
     }
 
-    private static void prependWithScope(TestNodeExpression expr, String scopeName) {
+    private static void prependWithType(TestNodeExpression expr, String scopeName) {
         ObjectCreationExpr parentScope = findParentObjectCreationScope(expr.expr.asObjectCreationExpr())
         ClassOrInterfaceType parentTypeScope = findParentTypeScope(parentScope.type)
         parentTypeScope.setScope(JavaParser.parseClassOrInterfaceType(scopeName))

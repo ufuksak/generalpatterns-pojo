@@ -17,7 +17,7 @@ public class RandomValueFactory implements ValueFactory {
 
     private final RandomJavaLangTypesFactory typesFactory;
 
-    RandomValueFactory() {
+    public RandomValueFactory() {
         typesFactory = new RandomJavaLangTypesFactory(this);
     }
 

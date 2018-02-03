@@ -5,7 +5,7 @@ import groovy.transform.Canonical
 
 @Canonical
 class TestNodeMethod implements TestNode<MethodDeclaration> {
-    TestDependency dependency
+    TestDependency dependency = new TestDependency()
     MethodDeclaration md
 
     @Override
