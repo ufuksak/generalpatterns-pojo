@@ -5,7 +5,7 @@ import one.util.streamex.StreamEx;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static com.aurea.testgenerator.source.ParsingUtils.parseJavaClassName;
+import static com.aurea.common.ParsingUtils.parseJavaClassName;
 
 public final class SourceFilters {
     private SourceFilters() {

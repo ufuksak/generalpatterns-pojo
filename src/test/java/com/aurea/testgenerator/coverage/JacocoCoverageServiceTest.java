@@ -99,7 +99,7 @@ public class JacocoCoverageServiceTest {
         MethodDeclaration md = simpleMethodDeclaration();
         fooDeclaration.setMembers(nodeList(innerDeclaration));
         CompilationUnit cu = newFooCu();
-        MethodCoverageQuery query = MethodCoverageQuery.of(new Unit(cu, "Foo", "org.example", Paths.get("")), innerDeclaration, md);
+        MethodCoverageQuery query = MethodCoverageQuery.of(new Unit(cu, "org.example.Foo", Paths.get("")), innerDeclaration, md);
 
         MethodCoverage methodCoverage = service.getMethodCoverage(query);
 
@@ -115,7 +115,7 @@ public class JacocoCoverageServiceTest {
         md.setParentNode(inner);
         fooDeclaration.setMembers(nodeList(inner));
         CompilationUnit cu = newFooCu();
-        MethodCoverageQuery query = MethodCoverageQuery.of(new Unit(cu, "Foo", "org.example", Paths.get("")), md);
+        MethodCoverageQuery query = MethodCoverageQuery.of(new Unit(cu, "org.example.Foo", Paths.get("")), md);
 
         MethodCoverage methodCoverage = service.getMethodCoverage(query);
 
@@ -136,7 +136,7 @@ public class JacocoCoverageServiceTest {
     }
 
     private MethodCoverageQuery queryForClass(ClassOrInterfaceDeclaration cd, MethodDeclaration md) {
-        return MethodCoverageQuery.of(new Unit(new CompilationUnit(), "Foo", "org.example", Paths.get("")), cd, md);
+        return MethodCoverageQuery.of(new Unit(new CompilationUnit(), "org.example.Foo", Paths.get("")), cd, md);
     }
 
     private JacocoCoverageService serviceWithCoverageInFooClass() {
