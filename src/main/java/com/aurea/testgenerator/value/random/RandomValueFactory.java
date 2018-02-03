@@ -9,15 +9,17 @@ import com.github.javaparser.ast.expr.ArrayCreationExpr;
 import com.github.javaparser.ast.expr.ArrayInitializerExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.StringLiteralExpr;
-import com.github.javaparser.ast.type.PrimitiveType;
 import com.github.javaparser.ast.type.Type;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 public class RandomValueFactory implements ValueFactory {
+
+    private final RandomJavaLangTypesFactory typesFactory;
+
+    RandomValueFactory() {
+        typesFactory = new RandomJavaLangTypesFactory(this);
+    }
 
     public Optional<TestNodeExpression> getExpression(Type type) {
         if (type.isPrimitiveType()) {
@@ -25,18 +27,18 @@ public class RandomValueFactory implements ValueFactory {
         } else if (type.isArrayType()) {
             return getExpression(type.asArrayType().getComponentType())
                     .map(testValue -> {
-                        Expression node = testValue.getNode();
+                        Expression node = testValue.getExpr();
                         ArrayCreationExpr arrayCreationExpr = new ArrayCreationExpr(type.asArrayType().getElementType());
                         arrayCreationExpr.setInitializer(new ArrayInitializerExpr(NodeList.nodeList(node)));
-                        testValue.setNode(arrayCreationExpr);
+                        testValue.setExpr(arrayCreationExpr);
                         return testValue;
                     });
         } else if (Types.isString(type)) {
             TestNodeExpression testNodeExpression = new TestNodeExpression();
-            testNodeExpression.setNode(new StringLiteralExpr(RandomStringPool.next()));
+            testNodeExpression.setExpr(new StringLiteralExpr(RandomStringPool.next()));
             return Optional.of(testNodeExpression);
         } else if (type.isClassOrInterfaceType()) {
-//            return Optional.of(RandomJavaLangTypesFactory.get(type.asClassOrInterfaceType()));
+            return typesFactory.get(type.asClassOrInterfaceType());
         }
         return Optional.empty();
     }

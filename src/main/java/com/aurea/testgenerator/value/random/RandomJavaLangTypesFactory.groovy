@@ -1,14 +1,17 @@
 package com.aurea.testgenerator.value.random
 
+import com.aurea.testgenerator.generation.TestDependencyMerger
 import com.aurea.testgenerator.generation.TestNodeExpression
 import com.aurea.testgenerator.generation.source.Imports
 import com.aurea.testgenerator.value.Types
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
+import com.github.javaparser.ast.expr.ClassExpr
 import com.github.javaparser.ast.expr.Expression
-import com.github.javaparser.ast.stmt.Statement
+import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.type.ClassOrInterfaceType
 import com.github.javaparser.ast.type.Type
+import org.apache.commons.lang.math.RandomUtils
 
 class RandomJavaLangTypesFactory {
 
@@ -19,46 +22,61 @@ class RandomJavaLangTypesFactory {
     }
 
     Optional<TestNodeExpression> get(ClassOrInterfaceType type) {
-        if (type.isBoxedType()) {
+        if (type.boxedType) {
             return Optional.of(RandomPrimitiveValueFactory.get(type.toUnboxedType()))
         } else if (Types.isList(type) || Types.isCollection(type) || Types.isIterable(type)) {
             Optional<TestNodeExpression> componentValue = getCollectionComponentValue(type)
             return componentValue.map {
-                it.imports << Imports.COLLECTIONS
-                Expression component = it.node
-                it.node = JavaParser.parseExpression("Collections.singletonList($component)")
+                it.dependency.imports << Imports.COLLECTIONS
+                Expression component = it.expr
+                it.expr = JavaParser.parseExpression("Collections.singletonList($component)")
                 it
             }
         } else if (Types.isSet(type)) {
             Optional<TestNodeExpression> componentValue = getCollectionComponentValue(type)
             return componentValue.map {
-                it.imports << Imports.COLLECTIONS
-                Expression component = it.node
-                it.node = JavaParser.parseExpression("Collections.singleton($component)")
+                it.dependency.imports << Imports.COLLECTIONS
+                Expression component = it.expr
+                it.expr = JavaParser.parseExpression("Collections.singleton($component)")
                 it
             }
         } else if (Types.isMap(type)) {
-            List<Type> keyValueTypes = type.getTypeArguments().filter {it.size() == 2 }.map {
+            List<Type> keyValueTypes = type.getTypeArguments().filter { it.size() == 2 }.map {
                 [it[0], it[1]]
             }.orElse([Types.OBJECT, Types.OBJECT])
 
-            Optional<TestNodeExpression> keyTypeValue = valueFactory.get(keyValueTypes[0])
-            Optional<TestNodeExpression> valueTypeValue = valueFactory.get(keyValueTypes[1])
+            Optional<TestNodeExpression> keyTypeValue = valueFactory.getExpression(keyValueTypes[0])
+            Optional<TestNodeExpression> valueTypeValue = valueFactory.getExpression(keyValueTypes[1])
             if (keyTypeValue.present && valueTypeValue.present) {
                 TestNodeExpression testNodeExpression = new TestNodeExpression()
                 TestNodeExpression keyExpression = keyTypeValue.get()
                 TestNodeExpression valueExpression = valueTypeValue.get()
-                testNodeExpression.imports.addAll(keyExpression.imports)
-                testNodeExpression.imports.addAll(valueExpression.imports)
-                Statement
+                testNodeExpression.dependency = TestDependencyMerger.merge(keyExpression.dependency, valueExpression.dependency)
 
-//                testNodeExpression.assignBlock
-//
+                testNodeExpression.expr = JavaParser.parseExpression("ImmutableMap.of(${keyExpression.expr}, ${valueExpression.expr})")
+                testNodeExpression.dependency.imports << Imports.IMMUTABLE_MAP
 
                 return Optional.of(testNodeExpression)
             } else {
                 return Optional.empty()
             }
+        } else if (Types.isDate(type)) {
+            TestNodeExpression expression = new TestNodeExpression(
+                    expr: JavaParser.parseExpression("new java.util.Date(${RandomUtils.nextInt(100_000)})")
+            )
+            expression.dependency.imports << Imports.DATE
+            return Optional.of(expression)
+        } else if (Types.isSqlDate(type)) {
+            TestNodeExpression expression = new TestNodeExpression(
+                    expr: JavaParser.parseExpression("new java.sql.Date(${RandomUtils.nextInt(100_000)})")
+            )
+            expression.dependency.imports << Imports.SQL_DATE
+            return Optional.of(expression)
+        } else {
+            TestNodeExpression expression = new TestNodeExpression()
+            expression.expr = new MethodCallExpr("mock", new ClassExpr(type))
+            expression.dependency.imports << Imports.STATIC_MOCK
+            return Optional.of(expression)
         }
     }
 

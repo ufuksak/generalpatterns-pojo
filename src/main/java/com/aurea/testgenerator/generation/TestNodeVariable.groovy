@@ -4,7 +4,7 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import groovy.transform.Canonical
 
 @Canonical
-class TestNodeVariable extends TestNode<VariableDeclarationExpr> {
-    TestNodeDependency dependency
+class TestNodeVariable implements TestNode<VariableDeclarationExpr> {
+    TestDependency dependency
     Optional<VariableDeclarationExpr> node
 }

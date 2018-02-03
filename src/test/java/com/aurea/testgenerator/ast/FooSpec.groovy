@@ -13,8 +13,7 @@ class FooSpec extends Specification {
         CompilationUnit cu = JavaParser.parse("""
             class Foo {
                 void foo() {                    
-             Map mapa = new HashMap();
-             mapa.put(1, 1);
+             new Foo();
             }
                 
             }

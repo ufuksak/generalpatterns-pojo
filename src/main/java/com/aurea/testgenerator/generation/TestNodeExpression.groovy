@@ -6,7 +6,12 @@ import groovy.transform.Canonical
 
 
 @Canonical
-class TestNodeExpression extends TestNode<Expression> {
-//    TestNodeDependency dependency
+class TestNodeExpression implements TestNode<Expression> {
+    TestDependency dependency
     Expression expr
+
+    @Override
+    Optional<Expression> getNode() {
+        Optional.of(expr)
+    }
 }

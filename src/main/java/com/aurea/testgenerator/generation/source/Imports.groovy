@@ -13,6 +13,10 @@ class Imports {
     static final ImportDeclaration ASSERTJ_OFFSET = parse('org.assertj.core.data.Offset')
     static final ImportDeclaration ASSERTJ_ASSERTTHAT = new ImportDeclaration(new Name('org.assertj.core.api.Assertions.assertThat'), true, false)
     static final ImportDeclaration COLLECTIONS = parse('java.util.Collections')
+    static final ImportDeclaration IMMUTABLE_MAP = parse('com.google.common.collect.ImmutableMap')
+    static final ImportDeclaration DATE = parse('java.util.Date')
+    static final ImportDeclaration SQL_DATE = parse('java.sql.Date')
+    static final ImportDeclaration STATIC_MOCK = new ImportDeclaration(new Name('org.mockito.Mockito.mock'), true, false)
 
     static ImportDeclaration parse(String fullClassName) {
         JavaParser.parseImport("import $fullClassName;")

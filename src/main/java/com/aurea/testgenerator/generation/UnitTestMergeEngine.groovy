@@ -41,7 +41,7 @@ class UnitTestMergeEngine {
         }
 
         private addImports() {
-            StreamEx.of(uts).flatMap { StreamEx.of(it.imports) }.toSet().forEach {
+            StreamEx.of(uts).flatMap { StreamEx.of(it.dependency.imports) }.toSet().forEach {
                 cu.addImport(it)
             }
         }
@@ -54,16 +54,14 @@ class UnitTestMergeEngine {
         }
 
         private void addFields() {
-            StreamEx.of(uts).flatMap { it.fields.stream() }.toSet().forEach {
+            StreamEx.of(uts).flatMap { it.dependency.fields.stream() }.toSet().forEach {
                 coid.addMember(it)
             }
         }
 
         private void addClassSetups() {
             StreamEx.of(uts)
-                    .map { it.classSetup }
-                    .filter { it.present }
-                    .map { it.get() }
+                    .flatMap { it.dependency.classSetups.stream() }
                     .forEach {
                 coid.addMember(it)
             }
@@ -71,9 +69,7 @@ class UnitTestMergeEngine {
 
         private void addMethodSetups() {
             StreamEx.of(uts)
-                    .map { it.methodSetup }
-                    .filter { it.present }
-                    .map { it.get() }
+                    .flatMap() { it.dependency.methodSetups.stream() }
                     .forEach {
                 coid.addMember(it)
             }
@@ -82,13 +78,15 @@ class UnitTestMergeEngine {
         private void addTests() {
             StreamEx.of(uts)
                     .map { it.node }
+                    .filter { it.present }
+                    .map { it.get() }
                     .forEach {
                 coid.addMember(it)
             }
         }
 
         private void appendClassAnnotations() {
-            StreamEx.of(uts).flatMap { it.classAnnotations.stream() }.toSet().forEach {
+            StreamEx.of(uts).flatMap { it.dependency.classAnnotations.stream() }.toSet().forEach {
                 coid.addAnnotation(it)
             }
         }
