@@ -63,20 +63,28 @@ class InvocationBuilder {
     }
 
     private static void prependWithScope(TestNodeExpression expr, String scopeName) {
-        NodeWithOptionalScope expressionWithScope = expr.expr.asObjectCreationExpr()
-        ObjectCreationExpr topObjectCreationExpr = findTopObjectCreationExpr(expressionWithScope)
-        topObjectCreationExpr.setType(JavaParser.parseClassOrInterfaceType(scopeName + "." + topObjectCreationExpr.getType().nameAsString))
+        ObjectCreationExpr parentScope = findParentObjectCreationScope(expr.expr.asObjectCreationExpr())
+        ClassOrInterfaceType parentTypeScope = findParentTypeScope(parentScope.type)
+        parentTypeScope.setScope(JavaParser.parseClassOrInterfaceType(scopeName))
     }
 
     private static void prependWithInvocation(TestNodeExpression invocation, TestNodeExpression expr) {
         appendParentScope(expr.expr.asObjectCreationExpr(), invocation.expr)
     }
 
-    private static ObjectCreationExpr findTopObjectCreationExpr(ObjectCreationExpr expr) {
-        if (expr.scope.present) {
-            return findTopObjectCreationExpr(expr.scope.get().asObjectCreationExpr())
+    private static ClassOrInterfaceType findParentTypeScope(ClassOrInterfaceType type) {
+        if (type.scope.present) {
+            return findParentTypeScope(type.scope.get())
         } else {
-            return expr
+            return type
+        }
+    }
+
+    private static ObjectCreationExpr findParentObjectCreationScope(ObjectCreationExpr n) {
+        if (n.scope.present) {
+            return findParentObjectCreationScope(n.scope.get().asObjectCreationExpr())
+        } else {
+            return n
         }
     }
 

@@ -66,6 +66,22 @@ class InvocationBuilderSpec extends Specification {
         """, "new Foo.Bar().new Crowd().new Bazooka()"
     }
 
+    def "multiple statics"() {
+        expect:
+        onConstructorCodeExpect """
+            class Foo {
+                static class Bar {
+                    static class Crowd {
+                        static class Bazooka {
+                            public Bazooka() {}
+                        }
+                    }
+                }                
+            }
+            
+        """, "new Foo.Bar.Crowd.Bazooka()"
+    }
+
     void onConstructorCodeExpect(String code, String expected) {
         ConstructorDeclaration cd = JavaParser.parse(code)
                                               .findFirst(ConstructorDeclaration)
