@@ -26,10 +26,55 @@ class InvocationBuilderSpec extends Specification {
         """
     }
 
+    def "should be able to invoke public constructor of inner class"() {
+        expect:
+        onConstructorCodeExpect """
+            class Foo {
+             class Bar {
+                 public Bar() {}
+             } 
+            }
+
+        """, """
+            new Foo().new Bar()
+        """
+    }
+
+    def "should be able to invoke public constructor of static inner class"() {
+        expect:
+        onConstructorCodeExpect """
+            class Foo {
+                static class Bar {
+                    public Bar(){}
+                }
+            }
+        """, "new Foo.Bar()"
+    }
+
+    def "complex mix type of innerness"() {
+        expect:
+        onConstructorCodeExpect """
+            class Foo {
+                static class Bar {
+                    class Crowd {
+                        class Bazooka {
+                            public Bazooka() {}
+                        }
+                    }
+                }
+            }
+        """, "new Foo.Bar().new Crowd().new Bazooka()"
+    }
+
     void onConstructorCodeExpect(String code, String expected) {
-        ConstructorDeclaration cd = JavaParser.parse(code).findFirst(ConstructorDeclaration).get()
-        Optional<TestNodeExpression> testNodeExpression = new InvocationBuilder(new TypeAsLiteralValueFactory()).build(cd)
+        ConstructorDeclaration cd = JavaParser.parse(code)
+                                              .findFirst(ConstructorDeclaration)
+                                              .get()
+        Optional<TestNodeExpression> testNodeExpression = new InvocationBuilder(
+                new TypeAsLiteralValueFactory())
+                .build(cd)
         assertThat(testNodeExpression).isPresent()
-        assertThat(testNodeExpression.get().expr.toString()).isEqualToNormalizingWhitespace(expected)
+        assertThat(testNodeExpression.get().expr.toString())
+                .isEqualToNormalizingWhitespace(expected)
     }
 }
