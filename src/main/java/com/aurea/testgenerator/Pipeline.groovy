@@ -52,21 +52,19 @@ class Pipeline {
         log.info "Finding matches in ${source.size(sourceFilter)} units"
         Map<Unit, List<PatternMatch>> matchesByUnit = collector.apply(filteredUnits)
 
-        String matchingStats = EntryStream.of(matchesByUnit).mapValues({ it.size() }).join(": ", "\r\n\t", "").joining("")
-        log.info "Matching statistics: $matchingStats"
+        logStats('Matching statistics', matchesByUnit)
 
         log.info "Building unit tests"
         Map<Unit, List<TestNodeMethod>> unitTestsByUnit = unitTestGenerator.apply(matchesByUnit)
 
-        String unitTestStats = EntryStream.of(unitTestsByUnit).mapValues({ it.size() }).join(": ", "\r\n\t", "").joining("")
-        log.info "Unit tests produced: ${unitTestStats}"
+        logStats('Unit tests produced', unitTestsByUnit)
 
         log.info "Post validation for UnitTest..."
         //TODO: Here we do post validation for UnitTest classes - check that names of fields are unique and other validations
         // we can do before proceeding to creating CUs.
 
         log.info "Merging UnitTests..."
-        Map<Unit, UnitTestMergeResult> merged = EntryStream.of(unitTestsByUnit).mapToValue{ k, v -> mergeEngine.merge(k, v)}.toMap()
+        Map<Unit, UnitTestMergeResult> merged = EntryStream.of(unitTestsByUnit).mapToValue { k, v -> mergeEngine.merge(k, v) }.toMap()
 
         log.info "Validation after merge..."
         //TODO: Validate that fields are unique after merge
@@ -74,5 +72,13 @@ class Pipeline {
 
         log.info "Generating .java files..."
         unitTestWriter.write(testsByUnit)
+    }
+
+    private static void logStats(String message, Map<Unit, List> unitTestsByUnit) {
+        String unitTestStats = EntryStream.of(unitTestsByUnit)
+                .mapValues{ it.size() }
+                .join(': ', '\r\n\t', '')
+                .joining()
+        log.info "$message: ${unitTestStats}"
     }
 }

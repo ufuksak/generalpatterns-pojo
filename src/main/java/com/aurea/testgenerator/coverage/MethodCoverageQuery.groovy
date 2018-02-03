@@ -43,6 +43,6 @@ class MethodCoverageQuery {
 
     @Override
     String toString() {
-        unit.fullName() + "::" + method.getName()
+        unit.fullName + "::" + method.getName()
     }
 }
