@@ -76,9 +76,9 @@ class Pipeline {
 
     private static void logStats(String message, Map<Unit, List> unitTestsByUnit) {
         String unitTestStats = EntryStream.of(unitTestsByUnit)
-                .mapValues{ it.size() }
-                .join(': ', '\r\n\t', '')
-                .joining()
+                                          .mapValues { it.size() }
+                                          .join(': ', '\r\n\t', '')
+                                          .joining()
         log.info "$message: ${unitTestStats}"
     }
 }

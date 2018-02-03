@@ -22,7 +22,7 @@ class PatternMatchCollector implements Function<StreamEx<Unit>, Map<Unit, List<P
 
     @Override
     Map<Unit, List<PatternMatch>> apply(StreamEx<Unit> units) {
-        units.toMap({ it}, { unit ->
+        units.toMap({ it }, { unit ->
             StreamEx.of(matchers).flatMap { matcher ->
                 matcher.apply(unit)
             }.toList()

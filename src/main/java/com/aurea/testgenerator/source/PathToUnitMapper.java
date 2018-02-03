@@ -1,18 +1,19 @@
 package com.aurea.testgenerator.source;
 
-import static com.aurea.common.ParsingUtils.parseJavaClassName;
-
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ParseProblemException;
 import com.github.javaparser.ast.CompilationUnit;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.FileNotFoundException;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.function.Function;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+
+import static com.aurea.common.ParsingUtils.parseJavaClassName;
 
 public class PathToUnitMapper implements Function<Path, Optional<Unit>> {
 

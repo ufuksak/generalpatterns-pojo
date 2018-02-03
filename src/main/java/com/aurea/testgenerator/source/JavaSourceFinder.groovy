@@ -1,7 +1,6 @@
 package com.aurea.testgenerator.source
 
 import com.aurea.testgenerator.config.ProjectConfiguration
-import groovy.transform.Memoized
 import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
 import org.springframework.beans.factory.annotation.Autowired

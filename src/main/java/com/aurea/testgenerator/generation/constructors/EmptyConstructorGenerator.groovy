@@ -1,6 +1,5 @@
 package com.aurea.testgenerator.generation.constructors
 
-import com.aurea.testgenerator.ast.ASTNodeUtils
 import com.aurea.testgenerator.ast.InvocationBuilder
 import com.aurea.testgenerator.generation.TestNodeExpression
 import com.aurea.testgenerator.generation.TestNodeMethod
@@ -12,7 +11,6 @@ import com.aurea.testgenerator.value.random.RandomValueFactory
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.body.ConstructorDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
-import com.github.javaparser.ast.body.TypeDeclaration
 import groovy.transform.ToString
 import org.springframework.stereotype.Component
 

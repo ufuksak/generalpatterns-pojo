@@ -44,12 +44,6 @@ public class RandomValueFactory implements ValueFactory {
     }
 
     public Optional<TestNodeVariable> getVariable(Type type) {
-
-        //new HashMap {{
-        // put(1,1);
-        //}}
-
         return Optional.empty();
     }
-
 }

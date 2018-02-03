@@ -1,19 +1,12 @@
 package com.aurea.testgenerator.value.random
 
 import com.aurea.testgenerator.generation.TestNodeExpression
-import com.github.javaparser.JavaParser
-import com.github.javaparser.ast.expr.BooleanLiteralExpr
-import com.github.javaparser.ast.expr.CastExpr
-import com.github.javaparser.ast.expr.CharLiteralExpr
-import com.github.javaparser.ast.expr.DoubleLiteralExpr
-import com.github.javaparser.ast.expr.IntegerLiteralExpr
-import com.github.javaparser.ast.expr.LongLiteralExpr
+import com.github.javaparser.ast.expr.*
 import com.github.javaparser.ast.type.PrimitiveType
 import org.apache.commons.lang3.RandomStringUtils
 import org.apache.commons.lang3.RandomUtils
 
 import static com.github.javaparser.ast.type.PrimitiveType.Primitive.*
-
 
 class RandomPrimitiveValueFactory {
     static TestNodeExpression get(PrimitiveType type) {

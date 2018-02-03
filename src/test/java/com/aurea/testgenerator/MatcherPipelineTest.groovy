@@ -83,5 +83,6 @@ abstract class MatcherPipelineTest extends Specification {
 
 
     abstract PatternMatcher matcher()
+
     abstract UnitTestGenerator generator()
 }

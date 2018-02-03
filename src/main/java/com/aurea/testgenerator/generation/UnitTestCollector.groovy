@@ -35,8 +35,8 @@ class UnitTestCollector implements Function<Map<Unit, List<PatternMatch>>, Map<U
                 }
             }.toList()
         }
-            .filterValues {!it.empty}
-            .toMap()
+                   .filterValues { !it.empty }
+                   .toMap()
     }
 
     @Override

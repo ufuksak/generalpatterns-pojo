@@ -3,7 +3,6 @@ package com.aurea.testgenerator.extensions
 import com.aurea.testgenerator.ast.ASTNodeUtils
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.VariableDeclarator
-import com.github.javaparser.ast.stmt.LocalClassDeclarationStmt
 import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
 import org.springframework.stereotype.Component

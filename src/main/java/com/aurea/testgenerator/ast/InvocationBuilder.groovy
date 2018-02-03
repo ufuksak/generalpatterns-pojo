@@ -106,7 +106,7 @@ class InvocationBuilder {
                                                           .filter { !it.private }
                                                           .sortedBy { it.parameters.size() }
                                                           .findFirst()
-            return cd.orElseThrow { new IllegalStateException("Failed to find accessible constructor in $td. It is not invocable!")}
+            return cd.orElseThrow { new IllegalStateException("Failed to find accessible constructor in $td. It is not invocable!") }
         }
     }
 }

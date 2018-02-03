@@ -47,6 +47,7 @@ class Types {
         String name = type.nameAsString
         name == 'Date' || name == 'java.util.Date' || name == 'java.sql.Date'
     }
+
     static boolean isSqlDate(ClassOrInterfaceType type) {
         String name = type.nameAsString
         name == 'java.sql.Date'

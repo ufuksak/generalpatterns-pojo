@@ -7,5 +7,6 @@ import com.github.javaparser.ast.type.Type
 interface ValueFactory {
 
     Optional<TestNodeExpression> getExpression(Type type)
+
     Optional<TestNodeVariable> getVariable(Type type)
 }
