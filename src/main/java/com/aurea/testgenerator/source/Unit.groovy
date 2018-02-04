@@ -8,7 +8,7 @@ import groovy.transform.ToString
 import java.nio.file.Path
 
 @EqualsAndHashCode(excludes = 'cu')
-@ToString(includePackage = false, excludes = ['cu', 'modulePath'])
+@ToString(includePackage = false, includes = ['javaClass'])
 class Unit {
 
     CompilationUnit cu
