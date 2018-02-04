@@ -13,16 +13,13 @@ class FooSpec extends Specification {
 
     def "sss"() {
         expect:
-        Annotations.TEST
         CompilationUnit cu = JavaParser.parse("""
             class Foo {
-                void foo() {                    
-             new Bar.Foo();
-            }
-                
+                void foo() {
+                    this.foo = 123;
+                    }
             }
         """)
-
         println Converters.newConverter().toXmlString(cu)
     }
 }

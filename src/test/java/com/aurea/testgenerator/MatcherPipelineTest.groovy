@@ -2,6 +2,7 @@ package com.aurea.testgenerator
 
 import com.aurea.testgenerator.config.ProjectConfiguration
 import com.aurea.testgenerator.extensions.Extensions
+import com.aurea.testgenerator.generation.PatternToTest
 import com.aurea.testgenerator.generation.UnitTestGenerator
 import com.aurea.testgenerator.generation.UnitTestMergeEngine
 import com.aurea.testgenerator.pattern.PatternMatchEngine
@@ -37,7 +38,7 @@ abstract class MatcherPipelineTest extends Specification {
 
         source = new PathUnitSource(new JavaSourceFinder(cfg), cfg.src, SourceFilters.empty())
         patternMatchCollector = new PatternMatchEngine([matcher()])
-        unitTestCollector = new UnitTestGenerator([generator()])
+        unitTestCollector = new UnitTestGenerator([patternToTest()])
         mergeEngine = new UnitTestMergeEngine()
         unitTestWriter = new UnitTestWriter(cfg)
 
@@ -83,5 +84,5 @@ abstract class MatcherPipelineTest extends Specification {
 
     abstract PatternMatcher matcher()
 
-    abstract UnitTestGenerator generator()
+    abstract PatternToTest patternToTest()
 }

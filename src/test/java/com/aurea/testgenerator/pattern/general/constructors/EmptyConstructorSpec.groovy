@@ -1,6 +1,7 @@
 package com.aurea.testgenerator.pattern.general.constructors
 
 import com.aurea.testgenerator.MatcherPipelineTest
+import com.aurea.testgenerator.generation.PatternToTest
 import com.aurea.testgenerator.generation.UnitTestGenerator
 import com.aurea.testgenerator.generation.constructors.EmptyConstructorGenerator
 import com.aurea.testgenerator.pattern.PatternMatcher
@@ -113,7 +114,7 @@ class EmptyConstructorSpec extends MatcherPipelineTest {
     }
 
     @Override
-    UnitTestGenerator generator() {
+    PatternToTest patternToTest() {
         new EmptyConstructorGenerator()
     }
 }

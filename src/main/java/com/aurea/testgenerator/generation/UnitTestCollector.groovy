@@ -61,7 +61,7 @@ class UnitTestGenerator implements Function<UnitWithMatches, Optional<TestUnit>>
     }
 
     private static String getTestName(Unit unit) {
-        unit.fullName + "Test"
+        unit.className + "Test"
     }
 
 }
