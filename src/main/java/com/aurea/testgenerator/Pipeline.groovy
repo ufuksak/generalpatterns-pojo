@@ -46,18 +46,20 @@ class Pipeline {
         log.info "Finding matches in ${source.size(sourceFilter)} units"
         filteredUnits.map {
             List<PatternMatch> matches = patternMatchEngine.apply(it)
-            log.info "Found ${matches.size()} in ${it}"
+            if (!matches.empty) {
+                log.info "Found ${matches.size()} patterns in ${it.fullName}"
+            }
             new UnitWithMatches(it, matches)
         }.filter {
             if (it.matches.empty) {
-                log.info "Skipping $it.unit since no patterns found in it"
+                log.debug "Skipping $it.unit.fullName since no patterns found in it"
                 return false
             }
             return true
         }.map {
             Optional<TestUnit> maybeTestUnit = unitTestGenerator.apply(it)
             if (!maybeTestUnit.present) {
-                log.info "Skipping ${it.unit} since no tests were generated for it"
+                log.debug "Skipping ${it.unit.fullName} since no tests were generated for it"
             }
             maybeTestUnit
         }.filter {
