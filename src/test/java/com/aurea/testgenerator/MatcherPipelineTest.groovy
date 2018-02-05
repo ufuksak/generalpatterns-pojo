@@ -8,6 +8,10 @@ import com.aurea.testgenerator.generation.UnitTestMergeEngine
 import com.aurea.testgenerator.pattern.PatternMatchEngine
 import com.aurea.testgenerator.pattern.PatternMatcher
 import com.aurea.testgenerator.source.*
+import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
@@ -56,6 +60,8 @@ abstract class MatcherPipelineTest extends Specification {
 
         pipeline.start()
 
+        File testFile = cfg.out.resolve('sample').resolve('FooTest.java').toFile()
+        assertThat(testFile).describedAs("Expected test to be generated but it wasn't").exists()
         String resultingTest = cfg.out.resolve('sample').resolve('FooTest.java').toFile().text
 
         assertThat(resultingTest).isEqualToNormalizingWhitespace(expectedTest)
@@ -81,6 +87,12 @@ abstract class MatcherPipelineTest extends Specification {
         """
     }
 
+    JavaParserFacade getSolver() {
+        JavaParserFacade.get(new CombinedTypeSolver(
+                new JavaParserTypeSolver(cfg.src.toFile()),
+                new ReflectionTypeSolver()
+        ))
+    }
 
     abstract PatternMatcher matcher()
 

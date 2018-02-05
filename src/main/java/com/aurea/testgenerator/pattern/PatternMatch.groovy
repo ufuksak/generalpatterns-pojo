@@ -6,5 +6,5 @@ import groovy.transform.Canonical
 @Canonical
 class PatternMatch {
     CallableDeclaration match
-    PatternType type
+    PatternType pattern
 }

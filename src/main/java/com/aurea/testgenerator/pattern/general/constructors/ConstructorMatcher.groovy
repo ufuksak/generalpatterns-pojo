@@ -27,8 +27,12 @@ class ConstructorMatcher extends XPathPatternMatcher {
 
         @Override
         void visit(ConstructorDeclaration n, JavaParserFacade arg) {
-            if (Callability.isCallableFromTests(n) && n.body.empty) {
-                matches << new PatternMatch(match: n, type: ConstructorTypes.EMPTY)
+            if (Callability.isCallableFromTests(n)) {
+                for (ConstructorPatterns pattern : ConstructorPatterns.values()) {
+                    if (pattern.is(n, unit)) {
+                        matches << new PatternMatch(match: n, pattern: pattern)
+                    }
+                }
             }
         }
     }

@@ -1,6 +1,6 @@
 //package com.aurea.testgenerator.value.random;
 //
-//import com.github.javaparser.ast.type.PrimitiveType;
+//import com.github.javaparser.ast.pattern.PrimitiveType;
 //import junitparams.JUnitParamsRunner;
 //import junitparams.Parameters;
 //import org.junit.Test;
@@ -16,10 +16,10 @@
 //            "List<Foo>|singletonList(pojoFactory.manufacturePojo(Foo.class))",
 //            "Collection<Foo>|singletonList(pojoFactory.manufacturePojo(Foo.class))",
 //            "Foo|pojoFactory.manufacturePojo(Foo.class)"})
-//    public void getReturnExpectedForGivenListOfPojo(String type, String expected) throws Exception {
+//    public void getReturnExpectedForGivenListOfPojo(String pattern, String expected) throws Exception {
 //        RandomValueFactory factory = new RandomValueFactory();
 //
-//        String result = factory.get(type).get();
+//        String result = factory.get(pattern).get();
 //
 //        assertThat(result).isEqualTo(expected);
 //    }

@@ -8,7 +8,7 @@ import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.stmt.Statement
 
 
-enum ConstructorTypes implements PatternType {
+enum ConstructorPatterns implements PatternType {
     EMPTY {
         @Override
         boolean is(ConstructorDeclaration cd, Unit unit) {
@@ -27,7 +27,7 @@ enum ConstructorTypes implements PatternType {
                         return false
                     }
                     AssignExpr assignExpr = expression.asAssignExpr()
-                    return assignExpr.targetsThis && assignExpr.value.literalExpr
+                    return assignExpr.targetsThis() && assignExpr.value.literalExpr
                 }
             }
             return false
