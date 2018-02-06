@@ -18,6 +18,7 @@ class SourceFiltersSpec extends Specification {
                 dir('src') {
                     dir('example') {
                         file('Foo.java')
+                        file('NotFoo.java')
                     }
                 }
             }
@@ -29,10 +30,14 @@ class SourceFiltersSpec extends Specification {
                 }
             }
         }
-        expect:
+
+        when:
         def predicate = SourceFilters.hasTest(
                 folder.root.toPath().resolve("project-potato/main"),
                 folder.root.toPath().resolve("project-potato/test"))
+
+        then:
         predicate.test(folder.root.toPath().resolve('project-potato/main/src/example/Foo.java'))
+        !predicate.test(folder.root.toPath().resolve('project-potato/main/src/example/NotFoo.java'))
     }
 }

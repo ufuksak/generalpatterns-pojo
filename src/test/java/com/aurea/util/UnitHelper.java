@@ -1,4 +1,4 @@
-package com.aurea.testgenerator;
+package com.aurea.util;
 
 import com.aurea.testgenerator.source.PathToUnitMapper;
 import com.aurea.testgenerator.source.PathUtils;

@@ -13,7 +13,7 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeS
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import spock.lang.Specification
 
-import static com.aurea.testgenerator.UnitHelper.getUnitForCode
+import static com.aurea.util.UnitHelper.getUnitForCode
 
 class ASTNodeUtilsSpec extends Specification {
     private JavaParserFacade facade

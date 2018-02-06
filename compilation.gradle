@@ -1,4 +1,4 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
 apply plugin: 'groovy'
 
 sourceCompatibility = "1.8"
@@ -10,6 +10,12 @@ sourceSets {
         groovy { //noinspection GroovyAssignabilityCheck
             srcDirs = ["src/main/java"]
         }  // compile   everything in src/ with groovy
+    }
+    test {
+        java { srcDirs = [] }
+        groovy { //noinspection GroovyAssignabilityCheck
+            srcDirs = ["src/test/java"]
+        }
     }
 }
 

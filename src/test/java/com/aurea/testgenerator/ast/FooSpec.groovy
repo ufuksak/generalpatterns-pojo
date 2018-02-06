@@ -17,5 +17,6 @@ class FooSpec extends Specification {
             }
         """)
         println Converters.newConverter().toXmlString(cu)
+        false && 'what does this test do?'
     }
 }
