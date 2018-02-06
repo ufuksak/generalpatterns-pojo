@@ -12,10 +12,11 @@ class FooSpec extends Specification {
         CompilationUnit cu = JavaParser.parse("""
             class Foo {
                 void foo() {
-                    this.foo = 123;
+                    return this.i;
                     }
             }
         """)
+
         println Converters.newConverter().toXmlString(cu)
         false && 'what does this test do?'
     }

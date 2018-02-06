@@ -20,12 +20,13 @@ class FieldLiteralAssignmentsSpec extends MatcherPipelineTest {
         """, """     
             package sample;
             
+            import static org.assertj.core.api.Assertions.assertThat;
             import org.junit.Test;
             
-            class FooTest {
+            public class FooTest {
                 
                 @Test
-                public test_Foo_AssignsConstantsToFields() throws Exception {
+                public void test_Foo_AssignsConstantsToFields() throws Exception {
                     Foo foo = new Foo();
                     
                     assertThat(foo.i).isEqualTo(42);
