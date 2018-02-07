@@ -7,8 +7,8 @@ import com.github.javaparser.ast.expr.FieldAccessExpr
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.stmt.BlockStmt
 import com.github.javaparser.ast.stmt.Statement
-import com.github.javaparser.resolution.MethodUsage
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
+import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration
 import com.github.javaparser.resolution.declarations.ResolvedTypeDeclaration
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserMethodDeclaration
 import groovy.util.logging.Log4j2
@@ -28,33 +28,36 @@ class FieldAccessorBuilder {
 
     Optional<Expression> build() {
         if (fieldDeclaration.accessSpecifier() != AccessSpecifier.PRIVATE) {
-            return Optional.ofNullable(new FieldAccessExpr(scope, fieldDeclaration.name))
+            return Optional.ofNullable(
+                    new FieldAccessExpr(scope, fieldDeclaration.name))
         } else {
-            Optional<MethodUsage> getter = tryToFindGetter()
+            Optional<ResolvedMethodDeclaration> getter = tryToFindGetter()
+            return getter.map { new MethodCallExpr(scope, it.name) }
+        }
+    }
 
+    Optional<ResolvedMethodDeclaration> tryToFindGetter() {
+        String expectedGetterName = "get" + fieldDeclaration.name.capitalize()
+        ResolvedTypeDeclaration rtd = fieldDeclaration.declaringType()
+        if (rtd.class || rtd.anonymousClass) {
+            return StreamEx.of(rtd.asClass().declaredMethods).findFirst {
+                it.name == expectedGetterName && isGetter(it)
+            }
+        } else if (rtd.enum) {
+            //TODO: Add enum support
         }
         return Optional.empty()
     }
 
-    Optional<MethodUsage> tryToFindGetter() {
-        String expectedGetterName = "get" + fieldDeclaration.name.capitalize()
-        ResolvedTypeDeclaration rtd = fieldDeclaration.declaringType()
-        if (rtd.class) {
-            return StreamEx.of(rtd.asClass().allMethods).findFirst {
-                it.name == expectedGetterName && isGetter(it)
-            }
-        }
+    private boolean isGetter(ResolvedMethodDeclaration rmd) {
+        rmd.accessSpecifier() != AccessSpecifier.PRIVATE &&
+                rmd.returnType == fieldDeclaration.getType() &&
+                checkSizeForJavaParserDeclaration(rmd)
     }
 
-    private boolean isGetter(MethodUsage mu) {
-        mu.declaration.accessSpecifier() != AccessSpecifier.PRIVATE &&
-                mu.declaration.returnType == fieldDeclaration.type &&
-                checkSizeForJavaParserDeclaration(mu)
-    }
-
-    private boolean checkSizeForJavaParserDeclaration(MethodUsage mu) {
-        if (mu.declaration instanceof JavaParserMethodDeclaration) {
-            MethodDeclaration md = (mu.declaration as JavaParserMethodDeclaration).wrappedNode
+    private boolean checkSizeForJavaParserDeclaration(ResolvedMethodDeclaration rmd) {
+        if (rmd instanceof JavaParserMethodDeclaration) {
+            MethodDeclaration md = (rmd as JavaParserMethodDeclaration).wrappedNode
             md.body.present && simplyReturnsFieldValue(md.body.get())
         }
         true

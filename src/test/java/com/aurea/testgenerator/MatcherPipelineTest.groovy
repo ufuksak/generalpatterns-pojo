@@ -10,6 +10,10 @@ import com.aurea.testgenerator.generation.UnitTestMergeEngine
 import com.aurea.testgenerator.pattern.PatternMatchEngine
 import com.aurea.testgenerator.pattern.PatternMatcher
 import com.aurea.testgenerator.source.*
+import com.aurea.testgenerator.value.ArbitraryClassOrInterfaceTypeFactory
+import com.aurea.testgenerator.value.ArbitraryPrimitiveValuesFactory
+import com.aurea.testgenerator.value.ValueFactory
+import com.aurea.testgenerator.value.random.ValueFactoryImpl
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver
@@ -33,6 +37,9 @@ abstract class MatcherPipelineTest extends Specification {
     UnitTestGenerator unitTestCollector
     PatternMatchEngine patternMatchCollector
     CoverageService coverageService
+    ValueFactory valueFactory = new ValueFactoryImpl(
+        new ArbitraryClassOrInterfaceTypeFactory(),
+        new ArbitraryPrimitiveValuesFactory())
 
     void setupSpec() {
         Extensions.enable()

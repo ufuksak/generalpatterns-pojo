@@ -6,5 +6,10 @@ import groovy.transform.Canonical
 @Canonical
 class TestNodeVariable implements TestNode<VariableDeclarationExpr> {
     TestDependency dependency = new TestDependency()
-    Optional<VariableDeclarationExpr> node
+    VariableDeclarationExpr expr
+
+    @Override
+    Optional<VariableDeclarationExpr> getNode() {
+        return Optional.of(expr)
+    }
 }

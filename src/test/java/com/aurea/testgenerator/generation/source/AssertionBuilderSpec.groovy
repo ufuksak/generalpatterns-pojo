@@ -2,22 +2,15 @@ package com.aurea.testgenerator.generation.source
 
 import com.aurea.testgenerator.TestUnitSpec
 import com.aurea.testgenerator.generation.TestUnit
-import com.github.javaparser.ast.CompilationUnit
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.stmt.Statement
 import com.github.javaparser.ast.type.PrimitiveType
-import com.github.javaparser.ast.type.Type
-import com.github.javaparser.symbolsolver.JavaSymbolSolver
-import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
-import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver
-import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import spock.lang.Unroll
 
 import static com.github.javaparser.JavaParser.parseExpression
 import static com.github.javaparser.JavaParser.parseType
 import static org.assertj.core.api.Assertions.assertThat
 
-class AssertionBuilderSpec extends TestUnitSpec{
+class AssertionBuilderSpec extends TestUnitSpec {
 
     TestUnit unit = newTestUnit()
     AssertionBuilder builder = AssertionBuilder.buildFor(unit)

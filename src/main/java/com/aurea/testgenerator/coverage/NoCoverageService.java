@@ -6,8 +6,9 @@ import com.aurea.coverage.unit.MethodCoverage;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.CallableDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
-import java.util.List;
 import one.util.streamex.StreamEx;
+
+import java.util.List;
 
 public class NoCoverageService implements CoverageService {
     @Override

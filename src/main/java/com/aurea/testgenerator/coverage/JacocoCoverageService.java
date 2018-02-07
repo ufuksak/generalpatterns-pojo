@@ -77,7 +77,7 @@ public class JacocoCoverageService implements CoverageService {
 
     private String toJacocoMethodNameRegex(MethodCoverageQuery query) {
         final Map<String, String> classGenerics = getClassGenerics(query);
-        assert query.getMethod() instanceof MethodDeclaration: "Constructor coverage not implemented yet";
+        assert query.getMethod() instanceof MethodDeclaration : "Constructor coverage not implemented yet";
         MethodDeclaration methodDeclaration = (MethodDeclaration) query.getMethod();
         String args = StreamEx.of(methodDeclaration.getParameters()).map(parameter -> {
             StringBuilder name = new StringBuilder();

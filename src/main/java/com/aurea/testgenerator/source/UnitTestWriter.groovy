@@ -2,14 +2,11 @@ package com.aurea.testgenerator.source
 
 import com.aurea.testgenerator.config.ProjectConfiguration
 import com.aurea.testgenerator.generation.TestUnit
-import com.github.javaparser.ast.CompilationUnit
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import groovy.util.logging.Log4j2
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 import java.nio.file.Path
-
 
 @Component
 @Log4j2

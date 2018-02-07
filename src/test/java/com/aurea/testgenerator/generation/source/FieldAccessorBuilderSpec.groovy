@@ -22,6 +22,7 @@ class FieldAccessorBuilderSpec extends TestUnitSpec {
     }
 
     def "should be able to build expression for a getter with javabeans getter"() {
+        expect:
         expectOnCode("""
             class Foo {
                 private int i = 123;
@@ -31,6 +32,21 @@ class FieldAccessorBuilderSpec extends TestUnitSpec {
                 }
             }
         """, new NameExpr("foo"), "foo.getI()")
+    }
+
+    def "should be able to build expression for inner class with a getter"() {
+        expect:
+        expectOnCode("""
+            class Foo {
+                static class Bar {
+                    private int i = 0;
+
+                    public int getI() {
+                        return i;
+                    }
+                }
+            }
+        """, new NameExpr("bar"), "bar.getI()")
     }
 
     void expectOnCode(String code, Expression scope, String expected) {

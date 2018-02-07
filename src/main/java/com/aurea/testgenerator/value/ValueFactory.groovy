@@ -8,5 +8,5 @@ interface ValueFactory {
 
     Optional<TestNodeExpression> getExpression(Type type)
 
-    Optional<TestNodeVariable> getVariable(Type type)
+    Optional<TestNodeVariable> getVariable(String name, Type type)
 }

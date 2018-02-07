@@ -17,16 +17,25 @@ class TestUnit {
         test.cu.imports
     }
 
-    void addImport(ImportDeclaration id) {
+    TestUnit addImport(ImportDeclaration id) {
         test.cu.imports << id
+        this
     }
 
-    void addTest(MethodDeclaration test) {
+    TestUnit addDependency(TestDependency dependency) {
+        //TODO: impl
+        this
+    }
+
+    TestUnit addTest(MethodDeclaration test) {
         getTestClass().addMember(test)
+        this
     }
 
     @Memoized
     ClassOrInterfaceDeclaration getTestClass() {
         test.cu.findFirst(ClassOrInterfaceDeclaration).get()
     }
+
+    
 }

@@ -9,6 +9,7 @@ import com.github.javaparser.ast.body.ConstructorDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.ObjectCreationExpr
+import com.github.javaparser.ast.expr.SimpleName
 import com.github.javaparser.ast.nodeTypes.NodeWithOptionalScope
 import com.github.javaparser.ast.type.ClassOrInterfaceType
 import groovy.util.logging.Log4j2
@@ -18,9 +19,15 @@ import one.util.streamex.StreamEx
 class InvocationBuilder {
 
     ValueFactory factory
+    Map<SimpleName, TestNodeExpression> expressionsForParameters
 
     InvocationBuilder(ValueFactory factory) {
         this.factory = factory
+    }
+
+    InvocationBuilder usingForParameters(Map<SimpleName, TestNodeExpression> expressionsForParameters) {
+        this.expressionsForParameters = expressionsForParameters
+        this
     }
 
     Optional<TestNodeExpression> build(ConstructorDeclaration cd) {
@@ -50,16 +57,29 @@ class InvocationBuilder {
 
     private TestNodeExpression buildConstructorInvocation(ConstructorDeclaration cd) {
         TestNodeExpression expr = new TestNodeExpression()
-        List<TestNodeExpression> parameterExpressions = StreamEx.of(cd.parameters).map { parameter ->
-            factory.getExpression(parameter.type).orElseThrow {
-                throw new IllegalArgumentException("Failed to create expression for ${parameter} of ${cd}")
-            }
-        }.toList()
+        List<TestNodeExpression> parameterExpressions
+        if (expressionsForParameters) {
+            parameterExpressions = getFromGivenParameters(cd)
+        } else {
+            parameterExpressions = StreamEx.of(cd.parameters).map { parameter ->
+                factory.getExpression(parameter.type).orElseThrow {
+                    throw new IllegalArgumentException("Failed to create expression for ${parameter} of ${cd}")
+                }
+            }.toList()
+        }
         expr.dependency = TestDependencyMerger.merge(StreamEx.of(parameterExpressions.stream().map { it.dependency }).toList())
         expr.expr = new ObjectCreationExpr(null,
                 JavaParser.parseClassOrInterfaceType(cd.nameAsString),
                 NodeList.nodeList(StreamEx.of(parameterExpressions).map { it.expr }.toList()))
         expr
+    }
+
+    private List<TestNodeExpression> getFromGivenParameters(ConstructorDeclaration cd) {
+        StreamEx.of(cd.parameters).map { parameter ->
+            Optional.ofNullable(expressionsForParameters.get(parameter.name)).orElseThrow {
+                throw new IllegalArgumentException("Failed to find a parameter value for $parameter in $cd. Only $expressionsForParameters were provided!")
+            }
+        }.toList()
     }
 
     private static void prependWithType(TestNodeExpression expr, String scopeName) {

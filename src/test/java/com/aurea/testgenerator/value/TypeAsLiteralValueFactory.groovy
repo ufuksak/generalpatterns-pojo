@@ -13,7 +13,8 @@ class TypeAsLiteralValueFactory implements ValueFactory {
     }
 
     @Override
-    Optional<TestNodeVariable> getVariable(Type type) {
-        Optional.of(new TestNodeVariable(node: Optional.of(new VariableDeclarationExpr(type, "foo"))))
+    Optional<TestNodeVariable> getVariable(String name, Type type) {
+        Optional.of(new TestNodeVariable(node: Optional.of(
+                new VariableDeclarationExpr(type, name))))
     }
 }

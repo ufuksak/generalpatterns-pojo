@@ -74,7 +74,7 @@ class Pipeline {
             maybeTestUnit
         }.filter {
             it.present
-        }.map{
+        }.map {
             it.get()
         }.each {
             unitTestWriter.write(it)

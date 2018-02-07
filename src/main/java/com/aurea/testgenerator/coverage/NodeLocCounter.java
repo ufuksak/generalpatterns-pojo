@@ -14,6 +14,7 @@ import com.github.javaparser.ast.stmt.IfStmt;
 import com.github.javaparser.ast.stmt.Statement;
 import com.github.javaparser.ast.stmt.TryStmt;
 import com.github.javaparser.ast.stmt.WhileStmt;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -29,13 +30,13 @@ public class NodeLocCounter {
 
     private static final List<Predicate<Node>> IS_INSIGNIFICANT_BLOCKSTMT_CONDITIONS = Arrays
             .asList(
-            p -> p instanceof MethodDeclaration && !((MethodDeclaration) p).getType().isVoidType(),
-            p -> p instanceof TryStmt,
-            p -> p instanceof ForStmt,
-            p -> p instanceof IfStmt,
-            p -> p instanceof WhileStmt,
-            p -> p instanceof DoStmt
-    );
+                    p -> p instanceof MethodDeclaration && !((MethodDeclaration) p).getType().isVoidType(),
+                    p -> p instanceof TryStmt,
+                    p -> p instanceof ForStmt,
+                    p -> p instanceof IfStmt,
+                    p -> p instanceof WhileStmt,
+                    p -> p instanceof DoStmt
+            );
 
     public static long count(List<Node> nodes) {
         long count = countRecursively(nodes);
