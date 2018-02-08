@@ -73,6 +73,9 @@ class ArgumentAssignmentGenerator implements PatternToTest {
                     new RuntimeException("Failed to build variable for parameter $p of $cd")
                 }
             }.toList()
+            variables.each {
+                testUnit.addDependency it.dependency
+            }
             List<Statement> variableStatements = variables.collect { new ExpressionStmt(it.expr)}
 
             Map<SimpleName, TestNodeExpression> variableExpressionsByNames = StreamEx.of(variables)

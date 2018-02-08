@@ -23,6 +23,9 @@ class TestUnit {
     }
 
     TestUnit addDependency(TestDependency dependency) {
+        dependency.imports.each {
+            addImport it
+        }
         //TODO: impl
         this
     }

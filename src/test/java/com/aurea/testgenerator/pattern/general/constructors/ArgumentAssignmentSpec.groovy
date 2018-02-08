@@ -87,8 +87,8 @@ class ArgumentAssignmentSpec extends MatcherPipelineTest {
             
             import java.util.List;
             import static org.assertj.core.api.Assertions.assertThat;
-            import org.junit.Test;
             import java.util.Collections;
+            import org.junit.Test;
             
             public class FooTest {
                 
