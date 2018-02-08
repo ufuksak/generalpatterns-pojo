@@ -5,7 +5,7 @@ import com.aurea.testgenerator.coverage.CoverageCollector
 import com.aurea.testgenerator.coverage.CoverageService
 import com.aurea.testgenerator.coverage.NoCoverageService
 import com.aurea.testgenerator.extensions.Extensions
-import com.aurea.testgenerator.generation.TestGenerator
+import com.aurea.testgenerator.generation.ReportingTestGenerator
 import com.aurea.testgenerator.generation.UnitTestGenerator
 import com.aurea.testgenerator.source.*
 import com.aurea.testgenerator.value.ArbitraryClassOrInterfaceTypeFactory
@@ -18,9 +18,11 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeS
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 import org.junit.Rule
 import org.junit.rules.TemporaryFolder
+import org.springframework.context.ApplicationEventPublisher
 import spock.lang.Specification
 
 import static org.assertj.core.api.Assertions.assertThat
+import static org.mockito.Mockito.mock
 
 abstract class MatcherPipelineTest extends Specification {
 
@@ -48,7 +50,9 @@ abstract class MatcherPipelineTest extends Specification {
         cfg.testSrc = folder.newFolder("test").toPath()
 
         source = new PathUnitSource(new JavaSourceFinder(cfg), cfg.src, SourceFilters.empty())
-        unitTestGenerator = new UnitTestGenerator([generator()])
+        ReportingTestGenerator generator = generator()
+        generator.publisher = mock(ApplicationEventPublisher)
+        unitTestGenerator = new UnitTestGenerator([generator])
         unitTestWriter = new UnitTestWriter(cfg)
         coverageService = new NoCoverageService()
         coverageCollector = new CoverageCollector(coverageService)
@@ -99,5 +103,5 @@ abstract class MatcherPipelineTest extends Specification {
         ))
     }
 
-    abstract TestGenerator generator()
+    abstract ReportingTestGenerator generator()
 }

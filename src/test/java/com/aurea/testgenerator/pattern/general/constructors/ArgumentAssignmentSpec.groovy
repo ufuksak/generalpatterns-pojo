@@ -2,6 +2,7 @@ package com.aurea.testgenerator.pattern.general.constructors
 
 import com.aurea.testgenerator.MatcherPipelineTest
 import com.aurea.testgenerator.ast.FieldAssignments
+import com.aurea.testgenerator.generation.ReportingTestGenerator
 import com.aurea.testgenerator.generation.TestGenerator
 import com.aurea.testgenerator.generation.constructors.ArgumentAssignmentGenerator
 
@@ -104,7 +105,7 @@ class ArgumentAssignmentSpec extends MatcherPipelineTest {
     }
 
     @Override
-    TestGenerator generator() {
+    ReportingTestGenerator generator() {
         new ArgumentAssignmentGenerator(new FieldAssignments(solver), solver, valueFactory)
     }
 }

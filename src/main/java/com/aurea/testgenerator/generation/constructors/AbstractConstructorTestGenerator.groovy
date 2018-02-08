@@ -1,7 +1,6 @@
 package com.aurea.testgenerator.generation.constructors
 
-import com.aurea.testgenerator.ast.Callability
-import com.aurea.testgenerator.generation.TestGenerator
+import com.aurea.testgenerator.generation.ReportingTestGenerator
 import com.aurea.testgenerator.generation.TestGeneratorResult
 import com.aurea.testgenerator.generation.TestGeneratorVisitor
 import com.aurea.testgenerator.generation.TestType
@@ -12,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
-abstract class AbstractConstructorTestGenerator implements TestGenerator {
+abstract class AbstractConstructorTestGenerator extends ReportingTestGenerator {
 
     @Autowired
     JavaParserFacade solver
@@ -24,6 +23,7 @@ abstract class AbstractConstructorTestGenerator implements TestGenerator {
     }
 
     protected abstract TestGeneratorResult generate(ConstructorDeclaration cd)
+
     protected abstract TestType getType()
 
     protected boolean shouldBeVisited(Unit unit, ConstructorDeclaration cd) {
@@ -40,6 +40,7 @@ abstract class AbstractConstructorTestGenerator implements TestGenerator {
             if (shouldBeVisited(unit, n)) {
                 TestGeneratorResult result = generate(n)
                 result.type = getType()
+                publish(result, unit, n)
                 results << result
             }
         }
