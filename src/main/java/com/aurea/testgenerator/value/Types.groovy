@@ -80,7 +80,7 @@ class Types {
     }
 
     static boolean isCollection(ResolvedType type) {
-        type.referenceType && isCollection(type.asReferenceType())
+        type.referenceType && KNOWN_COLLECTION_TYPES.contains(type.asReferenceType().qualifiedName)
     }
 
     static boolean isList(ClassOrInterfaceType type) {
@@ -92,7 +92,7 @@ class Types {
     }
 
     static boolean isList(ResolvedType type) {
-        type.referenceType && isList(type.asReferenceType())
+        type.referenceType && KNOWN_LIST_TYPES.contains(type.asReferenceType().qualifiedName)
     }
 
     static boolean isSet(ClassOrInterfaceType type) {
@@ -104,7 +104,7 @@ class Types {
     }
 
     static boolean isSet(ResolvedType type) {
-        type.referenceType && KNOWN_SET_TYPES.contains(type.asReferenceType())
+        type.referenceType && KNOWN_SET_TYPES.contains(type.asReferenceType().qualifiedName)
     }
 
     static boolean isComparable(ClassOrInterfaceType type) {
@@ -116,7 +116,7 @@ class Types {
     }
 
     static boolean isComparable(ResolvedType type) {
-        type.referenceType && KNOWN_COMPARABLE_TYPES.contains(type.asReferenceType())
+        type.referenceType && KNOWN_COMPARABLE_TYPES.contains(type.asReferenceType().qualifiedName)
     }
 
     static boolean isMap(ClassOrInterfaceType type) {
@@ -128,7 +128,7 @@ class Types {
     }
 
     static boolean isMap(ResolvedType type) {
-        type.referenceType && KNOWN_MAP_TYPES.contains(type.asReferenceType())
+        type.referenceType && KNOWN_MAP_TYPES.contains(type.asReferenceType().qualifiedName)
     }
 
     static boolean isBoxedPrimitive(ResolvedReferenceType type) {

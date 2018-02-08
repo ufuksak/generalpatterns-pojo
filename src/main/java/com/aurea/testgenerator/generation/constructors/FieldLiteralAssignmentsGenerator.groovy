@@ -2,19 +2,12 @@ package com.aurea.testgenerator.generation.constructors
 
 import com.aurea.testgenerator.ast.FieldAssignments
 import com.aurea.testgenerator.ast.InvocationBuilder
-import com.aurea.testgenerator.generation.PatternToTest
-import com.aurea.testgenerator.generation.TestDependency
-import com.aurea.testgenerator.generation.TestGeneratorResult
-import com.aurea.testgenerator.generation.TestNodeExpression
-import com.aurea.testgenerator.generation.TestNodeMethod
-import com.aurea.testgenerator.generation.TestType
-import com.aurea.testgenerator.generation.TestUnit
+import com.aurea.testgenerator.generation.*
 import com.aurea.testgenerator.generation.source.AssertionBuilder
 import com.aurea.testgenerator.generation.source.Imports
-import com.aurea.testgenerator.pattern.PatternMatch
-import com.aurea.testgenerator.pattern.general.constructors.ConstructorPatterns
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
+import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.body.ConstructorDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.AssignExpr
@@ -25,6 +18,7 @@ import com.github.javaparser.ast.stmt.Statement
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import groovy.util.logging.Log4j2
+import one.util.streamex.StreamEx
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -52,7 +46,7 @@ class FieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator 
         List<AssignExpr> assignExprs = cd.body.findAll(AssignExpr)
         Collection<AssignExpr> onlyLastAssignExprs = fieldAssignments.findLastAssignExpressionsByField(assignExprs)
         Collection<AssignExpr> onlyLiteralAssignExprs = onlyLastAssignExprs.findAll { it.value.literalExpr }
-        AssertionBuilder builder = AssertionBuilder.buildFor(testUnit).softly(onlyLiteralAssignExprs.size() > 1)
+        AssertionBuilder builder = new AssertionBuilder().softly(onlyLiteralAssignExprs.size() > 1)
         for (AssignExpr assignExpr : onlyLiteralAssignExprs) {
             Expression expected = assignExpr.value
             FieldAccessExpr fieldAccessExpr = assignExpr.target.asFieldAccessExpr()
@@ -62,8 +56,9 @@ class FieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator 
                 builder.with(maybeField.get().getType(), fieldAccessExpression, expected)
             }
         }
-        List<Statement> assertions = builder.build()
+        List<TestNodeStatement> assertions = builder.build()
         if (!assertions.empty) {
+            Set<ImportDeclaration> imports = StreamEx.of(assertions).flatMap { it.dependency.imports.stream() }.toSet()
             Optional<TestNodeExpression> constructorCall = new InvocationBuilder(valueFactory).build(cd)
             constructorCall.ifPresent { constructCallExpr ->
                 String assignsConstantsCode = """
@@ -71,15 +66,16 @@ class FieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator 
             public void test_${cd.nameAsString}_AssignsConstantsToFields() throws Exception {
                 ${cd.nameAsString} $instanceName = ${constructCallExpr.expr};
                 
-                ${assertions.join(System.lineSeparator())}
+                ${assertions.collect{it.stmt}.join(System.lineSeparator())}
             }
             """
                 MethodDeclaration assignsConstants = JavaParser.parseBodyDeclaration(assignsConstantsCode)
                                                                .asMethodDeclaration()
-
+                imports.addAll constructCallExpr.dependency.imports
+                imports << Imports.JUNIT_TEST
                 result.tests = [
                         new TestNodeMethod(
-                                dependency: new TestDependency(imports: [Imports.JUNIT_TEST]),
+                                dependency: new TestDependency(imports: imports),
                                 md: assignsConstants
                         )
                 ]

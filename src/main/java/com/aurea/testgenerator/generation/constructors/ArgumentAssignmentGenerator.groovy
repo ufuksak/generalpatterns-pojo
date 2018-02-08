@@ -2,18 +2,9 @@ package com.aurea.testgenerator.generation.constructors
 
 import com.aurea.testgenerator.ast.FieldAssignments
 import com.aurea.testgenerator.ast.InvocationBuilder
-import com.aurea.testgenerator.generation.PatternToTest
-import com.aurea.testgenerator.generation.TestDependency
-import com.aurea.testgenerator.generation.TestGeneratorResult
-import com.aurea.testgenerator.generation.TestNodeExpression
-import com.aurea.testgenerator.generation.TestNodeMethod
-import com.aurea.testgenerator.generation.TestNodeVariable
-import com.aurea.testgenerator.generation.TestType
-import com.aurea.testgenerator.generation.TestUnit
+import com.aurea.testgenerator.generation.*
 import com.aurea.testgenerator.generation.source.AssertionBuilder
 import com.aurea.testgenerator.generation.source.Imports
-import com.aurea.testgenerator.pattern.PatternMatch
-import com.aurea.testgenerator.pattern.general.constructors.ConstructorPatterns
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.ImportDeclaration
@@ -56,7 +47,7 @@ class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
         Collection<AssignExpr> onlyArgumentAssignExprs = onlyLastAssignExprs.findAll {
             it.value.nameExpr && cd.isNameOfArgument(it.value.asNameExpr().name)
         }
-        AssertionBuilder builder = AssertionBuilder.buildFor(testUnit).softly(onlyArgumentAssignExprs.size() > 1)
+        AssertionBuilder assertionBuilder = new AssertionBuilder().softly(onlyArgumentAssignExprs.size() > 1)
         for (AssignExpr assignExpr : onlyArgumentAssignExprs) {
             FieldAccessExpr fieldAccessExpr = assignExpr.target.asFieldAccessExpr()
             Optional<ResolvedFieldDeclaration> maybeField = fieldAccessExpr.findField(solver)
@@ -64,10 +55,10 @@ class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
             Optional<Expression> maybeFieldAccessExpression = fieldAssignments.buildFieldAccessExpression(assignExpr, scope)
             Expression expected = assignExpr.value
             maybeFieldAccessExpression.ifPresent { fieldAccessExpression ->
-                builder.with(fieldType, fieldAccessExpression, expected)
+                assertionBuilder.with(fieldType, fieldAccessExpression, expected)
             }
         }
-        List<Statement> assertions = builder.build()
+        List<TestNodeStatement> assertions = assertionBuilder.build()
         if (!assertions.empty) {
             List<TestNodeVariable> variables = StreamEx.of(cd.parameters).map { p ->
                 valueFactory.getVariable(p.nameAsString, p.type).orElseThrow {
@@ -75,7 +66,8 @@ class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
                 }
             }.toList()
             Set<ImportDeclaration> imports = StreamEx.of(variables).flatMap { it.dependency.imports.stream() }.toSet()
-            List<Statement> variableStatements = variables.collect { new ExpressionStmt(it.expr)}
+            imports.addAll StreamEx.of(assertions).flatMap {it.dependency.imports.stream()}.toSet()
+            List<Statement> variableStatements = variables.collect { new ExpressionStmt(it.expr) }
 
             Map<SimpleName, TestNodeExpression> variableExpressionsByNames = StreamEx.of(variables)
                                                                                      .toMap(
@@ -95,7 +87,7 @@ class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
 
                 ${cd.nameAsString} $instanceName = ${constructCallExpr.expr};
                 
-                ${assertions.join(System.lineSeparator())}
+                ${assertions.collect{it.stmt}.join(System.lineSeparator())}
             }
             """
                 MethodDeclaration assignsArguments = JavaParser.parseBodyDeclaration(assignsConstantsCode)

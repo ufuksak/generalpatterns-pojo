@@ -5,7 +5,7 @@ import groovy.transform.Canonical
 
 @Canonical
 class TestGeneratorResult {
-    List<TestGeneratorError> errors
-    List<TestNodeMethod> tests
+    List<TestGeneratorError> errors = Collections.emptyList()
+    List<TestNodeMethod> tests = Collections.emptyList()
     TestType type
 }

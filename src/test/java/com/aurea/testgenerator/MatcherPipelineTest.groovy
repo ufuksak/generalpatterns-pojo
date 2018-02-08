@@ -5,11 +5,8 @@ import com.aurea.testgenerator.coverage.CoverageCollector
 import com.aurea.testgenerator.coverage.CoverageService
 import com.aurea.testgenerator.coverage.NoCoverageService
 import com.aurea.testgenerator.extensions.Extensions
-import com.aurea.testgenerator.generation.PatternToTest
+import com.aurea.testgenerator.generation.TestGenerator
 import com.aurea.testgenerator.generation.UnitTestGenerator
-import com.aurea.testgenerator.generation.UnitTestMergeEngine
-import com.aurea.testgenerator.pattern.PatternMatchEngine
-import com.aurea.testgenerator.pattern.PatternMatcher
 import com.aurea.testgenerator.source.*
 import com.aurea.testgenerator.value.ArbitraryClassOrInterfaceTypeFactory
 import com.aurea.testgenerator.value.ArbitraryPrimitiveValuesFactory
@@ -34,14 +31,12 @@ abstract class MatcherPipelineTest extends Specification {
     UnitSource source
     Pipeline pipeline
     UnitTestWriter unitTestWriter
-    UnitTestMergeEngine mergeEngine
-    UnitTestGenerator unitTestCollector
-    PatternMatchEngine patternMatchCollector
+    UnitTestGenerator unitTestGenerator
     CoverageService coverageService
     CoverageCollector coverageCollector
     ValueFactory valueFactory = new ValueFactoryImpl(
-        new ArbitraryClassOrInterfaceTypeFactory(),
-        new ArbitraryPrimitiveValuesFactory())
+            new ArbitraryClassOrInterfaceTypeFactory(),
+            new ArbitraryPrimitiveValuesFactory())
 
     void setupSpec() {
         Extensions.enable()
@@ -53,21 +48,16 @@ abstract class MatcherPipelineTest extends Specification {
         cfg.testSrc = folder.newFolder("test").toPath()
 
         source = new PathUnitSource(new JavaSourceFinder(cfg), cfg.src, SourceFilters.empty())
-        patternMatchCollector = new PatternMatchEngine([matcher()])
-        unitTestCollector = new UnitTestGenerator([patternToTest()])
-        mergeEngine = new UnitTestMergeEngine()
+        unitTestGenerator = new UnitTestGenerator([generator()])
         unitTestWriter = new UnitTestWriter(cfg)
         coverageService = new NoCoverageService()
         coverageCollector = new CoverageCollector(coverageService)
 
         pipeline = new Pipeline(
                 source,
-                patternMatchCollector,
-                unitTestCollector,
+                unitTestGenerator,
                 SourceFilters.empty(),
-                mergeEngine,
-                unitTestWriter,
-                coverageCollector)
+                unitTestWriter)
     }
 
     String onClassCodeExpect(String code, String expectedTest) {
@@ -109,7 +99,5 @@ abstract class MatcherPipelineTest extends Specification {
         ))
     }
 
-    abstract PatternMatcher matcher()
-
-    abstract PatternToTest patternToTest()
+    abstract TestGenerator generator()
 }
