@@ -25,7 +25,7 @@ public class NoCoverageService implements CoverageService {
 
     @Override
     public ClassCoverage getClassCoverage(ClassCoverageQuery classCoverageQuery) {
-        List<MethodDeclaration> methodDeclarations = classCoverageQuery.getClassOfTheMethod().getMethods();
+        List<CallableDeclaration> methodDeclarations = classCoverageQuery.getClassOfTheMethod().findAll(CallableDeclaration.class);
         List<MethodCoverage> methodCoverages = StreamEx.of(methodDeclarations)
                 .map(this::getMethodCoverage)
                 .toList();
