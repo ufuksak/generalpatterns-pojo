@@ -14,9 +14,9 @@ import com.github.javaparser.ast.expr.AssignExpr
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.FieldAccessExpr
 import com.github.javaparser.ast.expr.NameExpr
-import com.github.javaparser.ast.stmt.Statement
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
+import com.github.javaparser.symbolsolver.javaparsermodel.UnsolvedSymbolException
 import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
 import org.springframework.beans.factory.annotation.Autowired
@@ -48,12 +48,20 @@ class FieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator 
         Collection<AssignExpr> onlyLiteralAssignExprs = onlyLastAssignExprs.findAll { it.value.literalExpr }
         AssertionBuilder builder = new AssertionBuilder().softly(onlyLiteralAssignExprs.size() > 1)
         for (AssignExpr assignExpr : onlyLiteralAssignExprs) {
-            Expression expected = assignExpr.value
             FieldAccessExpr fieldAccessExpr = assignExpr.target.asFieldAccessExpr()
-            Optional<ResolvedFieldDeclaration> maybeField = fieldAccessExpr.findField(solver)
-            Optional<Expression> maybeFieldAccessExpression = fieldAssignments.buildFieldAccessExpression(assignExpr, scope)
-            maybeFieldAccessExpression.ifPresent { fieldAccessExpression ->
-                builder.with(maybeField.get().getType(), fieldAccessExpression, expected)
+            try {
+                Expression expected = assignExpr.value
+                Optional<ResolvedFieldDeclaration> maybeField = fieldAccessExpr.findField(solver)
+                if (maybeField.present) {
+                    Optional<Expression> maybeFieldAccessExpression = fieldAssignments.buildFieldAccessExpression(assignExpr, scope)
+                    maybeFieldAccessExpression.ifPresent { fieldAccessExpression ->
+                        builder.with(maybeField.get().getType(), fieldAccessExpression, expected)
+                    }
+                } else {
+                    result.errors << new TestGeneratorError("Failed to solve field access $fieldAccessExpr")
+                }
+            } catch (UnsolvedSymbolException use) {
+                result.errors << new TestGeneratorError("Failed to solve field access $fieldAccessExpr")
             }
         }
         List<TestNodeStatement> assertions = builder.build()
@@ -66,7 +74,7 @@ class FieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator 
             public void test_${cd.nameAsString}_AssignsConstantsToFields() throws Exception {
                 ${cd.nameAsString} $instanceName = ${constructCallExpr.expr};
                 
-                ${assertions.collect{it.stmt}.join(System.lineSeparator())}
+                ${assertions.collect { it.stmt }.join(System.lineSeparator())}
             }
             """
                 MethodDeclaration assignsConstants = JavaParser.parseBodyDeclaration(assignsConstantsCode)

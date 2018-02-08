@@ -21,7 +21,7 @@ class ClassOrInterfaceExtension implements ASTExtension {
         log.debug "Adding ClassOrInterfaceDeclaration::getFullName"
         ClassOrInterfaceDeclaration.metaClass.getFullName() {
             ClassOrInterfaceDeclaration n = delegate as ClassOrInterfaceDeclaration
-            ASTNodeUtils.getFullName(n)
+            ASTNodeUtils.getNameOfCompilationUnit(n)
         }
     }
 }

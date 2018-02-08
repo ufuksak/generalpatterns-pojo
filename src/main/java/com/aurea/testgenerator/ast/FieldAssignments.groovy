@@ -5,7 +5,6 @@ import com.aurea.testgenerator.generation.source.StaticFieldAccessorBuilder
 import com.github.javaparser.ast.expr.AssignExpr
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.FieldAccessExpr
-import com.github.javaparser.ast.expr.NameExpr
 import com.github.javaparser.ast.expr.SimpleName
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade

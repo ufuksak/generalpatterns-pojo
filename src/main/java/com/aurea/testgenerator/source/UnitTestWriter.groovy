@@ -25,14 +25,14 @@ class UnitTestWriter {
         Path writeTo = out.resolve(pathInOut).resolve(fileName)
         File testFile = writeTo.toFile()
         if (!testFile.parentFile.exists()) {
-            log.info "Creating $testFile.parentFile"
+            log.debug "Creating $testFile.parentFile"
             testFile.parentFile.mkdirs()
         }
         if (testFile.exists()) {
-            log.info "$testFile existed before, deleting..."
+            log.debug "$testFile existed before, deleting..."
             testFile.delete()
         }
-        log.info("Writing test: $testFile")
+        log.debug "Writing test: $testFile"
         testFile.write(testUnit.test.cu.toString())
     }
 }

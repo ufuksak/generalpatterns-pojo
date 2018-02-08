@@ -1,8 +1,8 @@
 package com.aurea.testgenerator.ast;
 
 import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
-import com.github.javaparser.ast.PackageDeclaration;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -22,6 +22,7 @@ import one.util.streamex.StreamEx;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -31,6 +32,13 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class ASTNodeUtils {
+
+    private static final CompilationUnit UNKNOWN_CU = new CompilationUnit("unknown");
+
+    static {
+        UNKNOWN_CU.addType(new ClassOrInterfaceDeclaration(EnumSet.of(Modifier.PUBLIC), false, "UnknownClass"));
+    }
+
     private ASTNodeUtils() {
     }
 
@@ -218,12 +226,11 @@ public final class ASTNodeUtils {
         return hasOnlyChildsSubTypesOf(n, allowedClasses);
     }
 
-    public static String getFullName(ClassOrInterfaceDeclaration coid) {
-        CompilationUnit cu = findParentOf(CompilationUnit.class, coid);
-        Optional<PackageDeclaration> packageDeclaration = findChildOf(PackageDeclaration.class, cu);
-        return packageDeclaration
-                .map(pd -> pd.getNameAsString() + "." + coid.getNameAsString())
-                .orElse("");
+    public static String getNameOfCompilationUnit(Node n) {
+        CompilationUnit cu = n.findCompilationUnit().orElse(UNKNOWN_CU);
+        String packageName = cu.getPackageDeclaration().get().getNameAsString();
+        String typeName = cu.getType(0).getNameAsString();
+        return packageName + "." + typeName;
     }
 
     public static StreamEx<AssignExpr> findFieldAssignmentsInGivenNodeByName(Node node, SimpleName name) {

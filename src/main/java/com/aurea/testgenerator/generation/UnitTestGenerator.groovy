@@ -1,7 +1,6 @@
 package com.aurea.testgenerator.generation
 
 import com.aurea.common.JavaClass
-import com.aurea.testgenerator.generation.source.Annotations
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Modifier
@@ -41,12 +40,12 @@ class UnitTestGenerator implements Function<Unit, Optional<TestUnit>> {
         }.toList()
 
         //Merge here, currently simply imports
-        StreamEx.of(testGeneratorResults).flatMap {it.tests.stream()}.each { testNodeMethod ->
+        StreamEx.of(testGeneratorResults).flatMap { it.tests.stream() }.each { testNodeMethod ->
             testNodeMethod.dependency.imports.each { testCu.addImport(it) }
             testClass.addMember(testNodeMethod.md)
         }
 
-        boolean hasTests = testGeneratorResults.any {!it.tests.empty}
+        boolean hasTests = testGeneratorResults.any { !it.tests.empty }
         return hasTests ? Optional.of(testUnit) : Optional.empty()
     }
 

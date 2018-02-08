@@ -1,29 +1,32 @@
 package com.aurea.testgenerator.source;
 
+import com.aurea.testgenerator.config.ProjectConfiguration;
 import groovy.transform.Memoized;
 import one.util.streamex.StreamEx;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Predicate;
 
+@Component
 public class PathUnitSource implements UnitSource {
 
     private static final Logger logger = LogManager.getLogger(PathUnitSource.class.getSimpleName());
 
     private final SourceFinder sourceFinder;
     private final PathToUnitMapper pathToUnitMapper;
-    private final Predicate<Path> filter;
+    private final SourceFilter filter;
     private final Path root;
 
-    public PathUnitSource(SourceFinder sourceFinder, Path srcRoot, Predicate<Path> filter) {
+    public PathUnitSource(SourceFinder sourceFinder, ProjectConfiguration cfg, SourceFilter filter) {
         this.sourceFinder = sourceFinder;
-        this.pathToUnitMapper = new PathToUnitMapper(srcRoot);
+        this.pathToUnitMapper = new PathToUnitMapper(cfg.getSrc());
         this.filter = filter;
-        this.root = srcRoot;
+        this.root = cfg.getSrc();
     }
 
     @Override

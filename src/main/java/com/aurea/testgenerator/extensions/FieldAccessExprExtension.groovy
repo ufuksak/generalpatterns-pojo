@@ -1,5 +1,6 @@
 package com.aurea.testgenerator.extensions
 
+import com.aurea.testgenerator.ast.ASTNodeUtils
 import com.github.javaparser.ast.expr.FieldAccessExpr
 import com.github.javaparser.resolution.UnsolvedSymbolException
 import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component
 @Component
 @Log4j2
 class FieldAccessExprExtension implements ASTExtension {
+
     FieldAccessExprExtension() {
         log.debug "Adding FieldAccessExpr::solve"
         FieldAccessExpr.metaClass.findField() { JavaParserFacade facade ->
@@ -21,13 +23,15 @@ class FieldAccessExprExtension implements ASTExtension {
                     if (reference.correspondingDeclaration.field) {
                         return Optional.of(reference.correspondingDeclaration.asField())
                     } else {
-                        log.error("Solved reference of $n is not a field in ${n.findCompilationUnit()}")
+                        log.error("Solved reference of $n is not a field in ${ASTNodeUtils.getNameOfCompilationUnit(n)}")
                     }
                 } else {
-                    log.error "Failed to solve $n in ${n.findCompilationUnit()}"
+                    log.error "Failed to solve $n in ${ASTNodeUtils.getNameOfCompilationUnit(n)}"
                 }
             } catch (UnsolvedSymbolException use) {
-                log.error "Failed to solve $n in ${n.findCompilationUnit()}", use
+                log.error "Failed to solve $n declared in ${ASTNodeUtils.getNameOfCompilationUnit(n)}"
+            } catch (com.github.javaparser.symbolsolver.javaparsermodel.UnsolvedSymbolException use) {
+                log.error "Failed to solve $n in ${ASTNodeUtils.getNameOfCompilationUnit(n)}"
             }
             Optional.empty()
         }

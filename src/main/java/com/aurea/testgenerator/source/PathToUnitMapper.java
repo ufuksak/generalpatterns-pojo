@@ -50,7 +50,7 @@ public class PathToUnitMapper implements Function<Path, Optional<Unit>> {
         } catch (FileNotFoundException e) {
             logger.error("File not found: '" + path + "'", e);
         } catch (ParseProblemException ppe) {
-            logger.error("Failed to parse: '" + path + "'", ppe);
+            logger.error("Failed to parse: '" + path + "'");
         }
 
         return Optional.empty();

@@ -6,6 +6,7 @@ import com.aurea.testgenerator.value.ClassOrInterfaceTypeFactory;
 import com.aurea.testgenerator.value.PrimitiveValueFactory;
 import com.aurea.testgenerator.value.Types;
 import com.aurea.testgenerator.value.ValueFactory;
+import com.github.javaparser.ast.ArrayCreationLevel;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.ArrayCreationExpr;
@@ -39,8 +40,10 @@ public class ValueFactoryImpl implements ValueFactory {
             return getExpression(type.asArrayType().getComponentType())
                     .map(testValue -> {
                         Expression node = testValue.getExpr();
-                        ArrayCreationExpr arrayCreationExpr = new ArrayCreationExpr(type.asArrayType().getElementType());
-                        arrayCreationExpr.setInitializer(new ArrayInitializerExpr(NodeList.nodeList(node)));
+                        ArrayCreationExpr arrayCreationExpr = new ArrayCreationExpr(
+                                type.asArrayType().getElementType(),
+                                NodeList.nodeList(new ArrayCreationLevel(0)),
+                                new ArrayInitializerExpr(NodeList.nodeList(node)));
                         testValue.setExpr(arrayCreationExpr);
                         return testValue;
                     });

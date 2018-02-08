@@ -24,6 +24,11 @@ class Types {
             'java.util.SortedSet',
     ]
 
+    static final Set<String> KNOWN_ITERABLE_TYPES = [
+            'Iterable',
+            'java.util.Iterable',
+    ]
+
     static final Set<String> KNOWN_COMPARABLE_TYPES = [
             'BigDecimal',
             'BigInteger',
@@ -81,6 +86,18 @@ class Types {
 
     static boolean isCollection(ResolvedType type) {
         type.referenceType && KNOWN_COLLECTION_TYPES.contains(type.asReferenceType().qualifiedName)
+    }
+
+    static boolean isIterable(ClassOrInterfaceType type) {
+        KNOWN_ITERABLE_TYPES.contains(type.nameAsString)
+    }
+
+    static boolean isIterable(ResolvedReferenceType type) {
+        KNOWN_ITERABLE_TYPES.contains(type.qualifiedName)
+    }
+
+    static boolean isIterable(ResolvedType type) {
+        type.referenceType && KNOWN_ITERABLE_TYPES.contains(type.asReferenceType().qualifiedName)
     }
 
     static boolean isList(ClassOrInterfaceType type) {

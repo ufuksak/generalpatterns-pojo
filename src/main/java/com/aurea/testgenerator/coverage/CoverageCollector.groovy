@@ -24,7 +24,7 @@ class CoverageCollector implements ApplicationListener<TestGeneratorEvent> {
     }
 
     long getTotalCoverage() {
-        return StreamEx.of(coverageByUnit.values()).mapToLong{it.longValue()}.sum()
+        return StreamEx.of(coverageByUnit.values()).mapToLong { it.longValue() }.sum()
     }
 
     @Override
@@ -37,7 +37,7 @@ class CoverageCollector implements ApplicationListener<TestGeneratorEvent> {
                 it.total
             }.sum()
         })
-        log.info("$unit.fullName: covered $currentUnitCoverage of $classLocs loc")
+        log.trace "$unit.fullName: covered $currentUnitCoverage of $classLocs loc"
     }
 
     private int incrementUnitCoverage(Unit unit, TestGeneratorEvent event) {
