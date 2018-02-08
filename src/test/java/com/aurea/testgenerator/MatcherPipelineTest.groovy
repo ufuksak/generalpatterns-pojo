@@ -1,6 +1,7 @@
 package com.aurea.testgenerator
 
 import com.aurea.testgenerator.config.ProjectConfiguration
+import com.aurea.testgenerator.coverage.CoverageCollector
 import com.aurea.testgenerator.coverage.CoverageService
 import com.aurea.testgenerator.coverage.NoCoverageService
 import com.aurea.testgenerator.extensions.Extensions
@@ -37,6 +38,7 @@ abstract class MatcherPipelineTest extends Specification {
     UnitTestGenerator unitTestCollector
     PatternMatchEngine patternMatchCollector
     CoverageService coverageService
+    CoverageCollector coverageCollector
     ValueFactory valueFactory = new ValueFactoryImpl(
         new ArbitraryClassOrInterfaceTypeFactory(),
         new ArbitraryPrimitiveValuesFactory())
@@ -56,6 +58,7 @@ abstract class MatcherPipelineTest extends Specification {
         mergeEngine = new UnitTestMergeEngine()
         unitTestWriter = new UnitTestWriter(cfg)
         coverageService = new NoCoverageService()
+        coverageCollector = new CoverageCollector(coverageService)
 
         pipeline = new Pipeline(
                 source,
@@ -64,7 +67,7 @@ abstract class MatcherPipelineTest extends Specification {
                 SourceFilters.empty(),
                 mergeEngine,
                 unitTestWriter,
-                coverageService)
+                coverageCollector)
     }
 
     String onClassCodeExpect(String code, String expectedTest) {

@@ -35,7 +35,6 @@ dependencyManagement {
         dependency 'pl.pragmatists:JUnitParams:1.1.1'
         dependency 'org.spockframework:spock-spring:1.1-groovy-2.4'
         dependency 'org.reflections:reflections:0.9.11'
-
     }
 }
 

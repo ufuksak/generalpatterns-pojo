@@ -1,6 +1,6 @@
 package com.aurea.testgenerator
 
-import com.aurea.testgenerator.coverage.CoverageService
+import com.aurea.testgenerator.coverage.CoverageCollector
 import com.aurea.testgenerator.generation.TestUnit
 import com.aurea.testgenerator.generation.UnitTestGenerator
 import com.aurea.testgenerator.generation.UnitTestMergeEngine
@@ -12,8 +12,6 @@ import one.util.streamex.StreamEx
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import java.util.concurrent.atomic.AtomicLong
-
 @Component
 @Log4j2
 class Pipeline {
@@ -24,7 +22,7 @@ class Pipeline {
     final SourceFilter sourceFilter
     final UnitTestMergeEngine mergeEngine
     final UnitTestWriter unitTestWriter
-    final CoverageService coverageService
+    final CoverageCollector coverageCollector
 
     @Autowired
     Pipeline(UnitSource unitSource,
@@ -33,20 +31,18 @@ class Pipeline {
              SourceFilter sourceFilter,
              UnitTestMergeEngine mergeEngine,
              UnitTestWriter writer,
-             CoverageService coverageService) {
+             CoverageCollector coverageCollector) {
         this.source = unitSource
         this.patternMatchEngine = patternMatchEngine
         this.unitTestGenerator = unitTestGenerator
         this.sourceFilter = sourceFilter
         this.mergeEngine = mergeEngine
         this.unitTestWriter = writer
-        this.coverageService = coverageService
+        this.coverageCollector = coverageCollector
     }
 
     void start() {
         log.info """[$source] ⇒ [$patternMatchEngine] ⇒ [$unitTestGenerator]"""
-
-        AtomicLong coverage = new AtomicLong()
 
         log.info "Getting units from $source"
         StreamEx<Unit> filteredUnits = source.units(sourceFilter)
@@ -55,21 +51,22 @@ class Pipeline {
         filteredUnits.map {
             List<PatternMatch> matches = patternMatchEngine.apply(it)
             if (!matches.empty) {
-                log.info "Found ${matches.size()} patterns in ${it.fullName}"
+                log.info "$it.fullName: found ${matches.size()} patterns"
             }
             new UnitWithMatches(it, matches)
         }.peek {
-            coverage.getAndAdd(it.getCoverage(coverageService))
+            coverageCollector.addMatchesCoverage(it)
+            coverageCollector.logMethodCoverage(it)
         }.filter {
             if (it.matches.empty) {
-                log.debug "Skipping $it.unit.fullName since no patterns found in it"
+                log.debug "$it.unit.fullName: skipping — no patterns found"
                 return false
             }
             return true
         }.map {
             Optional<TestUnit> maybeTestUnit = unitTestGenerator.apply(it)
             if (!maybeTestUnit.present) {
-                log.debug "Skipping ${it.unit.fullName} since no tests were generated for it"
+                log.debug "$it.unit.fullName: skipping — no tests were generated"
             }
             maybeTestUnit
         }.filter {
@@ -80,6 +77,6 @@ class Pipeline {
             unitTestWriter.write(it)
         }
 
-        log.info 'Total coverage: ' + coverage.get()
+        log.info "Total coverage: $coverageCollector.totalCoverage"
     }
 }
