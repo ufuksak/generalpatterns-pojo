@@ -16,12 +16,6 @@ public abstract class XPathPatternMatcher implements PatternMatcher {
 
     protected static final Logger logger = LogManager.getLogger(XPathPatternMatcher.class.getSimpleName());
 
-    @Autowired
-    public NodeToXmlConverter xmlConverter;
-
-    @Autowired
-    public XPathEvaluator evaluator;
-
     @Override
     public StreamEx<PatternMatch> apply(Unit unit) {
         try {
@@ -37,17 +31,4 @@ public abstract class XPathPatternMatcher implements PatternMatcher {
     }
 
     protected abstract Optional<MatchVisitor> newVisitor(Unit unit);
-
-    public void setXmlConverter(NodeToXmlConverter xmlConverter) {
-        this.xmlConverter = xmlConverter;
-    }
-
-    public void setEvaluator(XPathEvaluator evaluator) {
-        this.evaluator = evaluator;
-    }
-
-    @Override
-    public String toString() {
-        return this.getClass().getSimpleName();
-    }
 }

@@ -1,12 +1,10 @@
 package com.aurea.testgenerator.generation.constructors
 
+import com.aurea.testgenerator.ast.Callability
 import com.aurea.testgenerator.ast.InvocationBuilder
-import com.aurea.testgenerator.generation.PatternToTest
-import com.aurea.testgenerator.generation.TestNodeExpression
-import com.aurea.testgenerator.generation.TestUnit
+import com.aurea.testgenerator.generation.*
 import com.aurea.testgenerator.generation.source.Imports
-import com.aurea.testgenerator.pattern.PatternMatch
-import com.aurea.testgenerator.pattern.general.constructors.ConstructorPatterns
+import com.aurea.testgenerator.source.Unit
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.body.ConstructorDeclaration
@@ -17,7 +15,7 @@ import org.springframework.stereotype.Component
 
 @Component
 @ToString
-class EmptyConstructorGenerator implements PatternToTest {
+class EmptyConstructorGenerator extends AbstractConstructorTestGenerator {
 
     ValueFactory valueFactory
 
@@ -27,13 +25,9 @@ class EmptyConstructorGenerator implements PatternToTest {
     }
 
     @Override
-    void accept(PatternMatch patternMatch, TestUnit testUnit) {
-        if (patternMatch.pattern != ConstructorPatterns.IS_EMPTY) {
-            return
-        }
-
-        ConstructorDeclaration cd = patternMatch.match.asConstructorDeclaration()
+    TestGeneratorResult generate(ConstructorDeclaration cd) {
         Optional<TestNodeExpression> constructorCall = new InvocationBuilder(valueFactory).build(cd)
+        TestGeneratorResult result = new TestGeneratorResult()
         constructorCall.ifPresent { constructCallExpr ->
             MethodDeclaration typeIsInstantiableTest = JavaParser.parseBodyDeclaration("""
             @Test
@@ -41,8 +35,22 @@ class EmptyConstructorGenerator implements PatternToTest {
                 ${constructCallExpr.expr};
             }                              
             """).asMethodDeclaration()
-            testUnit.addImport Imports.JUNIT_TEST
-            testUnit.addTest typeIsInstantiableTest
+
+            result.tests = [new TestNodeMethod(
+                    dependency: new TestDependency(imports: [Imports.JUNIT_TEST]),
+                    md: typeIsInstantiableTest
+            )]
         }
+        result
+    }
+
+    @Override
+    TestType getType() {
+        ConstructorTypes.EMPTY_CONSTRUCTOR
+    }
+
+    @Override
+    boolean shouldBeVisited(Unit unit, ConstructorDeclaration cd) {
+        Callability.isCallableFromTests(cd)
     }
 }

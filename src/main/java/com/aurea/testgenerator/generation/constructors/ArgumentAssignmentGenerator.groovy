@@ -3,8 +3,12 @@ package com.aurea.testgenerator.generation.constructors
 import com.aurea.testgenerator.ast.FieldAssignments
 import com.aurea.testgenerator.ast.InvocationBuilder
 import com.aurea.testgenerator.generation.PatternToTest
+import com.aurea.testgenerator.generation.TestDependency
+import com.aurea.testgenerator.generation.TestGeneratorResult
 import com.aurea.testgenerator.generation.TestNodeExpression
+import com.aurea.testgenerator.generation.TestNodeMethod
 import com.aurea.testgenerator.generation.TestNodeVariable
+import com.aurea.testgenerator.generation.TestType
 import com.aurea.testgenerator.generation.TestUnit
 import com.aurea.testgenerator.generation.source.AssertionBuilder
 import com.aurea.testgenerator.generation.source.Imports
@@ -12,6 +16,7 @@ import com.aurea.testgenerator.pattern.PatternMatch
 import com.aurea.testgenerator.pattern.general.constructors.ConstructorPatterns
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
+import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.body.ConstructorDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.*
@@ -27,10 +32,10 @@ import org.springframework.stereotype.Component
 
 @Component
 @Log4j2
-class ArgumentAssignmentGenerator implements PatternToTest {
+class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
 
-    JavaParserFacade solver
     FieldAssignments fieldAssignments
+    JavaParserFacade solver
     ValueFactory valueFactory
 
     @Autowired
@@ -41,12 +46,8 @@ class ArgumentAssignmentGenerator implements PatternToTest {
     }
 
     @Override
-    void accept(PatternMatch patternMatch, TestUnit testUnit) {
-        if (patternMatch.pattern != ConstructorPatterns.HAS_ARGUMENT_ASSIGNMENTS) {
-            return
-        }
-
-        ConstructorDeclaration cd = patternMatch.match.asConstructorDeclaration()
+    protected TestGeneratorResult generate(ConstructorDeclaration cd) {
+        TestGeneratorResult result = new TestGeneratorResult()
         String instanceName = cd.nameAsString.uncapitalize()
         Expression scope = new NameExpr(instanceName)
 
@@ -73,9 +74,7 @@ class ArgumentAssignmentGenerator implements PatternToTest {
                     new RuntimeException("Failed to build variable for parameter $p of $cd")
                 }
             }.toList()
-            variables.each {
-                testUnit.addDependency it.dependency
-            }
+            Set<ImportDeclaration> imports = StreamEx.of(variables).flatMap { it.dependency.imports.stream() }.toSet()
             List<Statement> variableStatements = variables.collect { new ExpressionStmt(it.expr)}
 
             Map<SimpleName, TestNodeExpression> variableExpressionsByNames = StreamEx.of(variables)
@@ -101,10 +100,21 @@ class ArgumentAssignmentGenerator implements PatternToTest {
             """
                 MethodDeclaration assignsArguments = JavaParser.parseBodyDeclaration(assignsConstantsCode)
                                                                .asMethodDeclaration()
-                testUnit.addImport Imports.JUNIT_TEST
-                testUnit.addDependency constructCallExpr.dependency
-                testUnit.addTest assignsArguments
+                imports << Imports.JUNIT_TEST
+                imports.addAll(constructCallExpr.dependency.imports)
+                result.tests = [
+                        new TestNodeMethod(
+                                dependency: new TestDependency(imports: imports),
+                                md: assignsArguments
+                        )
+                ]
             }
         }
+        result
+    }
+
+    @Override
+    protected TestType getType() {
+        ConstructorTypes.ARGUMENT_ASSIGNMENTS
     }
 }

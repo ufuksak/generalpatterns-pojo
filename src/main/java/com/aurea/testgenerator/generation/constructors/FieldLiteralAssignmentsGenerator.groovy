@@ -3,7 +3,11 @@ package com.aurea.testgenerator.generation.constructors
 import com.aurea.testgenerator.ast.FieldAssignments
 import com.aurea.testgenerator.ast.InvocationBuilder
 import com.aurea.testgenerator.generation.PatternToTest
+import com.aurea.testgenerator.generation.TestDependency
+import com.aurea.testgenerator.generation.TestGeneratorResult
 import com.aurea.testgenerator.generation.TestNodeExpression
+import com.aurea.testgenerator.generation.TestNodeMethod
+import com.aurea.testgenerator.generation.TestType
 import com.aurea.testgenerator.generation.TestUnit
 import com.aurea.testgenerator.generation.source.AssertionBuilder
 import com.aurea.testgenerator.generation.source.Imports
@@ -26,7 +30,7 @@ import org.springframework.stereotype.Component
 
 @Component
 @Log4j2
-class FieldLiteralAssignmentsGenerator implements PatternToTest {
+class FieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator {
 
     FieldAssignments fieldAssignments
     JavaParserFacade solver
@@ -40,12 +44,8 @@ class FieldLiteralAssignmentsGenerator implements PatternToTest {
     }
 
     @Override
-    void accept(PatternMatch patternMatch, TestUnit testUnit) {
-        if (patternMatch.pattern != ConstructorPatterns.HAS_FIELD_LITERAL_ASSIGNMENTS) {
-            return
-        }
-
-        ConstructorDeclaration cd = patternMatch.match.asConstructorDeclaration()
+    protected TestGeneratorResult generate(ConstructorDeclaration cd) {
+        TestGeneratorResult result = new TestGeneratorResult()
         String instanceName = cd.nameAsString.uncapitalize()
         Expression scope = new NameExpr(instanceName)
 
@@ -76,9 +76,20 @@ class FieldLiteralAssignmentsGenerator implements PatternToTest {
             """
                 MethodDeclaration assignsConstants = JavaParser.parseBodyDeclaration(assignsConstantsCode)
                                                                .asMethodDeclaration()
-                testUnit.addImport Imports.JUNIT_TEST
-                testUnit.addTest assignsConstants
+
+                result.tests = [
+                        new TestNodeMethod(
+                                dependency: new TestDependency(imports: [Imports.JUNIT_TEST]),
+                                md: assignsConstants
+                        )
+                ]
             }
         }
+        result
+    }
+
+    @Override
+    protected TestType getType() {
+        ConstructorTypes.FIELD_LITERAL_ASSIGNMENTS
     }
 }
