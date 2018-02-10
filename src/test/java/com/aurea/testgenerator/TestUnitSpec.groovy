@@ -22,7 +22,7 @@ class TestUnitSpec extends Specification {
     TemporaryFolder folder = new TemporaryFolder()
 
     static TestUnit newTestUnit() {
-        new TestUnit(unitUnderTest: null, test: new Unit(
+        new TestUnit(new Unit(
                 new CompilationUnit("sample"),
                 new JavaClass("sample.Foo"),
                 Paths.get("")

@@ -38,9 +38,9 @@ class Pipeline {
 
         log.info "Generating tests for ${source.size(sourceFilter)} units"
         filteredUnits
-                .map { unitTestGenerator.apply(it) }
+                .map { unitTestGenerator.tryGenerateTest(it) }
                 .filter { it.present }
                 .map { it.get() }
-                .each { unitTestWriter.write(it) }
+                .each { unitTestWriter.write(it.test) }
     }
 }

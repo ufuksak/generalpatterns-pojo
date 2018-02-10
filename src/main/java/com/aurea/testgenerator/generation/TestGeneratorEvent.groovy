@@ -6,13 +6,13 @@ import org.springframework.context.ApplicationEvent
 
 abstract class TestGeneratorEvent extends ApplicationEvent {
     TestGeneratorResult result
-    CallableDeclaration cd
+    CallableDeclaration callable
     Unit unit
 
-    TestGeneratorEvent(Object source, Unit unit, CallableDeclaration cd, TestGeneratorResult result) {
+    TestGeneratorEvent(Object source, Unit unit, CallableDeclaration callable, TestGeneratorResult result) {
         super(source)
         this.unit = unit
         this.result = result
-        this.cd = cd
+        this.callable = callable
     }
 }

@@ -4,12 +4,5 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import groovy.transform.Canonical
 
 @Canonical
-class TestNodeVariable implements TestNode<VariableDeclarationExpr> {
-    TestDependency dependency = new TestDependency()
-    VariableDeclarationExpr expr
-
-    @Override
-    Optional<VariableDeclarationExpr> getNode() {
-        return Optional.of(expr)
-    }
+class TestNodeVariable extends TestNode<VariableDeclarationExpr> {
 }

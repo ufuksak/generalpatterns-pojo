@@ -26,7 +26,7 @@ class ValueFactoryImplSpec extends Specification {
         expect:
         Optional<TestNodeVariable> testNodeVariableOptional = factory.getVariable("foo", type)
         testNodeVariableOptional.present
-        String expression = testNodeVariableOptional.get().expr.toString()
+        String expression = testNodeVariableOptional.get().node.toString()
         expression == expected
 
         where:
@@ -45,7 +45,7 @@ class ValueFactoryImplSpec extends Specification {
         expect:
         Optional<TestNodeVariable> testNodeVariableOptional = factory.getVariable("foo", JavaParser.parseClassOrInterfaceType("String"))
         testNodeVariableOptional.present
-        String expression = testNodeVariableOptional.get().expr.toString()
+        String expression = testNodeVariableOptional.get().node.toString()
         expression == 'String foo = "ABC"'
     }
 }

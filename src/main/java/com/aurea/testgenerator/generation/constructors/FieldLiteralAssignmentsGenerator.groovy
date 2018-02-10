@@ -3,13 +3,12 @@ package com.aurea.testgenerator.generation.constructors
 import com.aurea.testgenerator.ast.FieldAssignments
 import com.aurea.testgenerator.ast.InvocationBuilder
 import com.aurea.testgenerator.generation.*
+import com.aurea.testgenerator.generation.merge.TestNodeMerger
 import com.aurea.testgenerator.generation.source.AssertionBuilder
 import com.aurea.testgenerator.generation.source.Imports
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
-import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.body.ConstructorDeclaration
-import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.AssignExpr
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.FieldAccessExpr
@@ -18,7 +17,6 @@ import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import com.github.javaparser.symbolsolver.javaparsermodel.UnsolvedSymbolException
 import groovy.util.logging.Log4j2
-import one.util.streamex.StreamEx
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -66,27 +64,24 @@ class FieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator 
         }
         List<TestNodeStatement> assertions = builder.build()
         if (!assertions.empty) {
-            Set<ImportDeclaration> imports = StreamEx.of(assertions).flatMap { it.dependency.imports.stream() }.toSet()
+            TestNodeMethod assignConstants = new TestNodeMethod()
+            TestNodeMerger.appendDependencies(assignConstants, assertions)
             Optional<TestNodeExpression> constructorCall = new InvocationBuilder(valueFactory).build(cd)
             constructorCall.ifPresent { constructCallExpr ->
+                TestNodeMerger.appendDependencies(assignConstants, constructCallExpr)
                 String assignsConstantsCode = """
-            @Test
-            public void test_${cd.nameAsString}_AssignsConstantsToFields() throws Exception {
-                ${cd.nameAsString} $instanceName = ${constructCallExpr.expr};
-                
-                ${assertions.collect { it.stmt }.join(System.lineSeparator())}
-            }
-            """
-                MethodDeclaration assignsConstants = JavaParser.parseBodyDeclaration(assignsConstantsCode)
-                                                               .asMethodDeclaration()
-                imports.addAll constructCallExpr.dependency.imports
-                imports << Imports.JUNIT_TEST
-                result.tests = [
-                        new TestNodeMethod(
-                                dependency: new TestDependency(imports: imports),
-                                md: assignsConstants
-                        )
-                ]
+                    @Test
+                    public void test_${cd.nameAsString}_AssignsConstantsToFields() throws Exception {
+                        ${cd.nameAsString} $instanceName = ${constructCallExpr.node};
+                        
+                        ${assertions.collect { it.node }.join(System.lineSeparator())}
+                    }
+                """
+
+                assignConstants.node = JavaParser.parseBodyDeclaration(assignsConstantsCode)
+                                                   .asMethodDeclaration()
+                assignConstants.dependency.imports << Imports.JUNIT_TEST
+                result.tests = [assignConstants]
             }
         }
         result

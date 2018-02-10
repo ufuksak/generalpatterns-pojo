@@ -1,5 +1,6 @@
 package com.aurea.testgenerator.coverage
 
+import com.aurea.common.JavaClass
 import com.aurea.testgenerator.generation.TestGeneratorEvent
 import com.aurea.testgenerator.source.Unit
 import groovy.util.logging.Log4j2
@@ -15,8 +16,8 @@ import java.util.concurrent.atomic.AtomicLong
 @Log4j2
 class CoverageCollector implements ApplicationListener<TestGeneratorEvent> {
     private CoverageService coverageService
-    private Map<Unit, AtomicLong> coverageByUnit = new ConcurrentHashMap<>()
-    private Map<Unit, Integer> totalByUnit = new HashMap<>()
+    private Map<JavaClass, AtomicLong> coverageByUnit = new ConcurrentHashMap<>()
+    private Map<JavaClass, Integer> totalByUnit = new HashMap<>()
 
     @Autowired
     CoverageCollector(CoverageService coverageService) {
@@ -31,8 +32,8 @@ class CoverageCollector implements ApplicationListener<TestGeneratorEvent> {
     void onApplicationEvent(TestGeneratorEvent event) {
         def unit = event.unit
         int currentUnitCoverage = incrementUnitCoverage(unit, event)
-        Integer classLocs = totalByUnit.computeIfAbsent(unit, { u ->
-            def classCoverageQuery = ClassCoverageQuery.of(u, u.cu.getClassByName(u.className).get())
+        Integer classLocs = totalByUnit.computeIfAbsent(unit.javaClass, { javaClass ->
+            def classCoverageQuery = ClassCoverageQuery.of(unit, unit.cu.getClassByName(unit.className).get())
             coverageService.getClassCoverage(classCoverageQuery).methodCoverages().mapToInt {
                 it.total
             }.sum()
@@ -41,10 +42,10 @@ class CoverageCollector implements ApplicationListener<TestGeneratorEvent> {
     }
 
     private int incrementUnitCoverage(Unit unit, TestGeneratorEvent event) {
-        int coverage = coverageService.getMethodCoverage(MethodCoverageQuery.of(unit, event.cd)).uncovered
+        int coverage = coverageService.getMethodCoverage(MethodCoverageQuery.of(unit, event.callable)).uncovered
         AtomicLong atomicCoverage = new AtomicLong(coverage)
 
-        coverageByUnit.merge(unit, atomicCoverage, { AtomicLong l1, AtomicLong l2 ->
+        coverageByUnit.merge(unit.javaClass, atomicCoverage, { AtomicLong l1, AtomicLong l2 ->
             l1.addAndGet(l2.longValue())
             l1
         }).intValue()

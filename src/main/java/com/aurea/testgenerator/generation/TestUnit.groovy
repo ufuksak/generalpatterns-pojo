@@ -7,10 +7,10 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import groovy.transform.Canonical
 import groovy.transform.Memoized
+import one.util.streamex.StreamEx
 
 @Canonical
 class TestUnit {
-    Unit unitUnderTest
     Unit test
 
     NodeList<ImportDeclaration> getImports() {
@@ -30,6 +30,16 @@ class TestUnit {
         this
     }
 
+    TestUnit addDependency(Dependable dependable) {
+        addDependency(dependable.dependency)
+        this
+    }
+
+    TestUnit addDependencies(List<? extends Dependable> testNodes) {
+        StreamEx.of(testNodes).map { it.dependency }.each { addDependency(it) }
+        this
+    }
+
     TestUnit addTest(MethodDeclaration test) {
         getTestClass().addMember(test)
         this
@@ -39,6 +49,4 @@ class TestUnit {
     ClassOrInterfaceDeclaration getTestClass() {
         test.cu.findFirst(ClassOrInterfaceDeclaration).get()
     }
-
-    
 }

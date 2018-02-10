@@ -1,8 +1,8 @@
 package com.aurea.testgenerator.pattern.general.constructors
 
 import com.aurea.testgenerator.MatcherPipelineTest
-import com.aurea.testgenerator.generation.ReportingTestGenerator
 import com.aurea.testgenerator.generation.TestGenerator
+import com.aurea.testgenerator.generation.TestGeneratorResultReporter
 import com.aurea.testgenerator.generation.constructors.EmptyConstructorGenerator
 
 class EmptyConstructorSpec extends MatcherPipelineTest {
@@ -108,7 +108,9 @@ class EmptyConstructorSpec extends MatcherPipelineTest {
     }
 
     @Override
-    ReportingTestGenerator generator() {
-        new EmptyConstructorGenerator(valueFactory)
+    TestGenerator generator() {
+        TestGenerator generator = new EmptyConstructorGenerator(valueFactory)
+        generator.reporter = reporter
+        generator
     }
 }

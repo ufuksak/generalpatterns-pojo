@@ -30,10 +30,9 @@ class MethodCoverageQuery {
     }
 
     static MethodCoverageQuery of(Unit unit, CallableDeclaration method) {
-        ObjectCreationExpr objectCreationExpr = ASTNodeUtils.findParentOf(ObjectCreationExpr.class, method)
-        if (null != objectCreationExpr) {
+        method.getAncestorOfType(ObjectCreationExpr).ifPresent { objectCreationExpr ->
             TypeDeclaration classOrInterfaceDeclaration = ASTNodeUtils.findParentSubTypeOf(TypeDeclaration.class, method)
-            List<ObjectCreationExpr> objectCreationExprs = ASTNodeUtils.findChildsOf(ObjectCreationExpr.class, classOrInterfaceDeclaration)
+            List<ObjectCreationExpr> objectCreationExprs = classOrInterfaceDeclaration.findAll(ObjectCreationExpr)
             List<ObjectCreationExpr> filtered = StreamEx.of(objectCreationExprs).filter { it.getAnonymousClassBody() != null }.toList()
             int anonymousClassIndex = filtered.indexOf(objectCreationExpr) + 1
             return new MethodCoverageQuery(unit, classOrInterfaceDeclaration, method, anonymousClassIndex)

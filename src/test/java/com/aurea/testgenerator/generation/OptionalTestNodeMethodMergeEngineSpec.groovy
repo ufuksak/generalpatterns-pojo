@@ -2,7 +2,7 @@ package com.aurea.testgenerator.generation
 
 import spock.lang.Specification
 
-class TestNodeMethodMergeEngineSpec extends Specification {
+class OptionalTestNodeMethodMergeEngineSpec extends Specification {
 
     def "foo"() {
         expect:

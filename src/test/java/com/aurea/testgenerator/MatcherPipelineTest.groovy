@@ -5,7 +5,8 @@ import com.aurea.testgenerator.coverage.CoverageCollector
 import com.aurea.testgenerator.coverage.CoverageService
 import com.aurea.testgenerator.coverage.NoCoverageService
 import com.aurea.testgenerator.extensions.Extensions
-import com.aurea.testgenerator.generation.ReportingTestGenerator
+import com.aurea.testgenerator.generation.TestGenerator
+import com.aurea.testgenerator.generation.TestGeneratorResultReporter
 import com.aurea.testgenerator.generation.UnitTestGenerator
 import com.aurea.testgenerator.source.*
 import com.aurea.testgenerator.value.ArbitraryClassOrInterfaceTypeFactory
@@ -39,6 +40,7 @@ abstract class MatcherPipelineTest extends Specification {
     ValueFactory valueFactory = new ValueFactoryImpl(
             new ArbitraryClassOrInterfaceTypeFactory(),
             new ArbitraryPrimitiveValuesFactory())
+    TestGeneratorResultReporter reporter = new TestGeneratorResultReporter(mock(ApplicationEventPublisher))
 
     void setupSpec() {
         Extensions.enable()
@@ -49,9 +51,8 @@ abstract class MatcherPipelineTest extends Specification {
         cfg.src = folder.newFolder("src").toPath()
         cfg.testSrc = folder.newFolder("test").toPath()
 
-        source = new PathUnitSource(new JavaSourceFinder(cfg), cfg.src, SourceFilters.empty())
-        ReportingTestGenerator generator = generator()
-        generator.publisher = mock(ApplicationEventPublisher)
+        source = new PathUnitSource(new JavaSourceFinder(cfg), cfg, SourceFilters.empty())
+        TestGenerator generator = generator()
         unitTestGenerator = new UnitTestGenerator([generator])
         unitTestWriter = new UnitTestWriter(cfg)
         coverageService = new NoCoverageService()
@@ -103,5 +104,5 @@ abstract class MatcherPipelineTest extends Specification {
         ))
     }
 
-    abstract ReportingTestGenerator generator()
+    abstract TestGenerator generator()
 }

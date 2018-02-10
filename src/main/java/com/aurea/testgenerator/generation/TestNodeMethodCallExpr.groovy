@@ -5,12 +5,5 @@ import groovy.transform.Canonical
 
 
 @Canonical
-class TestNodeMethodCallExpr implements TestNode<MethodCallExpr> {
-    TestDependency dependency = new TestDependency()
-    MethodCallExpr mce
-
-    @Override
-    Optional<MethodCallExpr> getNode() {
-        Optional.of(mce)
-    }
+class TestNodeMethodCallExpr extends TestNode<MethodCallExpr> {
 }

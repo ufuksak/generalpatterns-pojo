@@ -1,6 +1,6 @@
 package com.aurea.testgenerator.ast
 
-import com.aurea.testgenerator.generation.TestDependencyMerger
+import com.aurea.testgenerator.generation.merge.TestNodeMerger
 import com.aurea.testgenerator.generation.TestNodeExpression
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
@@ -67,29 +67,30 @@ class InvocationBuilder {
                 }
             }.toList()
         }
-        expr.dependency = TestDependencyMerger.merge(StreamEx.of(parameterExpressions.stream().map { it.dependency }).toList())
-        expr.expr = new ObjectCreationExpr(null,
+        expr.dependency = TestNodeMerger.merge(StreamEx.of(parameterExpressions.stream().map { it.dependency }).toList())
+        expr.node = new ObjectCreationExpr(null,
                 JavaParser.parseClassOrInterfaceType(cd.nameAsString),
-                NodeList.nodeList(StreamEx.of(parameterExpressions).map { it.expr }.toList()))
+                NodeList.nodeList(StreamEx.of(parameterExpressions).map { it.node }.toList()))
         expr
     }
 
     private List<TestNodeExpression> getFromGivenParameters(ConstructorDeclaration cd) {
         StreamEx.of(cd.parameters).map { parameter ->
             Optional.ofNullable(expressionsForParameters.get(parameter.name)).orElseThrow {
-                throw new IllegalArgumentException("Failed to find a parameter value for $parameter in $cd. Only $expressionsForParameters were provided!")
+                throw new IllegalArgumentException("Failed to find a parameter value for $parameter in $cd. " +
+                        "Only $expressionsForParameters were provided!")
             }
         }.toList()
     }
 
     private static void prependWithType(TestNodeExpression expr, String scopeName) {
-        ObjectCreationExpr parentScope = findParentObjectCreationScope(expr.expr.asObjectCreationExpr())
+        ObjectCreationExpr parentScope = findParentObjectCreationScope(expr.node.asObjectCreationExpr())
         ClassOrInterfaceType parentTypeScope = findParentTypeScope(parentScope.type)
         parentTypeScope.setScope(JavaParser.parseClassOrInterfaceType(scopeName))
     }
 
     private static void prependWithInvocation(TestNodeExpression invocation, TestNodeExpression expr) {
-        appendParentScope(expr.expr.asObjectCreationExpr(), invocation.expr)
+        appendParentScope(expr.node.asObjectCreationExpr(), invocation.node)
     }
 
     private static ClassOrInterfaceType findParentTypeScope(ClassOrInterfaceType type) {
@@ -126,7 +127,8 @@ class InvocationBuilder {
                                                           .filter { !it.private }
                                                           .sortedBy { it.parameters.size() }
                                                           .findFirst()
-            return cd.orElseThrow { new IllegalStateException("Failed to find accessible constructor in $td. It is not invocable!") }
+            return cd.orElseThrow { new IllegalStateException("Failed to find accessible constructor in $td. " +
+                    "It is not invocable!") }
         }
     }
 }

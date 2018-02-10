@@ -80,7 +80,7 @@ class AssertionBuilder {
         assertions.collect {
             new TestNodeStatement(
                     dependency: it.dependency,
-                    stmt: new ExpressionStmt(it.mce)
+                    node: new ExpressionStmt(it.node)
             )
         }
     }
@@ -90,22 +90,22 @@ class AssertionBuilder {
         softAssertions << new TestNodeStatement(
                 dependency: new TestDependency(imports: [Imports.SOFT_ASSERTIONS]),
                 //TODO: 'sa' should be taken from name registry, not hardcoded
-                stmt: JavaParser.parseStatement("SoftAssertions sa = new SoftAssertions();"))
+                node: JavaParser.parseStatement("SoftAssertions sa = new SoftAssertions();"))
 
         assertions.each { assertion ->
             Expression sa = new NameExpr("sa")
-            MethodCallExpr assertThatMethodCall = assertion.mce.scope.get().asMethodCallExpr()
+            MethodCallExpr assertThatMethodCall = assertion.node.scope.get().asMethodCallExpr()
             assertThatMethodCall.setScope(sa)
             softAssertions << new TestNodeStatement(
                     dependency: assertion.dependency,
-                    stmt: new ExpressionStmt(assertion.mce)
+                    node: new ExpressionStmt(assertion.node)
             )
         }
-        softAssertions << new TestNodeStatement(stmt: JavaParser.parseStatement("sa.assertAll();"))
+        softAssertions << new TestNodeStatement(node: JavaParser.parseStatement("sa.assertAll();"))
     }
 
     private void addComparableAssertion(Expression actual, Expression expected) {
-        assertions << createAssertMethodCallExpression("assertThat($actual).isEqualByComparingTo($expected)")
+        assertions << createAssertThatMethodCallExpression("assertThat($actual).isEqualByComparingTo($expected)")
     }
 
     private void addPrimitiveAssertion(ResolvedPrimitiveType type, Expression actual, Expression expected) {
@@ -119,36 +119,41 @@ class AssertionBuilder {
                 type == ResolvedPrimitiveType.INT) {
             addEqualAssertion(actual, expected)
         } else if (type == ResolvedPrimitiveType.FLOAT) {
-            TestNodeMethodCallExpr methodCallExpr = createAssertMethodCallExpression("assertThat($actual).isCloseTo($expected, Offset.offset($FLOATING_POINT_OFFSET_FLOAT))")
+            TestNodeMethodCallExpr methodCallExpr = createAssertThatMethodCallExpression(
+                    "assertThat($actual).isCloseTo($expected, Offset.offset($FLOATING_POINT_OFFSET_FLOAT))")
             methodCallExpr.dependency.imports << Imports.ASSERTJ_OFFSET
             assertions << methodCallExpr
         } else if (type == ResolvedPrimitiveType.DOUBLE) {
-            TestNodeMethodCallExpr methodCallExpr = createAssertMethodCallExpression("assertThat($actual).isCloseTo($expected, Offset.offset($FLOATING_POINT_OFFSET_DOUBLE))")
+            TestNodeMethodCallExpr methodCallExpr = createAssertThatMethodCallExpression(
+                    "assertThat($actual).isCloseTo($expected, Offset.offset($FLOATING_POINT_OFFSET_DOUBLE))")
             methodCallExpr.dependency.imports << Imports.ASSERTJ_OFFSET
             assertions << methodCallExpr
         }
     }
 
     private void addEqualAssertion(Expression actual, Expression expected) {
-        assertions << createAssertMethodCallExpression("assertThat($actual).isEqualTo($expected)")
+        assertions << createAssertThatMethodCallExpression("assertThat($actual).isEqualTo($expected)")
     }
 
     private void addContainsAllAssertion(Expression actual, Expression expected) {
-        assertions << createAssertMethodCallExpression("assertThat($actual).containsAll($expected)")
+        assertions << createAssertThatMethodCallExpression("assertThat($actual).containsAll($expected)")
     }
 
     private void addBooleanPrimitiveAssertion(Expression actual, Expression expected) {
         if (expected.isBooleanLiteralExpr()) {
             boolean value = expected.asBooleanLiteralExpr().value
-            assertions << createAssertMethodCallExpression("assertThat($actual).is${value ? 'True' : 'False'}()")
+            assertions << createAssertThatMethodCallExpression("assertThat($actual).is${value ? 'True' : 'False'}()")
         } else {
             addEqualAssertion(actual, expected)
         }
     }
 
-    private static TestNodeMethodCallExpr createAssertMethodCallExpression(String expr) {
-        new TestNodeMethodCallExpr(
-                dependency: new TestDependency(imports: [Imports.ASSERTJ_ASSERTTHAT]),
-                mce: parseExpression(expr).asMethodCallExpr())
+    private TestNodeMethodCallExpr createAssertThatMethodCallExpression(String expr) {
+        TestNodeMethodCallExpr testNodeMethodCallExpr = new TestNodeMethodCallExpr()
+        if (!softly) {
+            testNodeMethodCallExpr.dependency.imports << Imports.ASSERTJ_ASSERTTHAT
+        }
+        testNodeMethodCallExpr.node = parseExpression(expr).asMethodCallExpr()
+        testNodeMethodCallExpr
     }
 }

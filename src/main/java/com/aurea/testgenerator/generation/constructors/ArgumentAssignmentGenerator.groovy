@@ -3,13 +3,12 @@ package com.aurea.testgenerator.generation.constructors
 import com.aurea.testgenerator.ast.FieldAssignments
 import com.aurea.testgenerator.ast.InvocationBuilder
 import com.aurea.testgenerator.generation.*
+import com.aurea.testgenerator.generation.merge.TestNodeMerger
 import com.aurea.testgenerator.generation.source.AssertionBuilder
 import com.aurea.testgenerator.generation.source.Imports
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
-import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.body.ConstructorDeclaration
-import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.*
 import com.github.javaparser.ast.stmt.ExpressionStmt
 import com.github.javaparser.ast.stmt.Statement
@@ -69,46 +68,42 @@ class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
         }
         List<TestNodeStatement> assertions = assertionBuilder.build()
         if (!assertions.empty) {
+            TestNodeMethod assignsArguments = new TestNodeMethod()
             List<TestNodeVariable> variables = StreamEx.of(cd.parameters).map { p ->
                 valueFactory.getVariable(p.nameAsString, p.type).orElseThrow {
                     new RuntimeException("Failed to build variable for parameter $p of $cd")
                 }
             }.toList()
-            Set<ImportDeclaration> imports = StreamEx.of(variables).flatMap { it.dependency.imports.stream() }.toSet()
-            imports.addAll StreamEx.of(assertions).flatMap { it.dependency.imports.stream() }.toSet()
-            List<Statement> variableStatements = variables.collect { new ExpressionStmt(it.expr) }
+            TestNodeMerger.appendDependencies(assignsArguments, variables)
+            TestNodeMerger.appendDependencies(assignsArguments, assertions)
+            List<Statement> variableStatements = variables.collect { new ExpressionStmt(it.node) }
 
             Map<SimpleName, TestNodeExpression> variableExpressionsByNames = StreamEx.of(variables)
                                                                                      .toMap(
-                    { it.expr.getVariable(0).name },
+                    { it.node.getVariable(0).name },
                     {
-                        new TestNodeExpression(expr: new NameExpr(it.expr.getVariable(0).name))
+                        new TestNodeExpression(node: new NameExpr(it.node.getVariable(0).name))
                     })
 
             Optional<TestNodeExpression> constructorCall = new InvocationBuilder(valueFactory)
                     .usingForParameters(variableExpressionsByNames)
                     .build(cd)
             constructorCall.ifPresent { constructCallExpr ->
-                String assignsConstantsCode = """
-            @Test
-            public void test_${cd.nameAsString}_AssignsArgumentsToFields() throws Exception {
-                ${variableStatements.join(System.lineSeparator())}
-
-                ${cd.nameAsString} $instanceName = ${constructCallExpr.expr};
-                
-                ${assertions.collect { it.stmt }.join(System.lineSeparator())}
-            }
-            """
-                MethodDeclaration assignsArguments = JavaParser.parseBodyDeclaration(assignsConstantsCode)
+                TestNodeMerger.appendDependencies(assignsArguments, constructCallExpr)
+                String assignsArgumentsCode = """
+                    @Test
+                    public void test_${cd.nameAsString}_AssignsArgumentsToFields() throws Exception {
+                        ${variableStatements.join(System.lineSeparator())}
+        
+                        ${cd.nameAsString} $instanceName = ${constructCallExpr.node};
+                        
+                        ${assertions.collect { it.node }.join(System.lineSeparator())}
+                    }
+                """
+                assignsArguments.node = JavaParser.parseBodyDeclaration(assignsArgumentsCode)
                                                                .asMethodDeclaration()
-                imports << Imports.JUNIT_TEST
-                imports.addAll(constructCallExpr.dependency.imports)
-                result.tests = [
-                        new TestNodeMethod(
-                                dependency: new TestDependency(imports: imports),
-                                md: assignsArguments
-                        )
-                ]
+                assignsArguments.dependency.imports << Imports.JUNIT_TEST
+                result.tests = [ assignsArguments ]
             }
         }
         result

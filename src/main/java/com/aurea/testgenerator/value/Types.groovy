@@ -31,9 +31,7 @@ class Types {
 
     static final Set<String> KNOWN_COMPARABLE_TYPES = [
             'BigDecimal',
-            'BigInteger',
-            'java.math.BigDecimal',
-            'java.math.BigInteger']
+            'java.math.BigDecimal']
 
     static final Set<String> KNOWN_MAP_TYPES = [
             'Map',
@@ -77,75 +75,75 @@ class Types {
     }
 
     static boolean isCollection(ClassOrInterfaceType type) {
-        KNOWN_COLLECTION_TYPES.contains(type.nameAsString)
+        type.nameAsString in KNOWN_COLLECTION_TYPES
     }
 
     static boolean isCollection(ResolvedReferenceType type) {
-        KNOWN_COLLECTION_TYPES.contains(type.qualifiedName)
+        type.qualifiedName in KNOWN_COLLECTION_TYPES
     }
 
     static boolean isCollection(ResolvedType type) {
-        type.referenceType && KNOWN_COLLECTION_TYPES.contains(type.asReferenceType().qualifiedName)
+        type.referenceType && (type.asReferenceType().qualifiedName in KNOWN_COLLECTION_TYPES)
     }
 
     static boolean isIterable(ClassOrInterfaceType type) {
-        KNOWN_ITERABLE_TYPES.contains(type.nameAsString)
+        type.nameAsString in KNOWN_ITERABLE_TYPES
     }
 
     static boolean isIterable(ResolvedReferenceType type) {
-        KNOWN_ITERABLE_TYPES.contains(type.qualifiedName)
+        type.qualifiedName in KNOWN_ITERABLE_TYPES
     }
 
     static boolean isIterable(ResolvedType type) {
-        type.referenceType && KNOWN_ITERABLE_TYPES.contains(type.asReferenceType().qualifiedName)
+        type.referenceType && (type.asReferenceType().qualifiedName in KNOWN_ITERABLE_TYPES)
     }
 
     static boolean isList(ClassOrInterfaceType type) {
-        KNOWN_LIST_TYPES.contains(type.nameAsString)
+        type.nameAsString in KNOWN_LIST_TYPES
     }
 
     static boolean isList(ResolvedReferenceType type) {
-        KNOWN_LIST_TYPES.contains(type.qualifiedName)
+        type.qualifiedName in KNOWN_LIST_TYPES
     }
 
     static boolean isList(ResolvedType type) {
-        type.referenceType && KNOWN_LIST_TYPES.contains(type.asReferenceType().qualifiedName)
+        type.referenceType && (type.asReferenceType().qualifiedName in KNOWN_LIST_TYPES)
     }
 
     static boolean isSet(ClassOrInterfaceType type) {
-        KNOWN_SET_TYPES.contains(type.nameAsString)
+        type.nameAsString in KNOWN_SET_TYPES
     }
 
     static boolean isSet(ResolvedReferenceType type) {
-        KNOWN_SET_TYPES.contains(type.qualifiedName)
+        type.qualifiedName in KNOWN_SET_TYPES
     }
 
     static boolean isSet(ResolvedType type) {
-        type.referenceType && KNOWN_SET_TYPES.contains(type.asReferenceType().qualifiedName)
+        type.referenceType && (type.asReferenceType().qualifiedName in KNOWN_SET_TYPES)
     }
 
     static boolean isComparable(ClassOrInterfaceType type) {
-        KNOWN_COMPARABLE_TYPES.contains(type.nameAsString)
+        type.nameAsString in KNOWN_COMPARABLE_TYPES
     }
 
     static boolean isComparable(ResolvedReferenceType type) {
-        KNOWN_COMPARABLE_TYPES.contains(type.qualifiedName)
+        type.qualifiedName in KNOWN_COMPARABLE_TYPES
     }
 
     static boolean isComparable(ResolvedType type) {
-        type.referenceType && KNOWN_COMPARABLE_TYPES.contains(type.asReferenceType().qualifiedName)
+        type.referenceType && (type.asReferenceType().qualifiedName in KNOWN_COMPARABLE_TYPES)
     }
 
     static boolean isMap(ClassOrInterfaceType type) {
-        KNOWN_MAP_TYPES.contains(type.nameAsString)
+        type.nameAsString in KNOWN_MAP_TYPES
     }
 
     static boolean isMap(ResolvedReferenceType type) {
-        KNOWN_MAP_TYPES.contains(type.qualifiedName)
+        type.qualifiedName in KNOWN_MAP_TYPES
     }
 
     static boolean isMap(ResolvedType type) {
-        type.referenceType && KNOWN_MAP_TYPES.contains(type.asReferenceType().qualifiedName)
+        type.referenceType && (type.asReferenceType().qualifiedName in KNOWN_MAP_TYPES)
     }
 
     static boolean isBoxedPrimitive(ResolvedReferenceType type) {
