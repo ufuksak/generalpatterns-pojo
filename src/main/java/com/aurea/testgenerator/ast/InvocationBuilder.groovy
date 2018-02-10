@@ -10,6 +10,7 @@ import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.ObjectCreationExpr
 import com.github.javaparser.ast.expr.SimpleName
+import com.github.javaparser.ast.nodeTypes.NodeWithConstructors
 import com.github.javaparser.ast.nodeTypes.NodeWithOptionalScope
 import com.github.javaparser.ast.type.ClassOrInterfaceType
 import groovy.util.logging.Log4j2
@@ -38,18 +39,33 @@ class InvocationBuilder {
         if (parents.size() == 1) {
             return Optional.of(buildConstructorInvocation(cd))
         } else {
-            boolean isPreviousStatic = parents.first().static
+            if (parents.empty) {
+                log.error "No type declaration for $cd"
+            }
+            boolean isParentStatic = parents.first().static
             TestNodeExpression expr = buildConstructorInvocation(cd)
             for (int i = 1; i < parents.size(); i++) {
                 TypeDeclaration parent = parents[i]
-                if (isPreviousStatic) {
+                if (isParentStatic) {
                     prependWithType(expr, parent.nameAsString)
                 } else {
-                    ConstructorDeclaration simplestConstructor = findSimplestConstructor(parent)
-                    TestNodeExpression invocation = buildConstructorInvocation(simplestConstructor)
-                    prependWithInvocation(invocation, expr)
+                    if (defaultConstructor(parent)) {
+                        TestNodeExpression defaultInvocation = new TestNodeExpression(
+                                node: new ObjectCreationExpr(null,
+                                        JavaParser.parseClassOrInterfaceType(parent.nameAsString),
+                                        NodeList.nodeList())
+                        )
+                        prependWithInvocation(defaultInvocation, expr)
+                    } else {
+                        Optional<ConstructorDeclaration> simplestConstructor = findSimplestConstructor(parent)
+                        if (!simplestConstructor.present) {
+                            return Optional.empty()
+                        }
+                        TestNodeExpression invocation = buildConstructorInvocation(simplestConstructor.get())
+                        prependWithInvocation(invocation, expr)
+                    }
                 }
-                isPreviousStatic = parent.static
+                isParentStatic = parent.static
             }
             return Optional.of(expr)
         }
@@ -117,18 +133,27 @@ class InvocationBuilder {
         }
     }
 
-    private static ConstructorDeclaration findSimplestConstructor(TypeDeclaration td) {
-        NodeList<ConstructorDeclaration> constructorDeclarations = td.findAll(ConstructorDeclaration)
-        if (constructorDeclarations.empty) {
-            //Nice, we can just use default constructor
-            return new ConstructorDeclaration(td.nameAsString)
+    private static Optional<ConstructorDeclaration> findSimplestConstructor(TypeDeclaration td) {
+        NodeList<ConstructorDeclaration> constructorDeclarations = getConstructors(td)
+        findNonPrivateLeastArgumentsConstructor(constructorDeclarations)
+    }
+
+    private static boolean defaultConstructor(TypeDeclaration td) {
+        getConstructors(td).empty
+    }
+
+    private static Collection<ConstructorDeclaration> getConstructors(TypeDeclaration td) {
+        if (td.annotationDeclaration) {
+            return Collections.emptyList()
         } else {
-            Optional<ConstructorDeclaration> cd = StreamEx.of(constructorDeclarations)
-                                                          .filter { !it.private }
-                                                          .sortedBy { it.parameters.size() }
-                                                          .findFirst()
-            return cd.orElseThrow { new IllegalStateException("Failed to find accessible constructor in $td. " +
-                    "It is not invocable!") }
+            return (td as NodeWithConstructors).constructors
         }
+    }
+
+    private static Optional<ConstructorDeclaration> findNonPrivateLeastArgumentsConstructor(Collection<ConstructorDeclaration> constructors) {
+        StreamEx.of(constructors)
+                .filter { !it.private }
+                .sortedBy { it.parameters.size() }
+                .findFirst()
     }
 }

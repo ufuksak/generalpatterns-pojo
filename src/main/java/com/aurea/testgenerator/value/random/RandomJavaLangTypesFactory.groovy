@@ -33,7 +33,7 @@ class RandomJavaLangTypesFactory implements ClassOrInterfaceTypeFactory {
         if (type.boxedType) {
             return Optional.of(primitiveValueFactory.get(type.toUnboxedType()))
         } else if (Types.isString(type)) {
-            return Optional.of(new TestNodeExpression(expr: new StringLiteralExpr(RandomStringPool.next())))
+            return Optional.of(new TestNodeExpression(node: new StringLiteralExpr(RandomStringPool.next())))
         } else if (Types.isList(type) || Types.isCollection(type) || Types.isIterable(type)) {
             Optional<TestNodeExpression> componentValue = getCollectionComponentValue(type)
             return componentValue.map {

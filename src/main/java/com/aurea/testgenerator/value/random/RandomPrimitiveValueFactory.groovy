@@ -15,23 +15,23 @@ class RandomPrimitiveValueFactory implements PrimitiveValueFactory {
     TestNodeExpression get(PrimitiveType type) {
         switch (type.getType()) {
             case BOOLEAN:
-                return new TestNodeExpression(expr: new BooleanLiteralExpr(RandomUtils.nextBoolean()))
+                return new TestNodeExpression(node: new BooleanLiteralExpr(RandomUtils.nextBoolean()))
             case CHAR:
-                return new TestNodeExpression(expr: new CharLiteralExpr(RandomStringUtils.randomAlphabetic(1)))
+                return new TestNodeExpression(node: new CharLiteralExpr(RandomStringUtils.randomAlphabetic(1)))
             case BYTE:
                 CastExpr castExpr = new CastExpr(PrimitiveType.byteType(), new IntegerLiteralExpr(RandomUtils.nextInt(-127, 127)))
-                return new TestNodeExpression(expr: castExpr)
+                return new TestNodeExpression(node: castExpr)
             case SHORT:
                 CastExpr castExpr = new CastExpr(PrimitiveType.shortType(), new IntegerLiteralExpr(RandomUtils.nextInt(-127, 127)))
-                return new TestNodeExpression(expr: castExpr)
+                return new TestNodeExpression(node: castExpr)
             case INT:
-                return new TestNodeExpression(expr: new IntegerLiteralExpr(RandomUtils.nextInt()))
+                return new TestNodeExpression(node: new IntegerLiteralExpr(RandomUtils.nextInt()))
             case LONG:
-                return new TestNodeExpression(expr: new LongLiteralExpr(RandomUtils.nextLong()))
+                return new TestNodeExpression(node: new LongLiteralExpr(RandomUtils.nextLong()))
             case FLOAT:
-                return new TestNodeExpression(expr: new DoubleLiteralExpr(RandomUtils.nextFloat()))
+                return new TestNodeExpression(node: new DoubleLiteralExpr(RandomUtils.nextFloat()))
             case DOUBLE:
-                return new TestNodeExpression(expr: new DoubleLiteralExpr(RandomUtils.nextDouble()))
+                return new TestNodeExpression(node: new DoubleLiteralExpr(RandomUtils.nextDouble()))
         }
         return null
     }
