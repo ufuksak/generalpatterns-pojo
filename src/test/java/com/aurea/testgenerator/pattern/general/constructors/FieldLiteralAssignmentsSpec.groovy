@@ -2,15 +2,11 @@ package com.aurea.testgenerator.pattern.general.constructors
 
 import com.aurea.testgenerator.MatcherPipelineTest
 import com.aurea.testgenerator.ast.FieldAssignments
-import com.aurea.testgenerator.generation.PatternToTest
+import com.aurea.testgenerator.generation.TestGenerator
+import com.aurea.testgenerator.generation.TestGeneratorResultReporter
 import com.aurea.testgenerator.generation.constructors.FieldLiteralAssignmentsGenerator
-import com.aurea.testgenerator.pattern.PatternMatcher
-import com.aurea.testgenerator.value.ArbitraryClassOrInterfaceTypeFactory
-import com.aurea.testgenerator.value.ArbitraryPrimitiveValuesFactory
-import com.aurea.testgenerator.value.random.ValueFactoryImpl
 
-
-class FieldLiteralFieldAssignmentsSpec extends MatcherPipelineTest {
+class FieldLiteralAssignmentsSpec extends MatcherPipelineTest {
 
     def "assigning integral literals should be asserted"() {
         expect:
@@ -34,7 +30,7 @@ class FieldLiteralFieldAssignmentsSpec extends MatcherPipelineTest {
                     Foo foo = new Foo();
                     
                     assertThat(foo.i).isEqualTo(42);
-                }
+                }                               
             }
         """
     }
@@ -92,13 +88,12 @@ class FieldLiteralFieldAssignmentsSpec extends MatcherPipelineTest {
                     this.i = "CFG";
                     this.b = "BDF";
                 }
-            } 
+            }    
         """, """     
             package sample;
             
-            import static org.assertj.core.api.Assertions.assertThat;
             import org.assertj.core.api.SoftAssertions;
-            import org.junit.Test;
+            import org.junit.Test;             
             
             public class FooTest {
                 
@@ -144,12 +139,9 @@ class FieldLiteralFieldAssignmentsSpec extends MatcherPipelineTest {
     }
 
     @Override
-    PatternMatcher matcher() {
-        return new ConstructorMatcher()
-    }
-
-    @Override
-    PatternToTest patternToTest() {
-        return new FieldLiteralAssignmentsGenerator(new FieldAssignments(solver), solver, valueFactory)
+    TestGenerator generator() {
+        TestGenerator generator = new FieldLiteralAssignmentsGenerator(new FieldAssignments(solver), solver, valueFactory)
+        generator.reporter = reporter
+        generator
     }
 }

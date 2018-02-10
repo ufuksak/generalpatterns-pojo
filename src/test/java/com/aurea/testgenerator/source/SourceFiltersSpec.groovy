@@ -4,6 +4,10 @@ import org.junit.Rule
 import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
+import java.nio.file.Path
+import java.util.function.BinaryOperator
+import java.util.function.UnaryOperator
+
 
 class SourceFiltersSpec extends Specification {
 
@@ -34,7 +38,11 @@ class SourceFiltersSpec extends Specification {
         when:
         def predicate = SourceFilters.hasTest(
                 folder.root.toPath().resolve("project-potato/main"),
-                folder.root.toPath().resolve("project-potato/test"))
+                folder.root.toPath().resolve("project-potato/test"),
+                { Path it ->
+                    Path fileName = it.getFileName()
+                    it.parent.resolve(fileName.toString().replace(".java", "Test.java"))
+                } as UnaryOperator<Path>)
 
         then:
         predicate.test(folder.root.toPath().resolve('project-potato/main/src/example/Foo.java'))

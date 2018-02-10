@@ -6,6 +6,7 @@ import com.aurea.testgenerator.value.ClassOrInterfaceTypeFactory;
 import com.aurea.testgenerator.value.PrimitiveValueFactory;
 import com.aurea.testgenerator.value.Types;
 import com.aurea.testgenerator.value.ValueFactory;
+import com.github.javaparser.ast.ArrayCreationLevel;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
 import com.github.javaparser.ast.expr.ArrayCreationExpr;
@@ -38,15 +39,17 @@ public class ValueFactoryImpl implements ValueFactory {
         } else if (type.isArrayType()) {
             return getExpression(type.asArrayType().getComponentType())
                     .map(testValue -> {
-                        Expression node = testValue.getExpr();
-                        ArrayCreationExpr arrayCreationExpr = new ArrayCreationExpr(type.asArrayType().getElementType());
-                        arrayCreationExpr.setInitializer(new ArrayInitializerExpr(NodeList.nodeList(node)));
-                        testValue.setExpr(arrayCreationExpr);
+                        Expression node = testValue.getNode();
+                        ArrayCreationExpr arrayCreationExpr = new ArrayCreationExpr(
+                                type.asArrayType().getElementType(),
+                                NodeList.nodeList(new ArrayCreationLevel(0)),
+                                new ArrayInitializerExpr(NodeList.nodeList(node)));
+                        testValue.setNode(arrayCreationExpr);
                         return testValue;
                     });
         } else if (Types.isString(type)) {
             TestNodeExpression testNodeExpression = new TestNodeExpression();
-            testNodeExpression.setExpr(typesFactory.get(type.asClassOrInterfaceType()).get().getExpr());
+            testNodeExpression.setNode(typesFactory.get(type.asClassOrInterfaceType()).get().getNode());
             return Optional.of(testNodeExpression);
         } else if (type.isClassOrInterfaceType()) {
             return typesFactory.get(type.asClassOrInterfaceType());
@@ -57,11 +60,11 @@ public class ValueFactoryImpl implements ValueFactory {
     public Optional<TestNodeVariable> getVariable(String name, Type type) {
         Optional<TestNodeExpression> maybeNodeExpression = getExpression(type);
         return maybeNodeExpression.map(nodeExpression -> {
-            Expression initializer = nodeExpression.getExpr();
+            Expression initializer = nodeExpression.getNode();
             VariableDeclarator variableDeclarator = new VariableDeclarator(type, name, initializer);
             TestNodeVariable testNodeVariable = new TestNodeVariable();
             testNodeVariable.setDependency(nodeExpression.getDependency());
-            testNodeVariable.setExpr(new VariableDeclarationExpr(variableDeclarator));
+            testNodeVariable.setNode(new VariableDeclarationExpr(variableDeclarator));
             return Optional.of(testNodeVariable);
         }).orElse(Optional.empty());
     }

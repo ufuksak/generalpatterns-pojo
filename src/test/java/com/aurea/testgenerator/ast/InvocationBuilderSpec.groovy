@@ -89,7 +89,7 @@ class InvocationBuilderSpec extends Specification {
     def "with given parameters"() {
         setup:
         builder.usingForParameters([
-                (new SimpleName("i")) : new TestNodeExpression(expr: new IntegerLiteralExpr(123))
+                (new SimpleName("i")): new TestNodeExpression(node: new IntegerLiteralExpr(123))
         ])
 
         expect:
@@ -107,7 +107,7 @@ class InvocationBuilderSpec extends Specification {
                                               .get()
         Optional<TestNodeExpression> testNodeExpression = builder.build(cd)
         assertThat(testNodeExpression).isPresent()
-        assertThat(testNodeExpression.get().expr.toString())
+        assertThat(testNodeExpression.get().node.toString())
                 .isEqualToNormalizingWhitespace(expected)
     }
 }

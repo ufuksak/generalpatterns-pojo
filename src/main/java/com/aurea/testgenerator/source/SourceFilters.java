@@ -4,6 +4,7 @@ import one.util.streamex.StreamEx;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.function.UnaryOperator;
 
 import static com.aurea.common.ParsingUtils.parseJavaClassName;
 
@@ -37,11 +38,11 @@ public final class SourceFilters {
                 .reduce(p -> false, SourceFilter::or);
     }
 
-    static SourceFilter hasTest(Path srcRoot, Path testRoot) {
+    static SourceFilter hasTest(Path srcRoot, Path testRoot, UnaryOperator<Path> toTestName) {
         return p -> {
             Path relativeToSourceRoot = srcRoot.relativize(p);
-            Path testFilePath = testRoot.resolve(relativeToSourceRoot);
-            return !Files.exists(testFilePath);
+            Path testFilePath = testRoot.resolve(toTestName.apply(relativeToSourceRoot));
+            return Files.exists(testFilePath);
         };
     }
 }

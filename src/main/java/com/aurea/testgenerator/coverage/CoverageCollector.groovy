@@ -1,48 +1,53 @@
 package com.aurea.testgenerator.coverage
 
-import com.aurea.testgenerator.source.UnitWithMatches
-import com.github.javaparser.ast.body.ConstructorDeclaration
+import com.aurea.common.JavaClass
+import com.aurea.testgenerator.generation.TestGeneratorEvent
+import com.aurea.testgenerator.source.Unit
 import groovy.util.logging.Log4j2
+import one.util.streamex.StreamEx
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Component
 
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.atomic.AtomicLong
 
 @Component
 @Log4j2
-class CoverageCollector {
+class CoverageCollector implements ApplicationListener<TestGeneratorEvent> {
     private CoverageService coverageService
-    private AtomicLong totalCoverage
+    private Map<JavaClass, AtomicLong> coverageByUnit = new ConcurrentHashMap<>()
+    private Map<JavaClass, Integer> totalByUnit = new HashMap<>()
 
     @Autowired
     CoverageCollector(CoverageService coverageService) {
         this.coverageService = coverageService
-        totalCoverage = new AtomicLong()
-    }
-
-    void addMatchesCoverage(UnitWithMatches it) {
-        def coverage = it.getCoverage(coverageService)
-        def classCoverageQuery = ClassCoverageQuery.of(it.unit, it.unit.cu.getClassByName(it.unit.className).get())
-        def classLocs = coverageService.getClassCoverage(classCoverageQuery).methodCoverages().mapToInt {
-            it.uncovered
-        }.sum()
-        log.info("$it.unit.fullName: covered $coverage of $classLocs loc")
-        totalCoverage.getAndAdd(coverage)
-    }
-
-    void logMethodCoverage(UnitWithMatches it) {
-        def uncoveredMethods = it.uncoveredMethods.grep(ConstructorDeclaration)
-        // grep can be removed once we accommodate "methods" other than constructors
-        if (uncoveredMethods) {
-            log.info("$it.unit.fullName: uncovered methods:")
-            def uncoveredMethodDeclarations = uncoveredMethods
-                    *.getDeclarationAsString(true, false)
-                    .join('\n\t')
-            log.info("\t$uncoveredMethodDeclarations")
-        }
     }
 
     long getTotalCoverage() {
-        return totalCoverage.get()
+        return StreamEx.of(coverageByUnit.values()).mapToLong { it.longValue() }.sum()
+    }
+
+    @Override
+    void onApplicationEvent(TestGeneratorEvent event) {
+        def unit = event.unit
+        int currentUnitCoverage = incrementUnitCoverage(unit, event)
+        Integer classLocs = totalByUnit.computeIfAbsent(unit.javaClass, { javaClass ->
+            def classCoverageQuery = ClassCoverageQuery.of(unit, unit.cu.getClassByName(unit.className).get())
+            coverageService.getClassCoverage(classCoverageQuery).methodCoverages().mapToInt {
+                it.total
+            }.sum()
+        })
+        log.trace "$unit.fullName: covered $currentUnitCoverage of $classLocs loc"
+    }
+
+    private int incrementUnitCoverage(Unit unit, TestGeneratorEvent event) {
+        int coverage = coverageService.getMethodCoverage(MethodCoverageQuery.of(unit, event.callable)).uncovered
+        AtomicLong atomicCoverage = new AtomicLong(coverage)
+
+        coverageByUnit.merge(unit.javaClass, atomicCoverage, { AtomicLong l1, AtomicLong l2 ->
+            l1.addAndGet(l2.longValue())
+            l1
+        }).intValue()
     }
 }

@@ -1,9 +1,8 @@
 package com.aurea.testgenerator.generation
 
 import com.aurea.common.JavaClass
-import com.aurea.testgenerator.generation.source.Annotations
+import com.aurea.testgenerator.generation.merge.TestNodeMerger
 import com.aurea.testgenerator.source.Unit
-import com.aurea.testgenerator.source.UnitWithMatches
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Modifier
 import com.github.javaparser.ast.NodeList
@@ -14,46 +13,43 @@ import one.util.streamex.StreamEx
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
-import java.util.function.Function
-
 @Component
 @Log4j2
-class UnitTestGenerator implements Function<UnitWithMatches, Optional<TestUnit>> {
+class UnitTestGenerator {
 
-    List<PatternToTest> patternToTests
+    List<TestGenerator> generators
 
     @Autowired
-    UnitTestGenerator(List<PatternToTest> patternToTests) {
-        this.patternToTests = patternToTests
-        log.info "Registered patternToTests: $patternToTests"
+    UnitTestGenerator(List<TestGenerator> generators) {
+        this.generators = generators
+        log.info "Registered generators: $generators"
     }
 
-    @Override
-    Optional<TestUnit> apply(UnitWithMatches unitWithMatches) {
-        PackageDeclaration pd = unitWithMatches.unit.cu.getPackageDeclaration().get()
+    Optional<TestUnit> tryGenerateTest(Unit unitUnderTest) {
+        PackageDeclaration pd = unitUnderTest.cu.getPackageDeclaration().get()
+        ClassOrInterfaceDeclaration testClass = newTestClass(unitUnderTest)
         CompilationUnit testCu = new CompilationUnit(pd,
-                unitWithMatches.unit.cu.getImports(),
-                NodeList.nodeList(newTestClass(unitWithMatches.unit)), null)
-        Unit test = new Unit(testCu, new JavaClass(pd.nameAsString, getTestName(unitWithMatches.unit)), null)
-        TestUnit testUnit = new TestUnit(unitWithMatches.unit, test)
-        StreamEx.of(unitWithMatches.matches).forEach { match ->
-            StreamEx.of(patternToTests).forEach { patternToTest ->
-                try {
-                    patternToTest.accept(match, testUnit)
-                } catch (Exception e) {
-                    log.error "Failed to generate tests for $match", e
-                }
-            }
+                unitUnderTest.cu.getImports(),
+                NodeList.nodeList(testClass), null)
+        Unit test = new Unit(testCu, new JavaClass(pd.nameAsString, getTestName(unitUnderTest)), null)
+        TestUnit testUnit = new TestUnit(test)
+        List<TestGeneratorResult> testGeneratorResults = StreamEx.of(generators).flatMap {
+            it.generate(unitUnderTest).stream()
+        }.toList()
+
+        testUnit.addDependencies(StreamEx.of(testGeneratorResults).flatMap { it.tests.stream() }.toList())
+
+        StreamEx.of(testGeneratorResults).flatMap { it.tests.stream() }.each { testNodeMethod ->
+            testUnit.addTest(testNodeMethod.node)
         }
-        boolean hasTests = StreamEx.of(testUnit.test.cu.findFirst(ClassOrInterfaceDeclaration).get().methods).anyMatch {
-            it.annotations.contains Annotations.TEST
-        }
+
+        boolean hasTests = testGeneratorResults.any { it.tests }
         return hasTests ? Optional.of(testUnit) : Optional.empty()
     }
 
     @Override
     String toString() {
-        'UnitTestGenerator'
+        generators
     }
 
     private static ClassOrInterfaceDeclaration newTestClass(Unit unit) {

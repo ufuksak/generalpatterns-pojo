@@ -4,12 +4,5 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import groovy.transform.Canonical
 
 @Canonical
-class TestNodeMethod implements TestNode<MethodDeclaration> {
-    TestDependency dependency = new TestDependency()
-    MethodDeclaration md
-
-    @Override
-    Optional<MethodDeclaration> getNode() {
-        Optional.of(md)
-    }
+class TestNodeMethod extends TestNode<MethodDeclaration> {
 }

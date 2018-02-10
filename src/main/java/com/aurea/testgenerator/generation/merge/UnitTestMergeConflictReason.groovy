@@ -1,4 +1,4 @@
-package com.aurea.testgenerator.generation
+package com.aurea.testgenerator.generation.merge
 
 
 enum UnitTestMergeConflictReason {

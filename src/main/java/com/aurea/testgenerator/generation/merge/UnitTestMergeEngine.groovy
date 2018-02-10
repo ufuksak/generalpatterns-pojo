@@ -1,5 +1,6 @@
-package com.aurea.testgenerator.generation
+package com.aurea.testgenerator.generation.merge
 
+import com.aurea.testgenerator.generation.TestNodeMethod
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Modifier

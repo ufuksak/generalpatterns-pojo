@@ -1,18 +1,16 @@
 package com.aurea.testgenerator.generation.source
 
-import com.aurea.testgenerator.generation.TestUnit
+import com.aurea.testgenerator.generation.TestDependency
+import com.aurea.testgenerator.generation.TestNodeMethodCallExpr
+import com.aurea.testgenerator.generation.TestNodeStatement
 import com.aurea.testgenerator.value.Types
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.expr.NameExpr
 import com.github.javaparser.ast.stmt.ExpressionStmt
-import com.github.javaparser.ast.stmt.Statement
-import com.github.javaparser.ast.type.ClassOrInterfaceType
-import com.github.javaparser.ast.type.PrimitiveType
 import com.github.javaparser.ast.type.Type
 import com.github.javaparser.resolution.UnsolvedSymbolException
-import com.github.javaparser.resolution.declarations.ResolvedTypeDeclaration
 import com.github.javaparser.resolution.types.ResolvedPrimitiveType
 import com.github.javaparser.resolution.types.ResolvedReferenceType
 import com.github.javaparser.resolution.types.ResolvedType
@@ -26,17 +24,8 @@ class AssertionBuilder {
     static final FLOATING_POINT_OFFSET_FLOAT = '0.001F'
     static final FLOATING_POINT_OFFSET_DOUBLE = '0.001D'
 
-    TestUnit testUnit
     boolean softly
-    List<MethodCallExpr> assertions = []
-
-    static AssertionBuilder buildFor(TestUnit testUnit) {
-        new AssertionBuilder(testUnit)
-    }
-
-    private AssertionBuilder(TestUnit testUnit) {
-        this.testUnit = testUnit
-    }
+    List<TestNodeMethodCallExpr> assertions = []
 
     AssertionBuilder softly(boolean softly) {
         this.softly = softly
@@ -79,35 +68,44 @@ class AssertionBuilder {
         this
     }
 
-    List<Statement> build() {
+    List<TestNodeStatement> build() {
         if (assertions.empty) {
             return Collections.emptyList()
         }
 
-        List<Statement> statements = []
-        testUnit.addImport(Imports.ASSERTJ_ASSERTTHAT)
-        if (softly) {
-            testUnit.addImport(Imports.SOFT_ASSERTIONS)
-            statements << JavaParser.parseStatement("SoftAssertions sa = new SoftAssertions();")
-        }
-        assertions.each {
-            if (softly) {
-                Expression sa = new NameExpr("sa")
-                MethodCallExpr assertThatMethodCall = it.scope.get().asMethodCallExpr()
-                assertThatMethodCall.setScope(sa)
-            }
-            ExpressionStmt stmt = new ExpressionStmt(it)
-            statements << stmt
-        }
-        if (softly) {
-            statements << JavaParser.parseStatement("sa.assertAll();")
-        }
+        softly ? asSoftStatements() : asStatements()
+    }
 
-        statements
+    private List<TestNodeStatement> asStatements() {
+        assertions.collect {
+            new TestNodeStatement(
+                    dependency: it.dependency,
+                    node: new ExpressionStmt(it.node)
+            )
+        }
+    }
+
+    private List<TestNodeStatement> asSoftStatements() {
+        List<TestNodeStatement> softAssertions = new ArrayList<>(assertions.size() + 2)
+        softAssertions << new TestNodeStatement(
+                dependency: new TestDependency(imports: [Imports.SOFT_ASSERTIONS]),
+                //TODO: 'sa' should be taken from name registry, not hardcoded
+                node: JavaParser.parseStatement("SoftAssertions sa = new SoftAssertions();"))
+
+        assertions.each { assertion ->
+            Expression sa = new NameExpr("sa")
+            MethodCallExpr assertThatMethodCall = assertion.node.scope.get().asMethodCallExpr()
+            assertThatMethodCall.setScope(sa)
+            softAssertions << new TestNodeStatement(
+                    dependency: assertion.dependency,
+                    node: new ExpressionStmt(assertion.node)
+            )
+        }
+        softAssertions << new TestNodeStatement(node: JavaParser.parseStatement("sa.assertAll();"))
     }
 
     private void addComparableAssertion(Expression actual, Expression expected) {
-        assertions << parseExpression("${softly ? 'sa.' : ''}assertThat($actual).isEqualByComparingTo($expected)").asMethodCallExpr()
+        assertions << createAssertThatMethodCallExpression("assertThat($actual).isEqualByComparingTo($expected)")
     }
 
     private void addPrimitiveAssertion(ResolvedPrimitiveType type, Expression actual, Expression expected) {
@@ -121,30 +119,41 @@ class AssertionBuilder {
                 type == ResolvedPrimitiveType.INT) {
             addEqualAssertion(actual, expected)
         } else if (type == ResolvedPrimitiveType.FLOAT) {
-            testUnit.addImport Imports.ASSERTJ_OFFSET
-            assertions << parseExpression("${softly ? 'sa.' : ''}assertThat($actual).isCloseTo($expected, Offset.offset($FLOATING_POINT_OFFSET_FLOAT))")
-                    .asMethodCallExpr()
+            TestNodeMethodCallExpr methodCallExpr = createAssertThatMethodCallExpression(
+                    "assertThat($actual).isCloseTo($expected, Offset.offset($FLOATING_POINT_OFFSET_FLOAT))")
+            methodCallExpr.dependency.imports << Imports.ASSERTJ_OFFSET
+            assertions << methodCallExpr
         } else if (type == ResolvedPrimitiveType.DOUBLE) {
-            testUnit.addImport Imports.ASSERTJ_OFFSET
-            assertions << parseExpression("${softly ? 'sa.' : ''}assertThat($actual).isCloseTo($expected, Offset.offset($FLOATING_POINT_OFFSET_DOUBLE))")
-                    .asMethodCallExpr()
+            TestNodeMethodCallExpr methodCallExpr = createAssertThatMethodCallExpression(
+                    "assertThat($actual).isCloseTo($expected, Offset.offset($FLOATING_POINT_OFFSET_DOUBLE))")
+            methodCallExpr.dependency.imports << Imports.ASSERTJ_OFFSET
+            assertions << methodCallExpr
         }
     }
 
     private void addEqualAssertion(Expression actual, Expression expected) {
-        assertions << parseExpression("${softly ? 'sa.' : ''}assertThat($actual).isEqualTo($expected)").asMethodCallExpr()
+        assertions << createAssertThatMethodCallExpression("assertThat($actual).isEqualTo($expected)")
     }
 
     private void addContainsAllAssertion(Expression actual, Expression expected) {
-        assertions << parseExpression("${softly ? 'sa.' : ''}assertThat($actual).containsAll($expected)").asMethodCallExpr()
+        assertions << createAssertThatMethodCallExpression("assertThat($actual).containsAll($expected)")
     }
 
     private void addBooleanPrimitiveAssertion(Expression actual, Expression expected) {
         if (expected.isBooleanLiteralExpr()) {
             boolean value = expected.asBooleanLiteralExpr().value
-            assertions << parseExpression("${softly ? 'sa.' : ''}assertThat($actual).is${value ? 'True' : 'False'}()").asMethodCallExpr()
+            assertions << createAssertThatMethodCallExpression("assertThat($actual).is${value ? 'True' : 'False'}()")
         } else {
             addEqualAssertion(actual, expected)
         }
+    }
+
+    private TestNodeMethodCallExpr createAssertThatMethodCallExpression(String expr) {
+        TestNodeMethodCallExpr testNodeMethodCallExpr = new TestNodeMethodCallExpr()
+        if (!softly) {
+            testNodeMethodCallExpr.dependency.imports << Imports.ASSERTJ_ASSERTTHAT
+        }
+        testNodeMethodCallExpr.node = parseExpression(expr).asMethodCallExpr()
+        testNodeMethodCallExpr
     }
 }

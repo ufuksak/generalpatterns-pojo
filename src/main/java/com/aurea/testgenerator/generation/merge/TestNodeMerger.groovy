@@ -1,7 +1,29 @@
-package com.aurea.testgenerator.generation
+package com.aurea.testgenerator.generation.merge
+
+import com.aurea.testgenerator.generation.Dependable
+import com.aurea.testgenerator.generation.TestDependency
+import com.aurea.testgenerator.generation.TestNode
 
 
-class TestDependencyMerger {
+class TestNodeMerger {
+
+    static <T extends TestNode> T appendDependencies(T to, Dependable from) {
+        TestDependency fromDependency = from.dependency
+        to.dependency.imports.addAll(fromDependency.imports)
+        to.dependency.methodSetups.addAll(fromDependency.methodSetups)
+        to.dependency.classSetups.addAll(fromDependency.classSetups)
+        to.dependency.assignFields.addAll(fromDependency.assignFields)
+        to.dependency.classAnnotations.addAll(fromDependency.classAnnotations)
+
+        to
+    }
+
+    static <T extends TestNode> T appendDependencies(T to, Collection<Dependable> froms) {
+        froms.each {
+            appendDependencies(to, it)
+        }
+        to
+    }
 
     static TestDependency merge(TestDependency left, TestDependency right) {
         TestDependency result = new TestDependency()

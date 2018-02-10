@@ -5,7 +5,6 @@ import com.aurea.coverage.unit.ClassCoverageImpl;
 import com.aurea.coverage.unit.MethodCoverage;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.CallableDeclaration;
-import com.github.javaparser.ast.body.MethodDeclaration;
 import one.util.streamex.StreamEx;
 
 import java.util.List;

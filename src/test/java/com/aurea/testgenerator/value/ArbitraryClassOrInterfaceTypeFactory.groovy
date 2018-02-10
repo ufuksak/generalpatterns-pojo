@@ -1,6 +1,6 @@
 package com.aurea.testgenerator.value
 
-import com.aurea.testgenerator.generation.TestDependencyMerger
+import com.aurea.testgenerator.generation.merge.TestNodeMerger
 import com.aurea.testgenerator.generation.TestNodeExpression
 import com.aurea.testgenerator.generation.source.Imports
 import com.github.javaparser.JavaParser
@@ -21,21 +21,21 @@ class ArbitraryClassOrInterfaceTypeFactory implements ClassOrInterfaceTypeFactor
         if (type.boxedType) {
             return Optional.of(arbitraryPrimitiveValuesFactory.get(type.toUnboxedType()))
         } else if (Types.isString(type)) {
-            return Optional.of(new TestNodeExpression(expr: new StringLiteralExpr("ABC")))
+            return Optional.of(new TestNodeExpression(node: new StringLiteralExpr("ABC")))
         } else if (Types.isList(type) || Types.isCollection(type) || Types.isIterable(type)) {
             Optional<TestNodeExpression> componentValue = getCollectionComponentValue(type)
             return componentValue.map {
                 it.dependency.imports << Imports.COLLECTIONS
-                Expression component = it.expr
-                it.expr = JavaParser.parseExpression("Collections.singletonList($component)")
+                Expression component = it.node
+                it.node = JavaParser.parseExpression("Collections.singletonList($component)")
                 it
             }
         } else if (Types.isSet(type)) {
             Optional<TestNodeExpression> componentValue = getCollectionComponentValue(type)
             return componentValue.map {
                 it.dependency.imports << Imports.COLLECTIONS
-                Expression component = it.expr
-                it.expr = JavaParser.parseExpression("Collections.singleton($component)")
+                Expression component = it.node
+                it.node = JavaParser.parseExpression("Collections.singleton($component)")
                 it
             }
         } else if (Types.isMap(type)) {
@@ -49,9 +49,10 @@ class ArbitraryClassOrInterfaceTypeFactory implements ClassOrInterfaceTypeFactor
                 TestNodeExpression testNodeExpression = new TestNodeExpression()
                 TestNodeExpression keyExpression = keyTypeValue.get()
                 TestNodeExpression valueExpression = valueTypeValue.get()
-                testNodeExpression.dependency = TestDependencyMerger.merge(keyExpression.dependency, valueExpression.dependency)
+                TestNodeMerger.appendDependencies(testNodeExpression, keyExpression)
+                TestNodeMerger.appendDependencies(testNodeExpression, valueExpression)
 
-                testNodeExpression.expr = JavaParser.parseExpression("ImmutableMap.of(${keyExpression.expr}, ${valueExpression.expr})")
+                testNodeExpression.node = JavaParser.parseExpression("ImmutableMap.of(${keyExpression.node}, ${valueExpression.node})")
                 testNodeExpression.dependency.imports << Imports.IMMUTABLE_MAP
 
                 return Optional.of(testNodeExpression)
@@ -72,7 +73,7 @@ class ArbitraryClassOrInterfaceTypeFactory implements ClassOrInterfaceTypeFactor
             return Optional.of(expression)
         } else {
             TestNodeExpression expression = new TestNodeExpression()
-            expression.expr = new MethodCallExpr("mock", new ClassExpr(type))
+            expression.node = new MethodCallExpr("mock", new ClassExpr(type))
             expression.dependency.imports << Imports.STATIC_MOCK
             return Optional.of(expression)
         }

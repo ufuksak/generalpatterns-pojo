@@ -2,9 +2,8 @@ package com.aurea.testgenerator.generation
 
 import com.github.javaparser.ast.Node
 
-interface TestNode<T extends Node> {
 
-    TestDependency getDependency()
-
-    Optional<T> getNode()
+abstract class TestNode<T extends Node> implements Dependable {
+    TestDependency dependency = new TestDependency()
+    T node
 }
