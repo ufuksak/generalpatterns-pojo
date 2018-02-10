@@ -16,29 +16,29 @@ public final class SourceFilters {
         return p -> true;
     }
 
-    static SourceFilter nameHasSuffix(String suffix) {
+    public static SourceFilter nameHasSuffix(String suffix) {
         return p -> parseJavaClassName(p).endsWith(suffix);
     }
 
-    static SourceFilter nameContains(String part) {
+    public static SourceFilter nameContains(String part) {
         return p -> parseJavaClassName(p).contains(part);
     }
 
-    static SourceFilter nameEquals(String name) {
+    public static SourceFilter nameEquals(String name) {
         return p -> parseJavaClassName(p).equals(name);
     }
 
-    static SourceFilter pathHasPrefix(Path prefix) {
+    public static SourceFilter pathHasPrefix(Path prefix) {
         return path -> path.startsWith(prefix);
     }
 
-    static SourceFilter pathHasPrefix(Path... prefixes) {
+    public static SourceFilter pathHasPrefix(Path... prefixes) {
         return StreamEx.of(prefixes)
                 .map(SourceFilters::pathHasPrefix)
                 .reduce(p -> false, SourceFilter::or);
     }
 
-    static SourceFilter hasTest(Path srcRoot, Path testRoot, UnaryOperator<Path> toTestName) {
+    public static SourceFilter hasTest(Path srcRoot, Path testRoot, UnaryOperator<Path> toTestName) {
         return p -> {
             Path relativeToSourceRoot = srcRoot.relativize(p);
             Path testFilePath = testRoot.resolve(toTestName.apply(relativeToSourceRoot));

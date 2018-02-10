@@ -134,7 +134,7 @@ class InvocationBuilder {
     }
 
     private static Optional<ConstructorDeclaration> findSimplestConstructor(TypeDeclaration td) {
-        NodeList<ConstructorDeclaration> constructorDeclarations = getConstructors(td)
+        Collection<ConstructorDeclaration> constructorDeclarations = getConstructors(td)
         findNonPrivateLeastArgumentsConstructor(constructorDeclarations)
     }
 
@@ -146,7 +146,8 @@ class InvocationBuilder {
         if (td.annotationDeclaration) {
             return Collections.emptyList()
         } else {
-            return (td as NodeWithConstructors).constructors
+            List<ConstructorDeclaration> cds = (td as NodeWithConstructors).getConstructors()
+            return cds
         }
     }
 

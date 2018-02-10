@@ -5,10 +5,12 @@ import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.body.ConstructorDeclaration
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
+import groovy.util.logging.Log4j2
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
+@Log4j2
 abstract class AbstractConstructorTestGenerator implements TestGenerator {
 
     @Autowired
@@ -24,12 +26,16 @@ abstract class AbstractConstructorTestGenerator implements TestGenerator {
             @Override
             void visit(ConstructorDeclaration n, JavaParserFacade arg) {
                 if (shouldBeVisited(unit, n)) {
-                    TestGeneratorResult result = generate(n)
-                    if (!result.type) {
-                        result.type = getType()
+                    try {
+                        TestGeneratorResult result = generate(n)
+                        if (!result.type) {
+                            result.type = getType()
+                        }
+                        reporter.publish(result, unit, n)
+                        results << result
+                    } catch (Exception e) {
+                        log.error "Unhandled error while generating for $unit.fullName", e
                     }
-                    reporter.publish(result, unit, n)
-                    results << result
                 }
             }
         }.visit(unit.cu, solver)

@@ -73,13 +73,13 @@ class RandomJavaLangTypesFactory implements ClassOrInterfaceTypeFactory {
             }
         } else if (Types.isDate(type)) {
             TestNodeExpression expression = new TestNodeExpression(
-                    expr: JavaParser.parseExpression("new java.util.Date(${RandomUtils.nextInt(100_000)})")
+                    node: JavaParser.parseExpression("new java.util.Date(${RandomUtils.nextInt(100_000)})")
             )
             expression.dependency.imports << Imports.DATE
             return Optional.of(expression)
         } else if (Types.isSqlDate(type)) {
             TestNodeExpression expression = new TestNodeExpression(
-                    expr: JavaParser.parseExpression("new java.sql.Date(${RandomUtils.nextInt(100_000)})")
+                    node: JavaParser.parseExpression("new java.sql.Date(${RandomUtils.nextInt(100_000)})")
             )
             expression.dependency.imports << Imports.SQL_DATE
             return Optional.of(expression)
