@@ -111,6 +111,7 @@ class EmptyConstructorSpec extends MatcherPipelineTest {
     TestGenerator generator() {
         TestGenerator generator = new EmptyConstructorGenerator(valueFactory)
         generator.reporter = reporter
+        generator.namerFactory = namerFactory
         generator
     }
 }

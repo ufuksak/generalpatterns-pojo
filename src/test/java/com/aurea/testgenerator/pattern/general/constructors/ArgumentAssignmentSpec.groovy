@@ -27,7 +27,7 @@ class ArgumentAssignmentSpec extends MatcherPipelineTest {
             public class FooTest {
                 
                 @Test
-                public void test_Foo_AssignsArgumentsToFields() throws Exception {
+                public void test_FooWithOneArgument_AssignsGivenArguments() throws Exception {
                     int i = 42;
                     
                     Foo foo = new Foo(i);
@@ -58,7 +58,7 @@ class ArgumentAssignmentSpec extends MatcherPipelineTest {
             public class FooTest {
                 
                 @Test
-                public void test_Foo_AssignsArgumentsToFields() throws Exception {
+                public void test_FooWithOneArgument_AssignsGivenArguments() throws Exception {
                     String i = "ABC";
                     
                     Foo foo = new Foo(i);
@@ -93,7 +93,7 @@ class ArgumentAssignmentSpec extends MatcherPipelineTest {
             public class FooTest {
                 
                 @Test
-                public void test_Foo_AssignsArgumentsToFields() throws Exception {
+                public void test_FooWithOneArgument_AssignsGivenArguments() throws Exception {
                     List<String> i = Collections.singletonList("ABC");
                     
                     Foo foo = new Foo(i);
@@ -108,6 +108,7 @@ class ArgumentAssignmentSpec extends MatcherPipelineTest {
     TestGenerator generator() {
         TestGenerator generator = new ArgumentAssignmentGenerator(new FieldAssignments(solver), solver, valueFactory)
         generator.reporter = reporter
+        generator.namerFactory = namerFactory
         generator
     }
 }

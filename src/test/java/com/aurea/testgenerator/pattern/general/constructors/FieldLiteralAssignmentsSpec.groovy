@@ -26,7 +26,7 @@ class FieldLiteralAssignmentsSpec extends MatcherPipelineTest {
             public class FooTest {
                 
                 @Test
-                public void test_Foo_AssignsConstantsToFields() throws Exception {
+                public void test_Foo_AssignsConstants() throws Exception {
                     Foo foo = new Foo();
                     
                     assertThat(foo.i).isEqualTo(42);
@@ -69,7 +69,7 @@ class FieldLiteralAssignmentsSpec extends MatcherPipelineTest {
             public class FooTest {
                 
                 @Test
-                public void test_Foo_AssignsConstantsToFields() throws Exception {
+                public void test_Foo_AssignsConstants() throws Exception {
                     Foo foo = new Foo();
                     
                     assertThat(foo.getI()).isEqualTo("ABC");
@@ -98,7 +98,7 @@ class FieldLiteralAssignmentsSpec extends MatcherPipelineTest {
             public class FooTest {
                 
                 @Test
-                public void test_Foo_AssignsConstantsToFields() throws Exception {
+                public void test_Foo_AssignsConstants() throws Exception {
                     Foo foo = new Foo();
                     
                     SoftAssertions sa = new SoftAssertions();
@@ -129,7 +129,7 @@ class FieldLiteralAssignmentsSpec extends MatcherPipelineTest {
             public class FooTest {
                 
                 @Test
-                public void test_Foo_AssignsConstantsToFields() throws Exception {
+                public void test_Foo_AssignsConstants() throws Exception {
                     Foo foo = new Foo();
                     
                     assertThat(foo.i).isEqualTo("BDF");
@@ -142,6 +142,7 @@ class FieldLiteralAssignmentsSpec extends MatcherPipelineTest {
     TestGenerator generator() {
         TestGenerator generator = new FieldLiteralAssignmentsGenerator(new FieldAssignments(solver), solver, valueFactory)
         generator.reporter = reporter
+        generator.namerFactory = namerFactory
         generator
     }
 }

@@ -1,14 +1,19 @@
 package com.aurea.testgenerator.generation.constructors
 
+import com.aurea.testgenerator.ast.ASTNodeUtils
+import com.aurea.testgenerator.ast.Callability
 import com.aurea.testgenerator.ast.FieldAssignments
 import com.aurea.testgenerator.ast.InvocationBuilder
 import com.aurea.testgenerator.generation.*
 import com.aurea.testgenerator.generation.merge.TestNodeMerger
+import com.aurea.testgenerator.generation.names.TestMethodNomenclature
 import com.aurea.testgenerator.generation.source.AssertionBuilder
 import com.aurea.testgenerator.generation.source.Imports
+import com.aurea.testgenerator.source.Unit
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.body.ConstructorDeclaration
+import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.expr.*
 import com.github.javaparser.ast.stmt.ExpressionStmt
 import com.github.javaparser.ast.stmt.Statement
@@ -37,7 +42,7 @@ class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
     }
 
     @Override
-    protected TestGeneratorResult generate(ConstructorDeclaration cd) {
+    protected TestGeneratorResult generate(ConstructorDeclaration cd, Unit unitUnderTest) {
         TestGeneratorResult result = new TestGeneratorResult()
         String instanceName = cd.nameAsString.uncapitalize()
         Expression scope = new NameExpr(instanceName)
@@ -89,10 +94,12 @@ class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
                     .usingForParameters(variableExpressionsByNames)
                     .build(cd)
             constructorCall.ifPresent { constructCallExpr ->
+                TestMethodNomenclature testMethodNomenclature = namerFactory.getTestMethodNomenclature(unitUnderTest.javaClass)
                 TestNodeMerger.appendDependencies(assignsArguments, constructCallExpr)
+                String testName = testMethodNomenclature.requestTestMethodName(getType(), cd)
                 String assignsArgumentsCode = """
                     @Test
-                    public void test_${cd.nameAsString}_AssignsArgumentsToFields() throws Exception {
+                    public void ${testName}() throws Exception {
                         ${variableStatements.join(System.lineSeparator())}
         
                         ${cd.nameAsString} $instanceName = ${constructCallExpr.node};
@@ -112,5 +119,10 @@ class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
     @Override
     protected TestType getType() {
         ConstructorTypes.ARGUMENT_ASSIGNMENTS
+    }
+
+    @Override
+    protected boolean shouldBeVisited(Unit unit, ConstructorDeclaration cd) {
+        Callability.isCallableFromTests(cd) && ASTNodeUtils.parents(cd, TypeDeclaration).noneMatch { it.enumDeclaration }
     }
 }

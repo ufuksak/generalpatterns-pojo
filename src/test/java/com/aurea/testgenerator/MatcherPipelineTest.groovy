@@ -8,6 +8,7 @@ import com.aurea.testgenerator.extensions.Extensions
 import com.aurea.testgenerator.generation.TestGenerator
 import com.aurea.testgenerator.generation.TestGeneratorResultReporter
 import com.aurea.testgenerator.generation.UnitTestGenerator
+import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.source.*
 import com.aurea.testgenerator.value.ArbitraryClassOrInterfaceTypeFactory
 import com.aurea.testgenerator.value.ArbitraryPrimitiveValuesFactory
@@ -41,6 +42,7 @@ abstract class MatcherPipelineTest extends Specification {
             new ArbitraryClassOrInterfaceTypeFactory(),
             new ArbitraryPrimitiveValuesFactory())
     TestGeneratorResultReporter reporter = new TestGeneratorResultReporter(mock(ApplicationEventPublisher))
+    NomenclatureFactory namerFactory = new NomenclatureFactory()
 
     void setupSpec() {
         Extensions.enable()

@@ -1,16 +1,16 @@
 package com.aurea.testgenerator.coverage
 
 import com.aurea.testgenerator.source.Unit
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
+import com.github.javaparser.ast.body.TypeDeclaration
 import groovy.transform.Immutable
 
-@Immutable(knownImmutableClasses = [Unit.class, ClassOrInterfaceDeclaration.class])
+@Immutable(knownImmutableClasses = [Unit.class, TypeDeclaration.class])
 class ClassCoverageQuery {
     Unit unit
-    ClassOrInterfaceDeclaration classOfTheMethod
+    TypeDeclaration type
     int anonymousClassIndex
 
-    static ClassCoverageQuery of(Unit unit, ClassOrInterfaceDeclaration classOfTheMethod) {
-        new ClassCoverageQuery(unit, classOfTheMethod, 0)
+    static ClassCoverageQuery of(Unit unit, TypeDeclaration type) {
+        new ClassCoverageQuery(unit, type, 0)
     }
 }

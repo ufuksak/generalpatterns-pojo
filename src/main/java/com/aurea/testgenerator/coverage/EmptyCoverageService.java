@@ -12,7 +12,7 @@ public class EmptyCoverageService implements CoverageService {
     }
 
     @Override
-    public ClassCoverage getClassCoverage(ClassCoverageQuery classCoverageQuery) {
+    public ClassCoverage getTypeCoverage(ClassCoverageQuery classCoverageQuery) {
         return ClassCoverageImpl.EMPTY;
     }
 }

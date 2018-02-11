@@ -19,11 +19,11 @@ class TestGeneratorResultReporter {
 
     void publish(TestGeneratorResult result, Unit unit, CallableDeclaration n) {
         if (result.tests.empty) {
-            publisher.publishEvent(new ClassifiedButNoTestsEvent(this, unit, n, result))
+            publisher.publishEvent(new TestGeneratorEvent(this, unit, n, result, TestGeneratorEventType.NOT_CLASSIFIED))
         } else if (!result.errors.empty) {
-            publisher.publishEvent(new ClassifiedButFailedToGenerateEvent(this, unit, n, result))
+            publisher.publishEvent(new TestGeneratorEvent(this, unit, n, result, TestGeneratorEventType.CLASSIFIED_BUT_FAILED))
         } else {
-            publisher.publishEvent(new GeneratedTestsEvent(this, unit, n, result))
+            publisher.publishEvent(new TestGeneratorEvent(this, unit, n, result, TestGeneratorEventType.GENERATED))
         }
     }
 }

@@ -10,6 +10,9 @@ import one.util.streamex.StreamEx
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
+import java.util.concurrent.atomic.AtomicInteger
+import java.util.concurrent.atomic.LongAdder
+
 @Component
 @Log4j2
 class Pipeline {
@@ -36,9 +39,14 @@ class Pipeline {
         log.info "Getting units from $source"
         StreamEx<Unit> filteredUnits = source.units(sourceFilter)
 
-        log.info "Generating tests for ${source.size(sourceFilter)} units"
+        long totalUnits = source.size(sourceFilter)
+        AtomicInteger counter = new AtomicInteger()
+        log.info "Generating tests for ${totalUnits} units"
         filteredUnits
-                .map { unitTestGenerator.tryGenerateTest(it) }
+                .map {
+                    log.debug "${counter.incrementAndGet()} / $totalUnits: $it.fullName"
+                    unitTestGenerator.tryGenerateTest(it)
+                }
                 .filter { it.present }
                 .map { it.get() }
                 .each { unitTestWriter.write(it.test) }

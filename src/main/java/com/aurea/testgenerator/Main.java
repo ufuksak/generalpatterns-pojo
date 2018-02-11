@@ -14,6 +14,7 @@ import org.springframework.boot.autoconfigure.info.ProjectInfoAutoConfiguration;
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration;
 import org.springframework.boot.autoconfigure.jmx.JmxAutoConfiguration;
 import org.springframework.boot.autoconfigure.web.WebClientAutoConfiguration;
+import org.springframework.context.ConfigurableApplicationContext;
 
 @SpringBootApplication
 @EnableAutoConfiguration(
@@ -36,7 +37,8 @@ public class Main implements CommandLineRunner {
         Stopwatch stopwatch = Stopwatch.createStarted();
         SpringApplication app = new SpringApplication(Main.class);
         app.setBannerMode(Banner.Mode.OFF);
-        app.run(args);
+        ConfigurableApplicationContext context = app.run(args);
+        context.close();
         logger.info("Executed in {}", stopwatch);
     }
 

@@ -13,6 +13,7 @@ class Callability {
         ASTNodeUtils.parents(cd, TypeDeclaration).noneMatch {
             return it.private ||
                     it.isAnonymous() ||
+                    isAbstract(it) ||
                     isLocalClass(it)
         }
     }
@@ -20,5 +21,10 @@ class Callability {
     static boolean isLocalClass(TypeDeclaration td) {
         td instanceof ClassOrInterfaceDeclaration &&
                 (td as ClassOrInterfaceDeclaration).isLocalClassDeclaration()
+    }
+
+    static boolean isAbstract(TypeDeclaration td) {
+        td instanceof ClassOrInterfaceDeclaration &&
+                (td as ClassOrInterfaceDeclaration).isAbstract()
     }
 }

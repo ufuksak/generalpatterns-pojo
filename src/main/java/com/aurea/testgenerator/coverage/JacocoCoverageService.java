@@ -57,9 +57,9 @@ public class JacocoCoverageService implements CoverageService {
     }
 
     @Override
-    public ClassCoverage getClassCoverage(ClassCoverageQuery query) {
+    public ClassCoverage getTypeCoverage(ClassCoverageQuery query) {
         String classNameInJacocoFormat = toClassCoverageName(query.getUnit(), query
-                .getClassOfTheMethod(), query
+                .getType(), query
                 .getAnonymousClassIndex());
         return coverageRepository.getClassCoverage(ClassCoverageCriteria.of(query.getUnit()
                 .getPackageName(), classNameInJacocoFormat)).orElseGet(() -> {

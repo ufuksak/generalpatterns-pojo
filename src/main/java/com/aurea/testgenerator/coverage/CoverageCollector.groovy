@@ -33,8 +33,8 @@ class CoverageCollector implements ApplicationListener<TestGeneratorEvent> {
         def unit = event.unit
         int currentUnitCoverage = incrementUnitCoverage(unit, event)
         Integer classLocs = totalByUnit.computeIfAbsent(unit.javaClass, { javaClass ->
-            def classCoverageQuery = ClassCoverageQuery.of(unit, unit.cu.getClassByName(unit.className).get())
-            coverageService.getClassCoverage(classCoverageQuery).methodCoverages().mapToInt {
+            def typeCoverageQuery = ClassCoverageQuery.of(unit, unit.cu.getType(0))
+            coverageService.getTypeCoverage(typeCoverageQuery).methodCoverages().mapToInt {
                 it.total
             }.sum()
         })

@@ -7,5 +7,5 @@ public interface CoverageService {
 
     MethodCoverage getMethodCoverage(MethodCoverageQuery methodCoverageQuery);
 
-    ClassCoverage getClassCoverage(ClassCoverageQuery classCoverageQuery);
+    ClassCoverage getTypeCoverage(ClassCoverageQuery classCoverageQuery);
 }

@@ -23,12 +23,12 @@ public class NoCoverageService implements CoverageService {
     }
 
     @Override
-    public ClassCoverage getClassCoverage(ClassCoverageQuery classCoverageQuery) {
-        List<CallableDeclaration> methodDeclarations = classCoverageQuery.getClassOfTheMethod().findAll(CallableDeclaration.class);
+    public ClassCoverage getTypeCoverage(ClassCoverageQuery classCoverageQuery) {
+        List<CallableDeclaration> methodDeclarations = classCoverageQuery.getType().findAll(CallableDeclaration.class);
         List<MethodCoverage> methodCoverages = StreamEx.of(methodDeclarations)
                 .map(this::getMethodCoverage)
                 .toList();
 
-        return new ClassCoverageImpl(classCoverageQuery.getClassOfTheMethod().getNameAsString(), methodCoverages);
+        return new ClassCoverageImpl(classCoverageQuery.getType().getNameAsString(), methodCoverages);
     }
 }

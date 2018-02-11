@@ -27,7 +27,7 @@ class RandomPrimitiveValueFactory implements PrimitiveValueFactory {
             case INT:
                 return new TestNodeExpression(node: new IntegerLiteralExpr(RandomUtils.nextInt()))
             case LONG:
-                return new TestNodeExpression(node: new LongLiteralExpr(RandomUtils.nextLong()))
+                return new TestNodeExpression(node: new LongLiteralExpr(RandomUtils.nextLong().toString() + "L"))
             case FLOAT:
                 return new TestNodeExpression(node: new DoubleLiteralExpr(RandomUtils.nextFloat()))
             case DOUBLE:

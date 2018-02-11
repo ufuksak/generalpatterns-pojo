@@ -1,6 +1,7 @@
 package com.aurea.testgenerator.generation.constructors
 
 import com.aurea.testgenerator.generation.*
+import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.body.ConstructorDeclaration
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
@@ -19,6 +20,9 @@ abstract class AbstractConstructorTestGenerator implements TestGenerator {
     @Autowired
     TestGeneratorResultReporter reporter
 
+    @Autowired
+    NomenclatureFactory namerFactory
+
     @Override
     Collection<TestGeneratorResult> generate(Unit unit) {
         List<TestGeneratorResult> results = []
@@ -27,7 +31,7 @@ abstract class AbstractConstructorTestGenerator implements TestGenerator {
             void visit(ConstructorDeclaration n, JavaParserFacade arg) {
                 if (shouldBeVisited(unit, n)) {
                     try {
-                        TestGeneratorResult result = generate(n)
+                        TestGeneratorResult result = generate(n, unit)
                         if (!result.type) {
                             result.type = getType()
                         }
@@ -42,7 +46,7 @@ abstract class AbstractConstructorTestGenerator implements TestGenerator {
         results
     }
 
-    protected abstract TestGeneratorResult generate(ConstructorDeclaration cd)
+    protected abstract TestGeneratorResult generate(ConstructorDeclaration cd, Unit unitUnderTest)
 
     protected abstract TestType getType()
 
