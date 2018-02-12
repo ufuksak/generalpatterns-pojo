@@ -4,36 +4,23 @@ import com.github.javaparser.ast.AccessSpecifier
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.FieldAccessExpr
-import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.stmt.BlockStmt
 import com.github.javaparser.ast.stmt.Statement
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration
 import com.github.javaparser.resolution.declarations.ResolvedTypeDeclaration
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserMethodDeclaration
-import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
 
-@Log4j2
-class FieldAccessorBuilder {
+
+class GetterFinder {
 
     ResolvedFieldDeclaration fieldDeclaration
-    Expression scope
+    boolean isStatic
 
-    FieldAccessorBuilder(ResolvedFieldDeclaration fieldDeclaration, Expression scope) {
-        assert !fieldDeclaration.static
+    GetterFinder(ResolvedFieldDeclaration fieldDeclaration, boolean isStatic = false) {
         this.fieldDeclaration = fieldDeclaration
-        this.scope = scope
-    }
-
-    Optional<Expression> build() {
-        if (fieldDeclaration.accessSpecifier() != AccessSpecifier.PRIVATE) {
-            return Optional.ofNullable(
-                    new FieldAccessExpr(scope, fieldDeclaration.name))
-        } else {
-            Optional<ResolvedMethodDeclaration> getter = tryToFindGetter()
-            return getter.map { new MethodCallExpr(scope, it.name) }
-        }
+        this.isStatic = isStatic
     }
 
     Optional<ResolvedMethodDeclaration> tryToFindGetter() {
@@ -51,6 +38,7 @@ class FieldAccessorBuilder {
 
     private boolean isGetter(ResolvedMethodDeclaration rmd) {
         rmd.accessSpecifier() != AccessSpecifier.PRIVATE &&
+                (isStatic ? rmd.isStatic() : !rmd.isStatic()) &&
                 rmd.returnType == fieldDeclaration.getType() &&
                 checkSizeForJavaParserDeclaration(rmd)
     }
@@ -82,4 +70,3 @@ class FieldAccessorBuilder {
         false
     }
 }
-

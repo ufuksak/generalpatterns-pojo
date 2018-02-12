@@ -25,20 +25,20 @@ class BaseConfig {
     @Bean
     SourceFilter sourceFilter() {
         SourceFilters.empty()
-    }
+    }                                                        
 
     @Bean
     JavaParserFacade javaParserFacade(ProjectConfiguration projectConfiguration) {
         JavaParserFacade.get(new CombinedTypeSolver(
                 new ReflectionTypeSolver(),
-                new JavaParserTypeSolver(projectConfiguration.src.toFile())
+                new JavaParserTypeSolver(projectConfiguration.srcPath.toFile())
         ))
     }
 
     @Bean
     CoverageService coverageService(ProjectConfiguration projectConfiguration) {
         if (projectConfiguration.jacoco) {
-            return new JacocoCoverageService(JacocoCoverageRepository.fromFile(projectConfiguration.jacoco))
+            return new JacocoCoverageService(JacocoCoverageRepository.fromFile(projectConfiguration.jacocoPath))
         } else {
             return new NoCoverageService()
         }

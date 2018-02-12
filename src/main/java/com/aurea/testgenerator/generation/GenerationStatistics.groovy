@@ -52,15 +52,13 @@ class GenerationStatistics implements ApplicationListener<TestGeneratorEvent> {
     @PreDestroy
     void logStats() {
         String text = """
-        Generations: $generations
-        Generation stats:
-${EntryStream.of(counters).join(': ', '\t', System.lineSeparator()).join("")}
-        Total generated tests: $tests
-        Generated tests per type:                                            
-${EntryStream.of(testsPerType).join(': ', '\t', System.lineSeparator()).join("")}
-        Generated tests per unit:
-${EntryStream.of(testsPerUnit).join(': ', '\t', System.lineSeparator()).join("")}        
-        Errors per unit:
+\tGeneration stats: $generations 
+\t${EntryStream.of(counters).join(': ', '\t', System.lineSeparator() + '\t').join("")}
+\tGenerated tests per type: $tests                                            
+\t${EntryStream.of(testsPerType).join(': ', '\t', System.lineSeparator() + '\t').join("")}
+\tGenerated tests per unit:
+\t${EntryStream.of(testsPerUnit).join(': ', '\t', System.lineSeparator() + '\t').join("")}        
+\tErrors per unit:
 ${printErrorsPerUnit()}
         """
         log.info text

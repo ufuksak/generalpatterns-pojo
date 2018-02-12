@@ -1,6 +1,7 @@
 package com.aurea.testgenerator.generation.source
 
 import com.aurea.testgenerator.TestUnitSpec
+import com.aurea.testgenerator.ast.FieldAccessResult
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.FieldDeclaration
@@ -18,6 +19,19 @@ class StaticFieldAccessorBuilderSpec extends TestUnitSpec {
                 static int i = 123; 
             }
         """, "Foo.i")
+    }
+
+    def "should be able to build expression for a static private variable with public static getter"() {
+        expect:
+        expectOnCode("""
+            class Foo {
+                private static int i = 123;
+                
+                public static int getI() {
+                    return i;
+                }
+            }
+        """, "Foo.getI()")
     }
 
     def "should be able to build expression for a static public variable of inner class"() {
@@ -45,12 +59,12 @@ class StaticFieldAccessorBuilderSpec extends TestUnitSpec {
         injectSolver(cu)
         FieldDeclaration fd = cu.findAll(FieldDeclaration).first()
         ResolvedFieldDeclaration rfd = fd.resolve()
-        Optional<Expression> expression = new StaticFieldAccessorBuilder(rfd).build()
+        FieldAccessResult result = new StaticFieldAccessorBuilder(rfd).build()
 
-        assertThat(expression)
-                .describedAs("Expected to have resolved access expression but none was generated")
-                .isPresent()
-        assertThat(expression.get().toString()).isEqualToIgnoringWhitespace(expected)
+        assertThat(result.type)
+                .describedAs("Expected to have resolved access result but none was generated")
+                .isEqualTo(FieldAccessResult.Type.SUCCESS)
+        assertThat(result.expression.toString()).isEqualToIgnoringWhitespace(expected)
     }
 
     void expectNoExpressionOnCode(String code) {
@@ -58,10 +72,8 @@ class StaticFieldAccessorBuilderSpec extends TestUnitSpec {
         injectSolver(cu)
         FieldDeclaration fd = cu.findAll(FieldDeclaration).first()
         ResolvedFieldDeclaration rfd = fd.resolve()
-        Optional<Expression> expression = new StaticFieldAccessorBuilder(rfd).build()
+        FieldAccessResult result = new StaticFieldAccessorBuilder(rfd).build()
 
-        assertThat(expression)
-                .describedAs("Expected to not to have resolved access expression but it was generated")
-                .isEmpty()
+        assertThat(result.getType()).isEqualTo(FieldAccessResult.Type.NO_ACCESS)
     }
 }

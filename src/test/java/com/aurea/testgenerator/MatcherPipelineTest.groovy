@@ -42,16 +42,16 @@ abstract class MatcherPipelineTest extends Specification {
             new ArbitraryClassOrInterfaceTypeFactory(),
             new ArbitraryPrimitiveValuesFactory())
     TestGeneratorResultReporter reporter = new TestGeneratorResultReporter(mock(ApplicationEventPublisher))
-    NomenclatureFactory namerFactory = new NomenclatureFactory()
+    NomenclatureFactory nomenclatureFactory = new NomenclatureFactory()
 
     void setupSpec() {
         Extensions.enable()
     }
 
     void setup() {
-        cfg.out = folder.newFolder("test-out").toPath()
-        cfg.src = folder.newFolder("src").toPath()
-        cfg.testSrc = folder.newFolder("test").toPath()
+        cfg.out = folder.newFolder("test-out").absolutePath
+        cfg.src = folder.newFolder("src").absolutePath
+        cfg.testSrc = folder.newFolder("test").absolutePath
 
         source = new PathUnitSource(new JavaSourceFinder(cfg), cfg, SourceFilters.empty())
         TestGenerator generator = generator()
@@ -72,9 +72,9 @@ abstract class MatcherPipelineTest extends Specification {
 
         pipeline.start()
 
-        File testFile = cfg.out.resolve('sample').resolve('FooTest.java').toFile()
+        File testFile = cfg.outPath.resolve('sample').resolve('FooTest.java').toFile()
         assertThat(testFile).describedAs("Expected test to be generated but it wasn't").exists()
-        String resultingTest = cfg.out.resolve('sample').resolve('FooTest.java').toFile().text
+        String resultingTest = cfg.outPath.resolve('sample').resolve('FooTest.java').toFile().text
 
         assertThat(resultingTest).isEqualToNormalizingWhitespace(expectedTest)
     }
@@ -84,13 +84,13 @@ abstract class MatcherPipelineTest extends Specification {
 
         pipeline.start()
 
-        File resultingTest = cfg.out.resolve('sample').resolve('FooTest.java').toFile()
+        File resultingTest = cfg.outPath.resolve('sample').resolve('FooTest.java').toFile()
 
         assertThat(resultingTest).doesNotExist()
     }
 
     private void createTestedCode(String code) {
-        File testFile = new File(cfg.src.toFile().absolutePath + "/sample", 'Foo.java')
+        File testFile = new File(cfg.srcPath.toFile().absolutePath + "/sample", 'Foo.java')
         testFile.parentFile.mkdirs()
         testFile.write """
         package sample;
@@ -101,7 +101,7 @@ abstract class MatcherPipelineTest extends Specification {
 
     JavaParserFacade getSolver() {
         JavaParserFacade.get(new CombinedTypeSolver(
-                new JavaParserTypeSolver(cfg.src.toFile()),
+                new JavaParserTypeSolver(cfg.srcPath.toFile()),
                 new ReflectionTypeSolver()
         ))
     }

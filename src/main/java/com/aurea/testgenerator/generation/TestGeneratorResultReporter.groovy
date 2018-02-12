@@ -17,13 +17,11 @@ class TestGeneratorResultReporter {
         this.publisher = publisher
     }
 
-    void publish(TestGeneratorResult result, Unit unit, CallableDeclaration n) {
-        if (result.tests.empty) {
-            publisher.publishEvent(new TestGeneratorEvent(this, unit, n, result, TestGeneratorEventType.NOT_CLASSIFIED))
-        } else if (!result.errors.empty) {
-            publisher.publishEvent(new TestGeneratorEvent(this, unit, n, result, TestGeneratorEventType.CLASSIFIED_BUT_FAILED))
-        } else {
-            publisher.publishEvent(new TestGeneratorEvent(this, unit, n, result, TestGeneratorEventType.GENERATED))
+    void publish(TestGeneratorResult result, Unit unit, CallableDeclaration callable) {
+        if (!result.errors.empty) {
+            publisher.publishEvent(new TestGeneratorEvent(this, unit, callable, result, TestGeneratorEventType.GENERATION_FAILURE))
+        } else if (!result.tests.empty) {
+            publisher.publishEvent(new TestGeneratorEvent(this, unit, callable, result, TestGeneratorEventType.GENERATION_SUCCESS))
         }
     }
 }

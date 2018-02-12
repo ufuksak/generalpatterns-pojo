@@ -1,16 +1,18 @@
 package com.aurea.testgenerator.generation.source
 
 import com.aurea.testgenerator.TestUnitSpec
+import com.aurea.testgenerator.ast.FieldAccessResult
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.expr.Expression
+import com.github.javaparser.ast.expr.FieldAccessExpr
 import com.github.javaparser.ast.expr.NameExpr
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
 
 import static org.assertj.core.api.Assertions.assertThat
 
-class FieldAccessorBuilderSpec extends TestUnitSpec {
+class NonStaticFieldAccessorBuilderSpec extends TestUnitSpec {
 
     def "should be able to build expression for a non-private variable"() {
         expect:
@@ -54,11 +56,11 @@ class FieldAccessorBuilderSpec extends TestUnitSpec {
         injectSolver(cu)
         FieldDeclaration fd = cu.findAll(FieldDeclaration).first()
         ResolvedFieldDeclaration rfd = fd.resolve()
-        Optional<Expression> expression = new FieldAccessorBuilder(rfd, scope).build()
+        FieldAccessResult fieldAccessResult = new NonStaticFieldAccessorBuilder(rfd, scope).build()
 
-        assertThat(expression)
+        assertThat(fieldAccessResult.type)
                 .describedAs("Expected to have resolved access expression but none was generated")
-                .isPresent()
-        assertThat(expression.get().toString()).isEqualToIgnoringWhitespace(expected)
+                .isEqualTo(FieldAccessResult.Type.SUCCESS)
+        assertThat(fieldAccessResult.expression.toString()).isEqualToIgnoringWhitespace(expected)
     }
 }

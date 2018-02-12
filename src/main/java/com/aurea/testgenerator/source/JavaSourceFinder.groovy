@@ -18,7 +18,7 @@ class JavaSourceFinder implements SourceFinder {
 
     @Autowired
     JavaSourceFinder(ProjectConfiguration cfg) {
-        src = cfg.src
+        src = cfg.srcPath
         log.info "Source classes are in $src"
     }
 

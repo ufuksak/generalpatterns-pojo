@@ -21,7 +21,7 @@ abstract class AbstractConstructorTestGenerator implements TestGenerator {
     TestGeneratorResultReporter reporter
 
     @Autowired
-    NomenclatureFactory namerFactory
+    NomenclatureFactory nomenclatures
 
     @Override
     Collection<TestGeneratorResult> generate(Unit unit) {

@@ -21,12 +21,12 @@ import org.springframework.stereotype.Component
 @Component
 @ToString
 @Log4j2
-class EmptyConstructorGenerator extends AbstractConstructorTestGenerator {
+class IsInstantiableConstructorGenerator extends AbstractConstructorTestGenerator {
 
     ValueFactory valueFactory
 
     @Autowired
-    EmptyConstructorGenerator(ValueFactory valueFactory) {
+    IsInstantiableConstructorGenerator(ValueFactory valueFactory) {
         this.valueFactory = valueFactory
     }
 
@@ -35,7 +35,7 @@ class EmptyConstructorGenerator extends AbstractConstructorTestGenerator {
         Optional<TestNodeExpression> constructorCall = new InvocationBuilder(valueFactory).build(cd)
         TestGeneratorResult result = new TestGeneratorResult()
         constructorCall.ifPresent { constructCallExpr ->
-            TestMethodNomenclature testMethodNomenclature = namerFactory.getTestMethodNomenclature(unitUnderTest.javaClass)
+            TestMethodNomenclature testMethodNomenclature = nomenclatures.getTestMethodNomenclature(unitUnderTest.javaClass)
             TestNodeMethod isInstantiable = new TestNodeMethod()
             TestNodeMerger.appendDependencies(isInstantiable, constructCallExpr)
             String testText = ''

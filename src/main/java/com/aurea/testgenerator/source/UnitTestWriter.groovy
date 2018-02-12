@@ -12,26 +12,35 @@ import java.nio.file.Path
 class UnitTestWriter {
 
     Path out
-
-    void write(Unit unit) {
-        Path pathInOut = PathUtils.packageNameToPath(unit.cu.packageDeclaration.get().nameAsString)
-        String fileName = unit.className + ".java"
-        Path writeTo = out.resolve(pathInOut).resolve(fileName)
-        File testFile = writeTo.toFile()
-        if (!testFile.parentFile.exists()) {
-            log.debug "Creating $testFile.parentFile"
-            testFile.parentFile.mkdirs()
-        }
-        if (testFile.exists()) {
-            log.debug "$testFile existed before, deleting..."
-            testFile.delete()
-        }
-        log.debug "Writing test: $testFile"
-        testFile.write(unit.cu.toString())
-    }
+    boolean blank
 
     @Autowired
     UnitTestWriter(ProjectConfiguration cfg) {
-        out = cfg.out
+        if (!cfg.blank) {
+            this.out = cfg.outPath
+        }
+        this.blank = cfg.blank
+    }
+
+    void write(Unit unit) {
+        if (blank) {
+            log.info "Blank run, writing tests is disabled"
+            return
+        } else {
+            Path pathInOut = PathUtils.packageNameToPath(unit.cu.packageDeclaration.get().nameAsString)
+            String fileName = unit.className + ".java"
+            Path writeTo = out.resolve(pathInOut).resolve(fileName)
+            File testFile = writeTo.toFile()
+            if (!testFile.parentFile.exists()) {
+                log.debug "Creating $testFile.parentFile"
+                testFile.parentFile.mkdirs()
+            }
+            if (testFile.exists()) {
+                log.debug "$testFile existed before, deleting..."
+                testFile.delete()
+            }
+            log.debug "Writing test: $testFile"
+            testFile.write(unit.cu.toString())
+        }
     }
 }

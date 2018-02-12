@@ -24,9 +24,9 @@ public class PathUnitSource implements UnitSource {
 
     public PathUnitSource(SourceFinder sourceFinder, ProjectConfiguration cfg, SourceFilter filter) {
         this.sourceFinder = sourceFinder;
-        this.pathToUnitMapper = new PathToUnitMapper(cfg.getSrc());
+        this.pathToUnitMapper = new PathToUnitMapper(cfg.getSrcPath());
         this.filter = filter;
-        this.root = cfg.getSrc();
+        this.root = cfg.getSrcPath();
     }
 
     @Override

@@ -2,10 +2,9 @@ package com.aurea.testgenerator.pattern.general.constructors
 
 import com.aurea.testgenerator.MatcherPipelineTest
 import com.aurea.testgenerator.generation.TestGenerator
-import com.aurea.testgenerator.generation.TestGeneratorResultReporter
-import com.aurea.testgenerator.generation.constructors.EmptyConstructorGenerator
+import com.aurea.testgenerator.generation.constructors.IsInstantiableConstructorGenerator
 
-class EmptyConstructorSpec extends MatcherPipelineTest {
+class IsInstantiableConstructorSpec extends MatcherPipelineTest {
 
     def "empty constructor simplest case"() {
         expect:
@@ -109,9 +108,9 @@ class EmptyConstructorSpec extends MatcherPipelineTest {
 
     @Override
     TestGenerator generator() {
-        TestGenerator generator = new EmptyConstructorGenerator(valueFactory)
+        TestGenerator generator = new IsInstantiableConstructorGenerator(valueFactory)
         generator.reporter = reporter
-        generator.namerFactory = namerFactory
+        generator.nomenclatures = nomenclatureFactory
         generator
     }
 }

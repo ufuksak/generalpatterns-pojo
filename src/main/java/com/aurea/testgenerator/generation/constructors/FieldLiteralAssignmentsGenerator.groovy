@@ -2,7 +2,10 @@ package com.aurea.testgenerator.generation.constructors
 
 import com.aurea.testgenerator.ast.ASTNodeUtils
 import com.aurea.testgenerator.ast.Callability
+import com.aurea.testgenerator.ast.FieldAccessBuilder
+import com.aurea.testgenerator.ast.FieldAccessResult
 import com.aurea.testgenerator.ast.FieldAssignments
+import com.aurea.testgenerator.ast.FieldResolver
 import com.aurea.testgenerator.ast.InvocationBuilder
 import com.aurea.testgenerator.generation.*
 import com.aurea.testgenerator.generation.merge.TestNodeMerger
@@ -19,8 +22,8 @@ import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.FieldAccessExpr
 import com.github.javaparser.ast.expr.NameExpr
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
+import com.github.javaparser.resolution.types.ResolvedType
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
-import com.github.javaparser.symbolsolver.javaparsermodel.UnsolvedSymbolException
 import groovy.util.logging.Log4j2
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -29,14 +32,14 @@ import org.springframework.stereotype.Component
 @Log4j2
 class FieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator {
 
-    FieldAssignments fieldAssignments
     JavaParserFacade solver
+    FieldResolver fieldResolver
     ValueFactory valueFactory
 
     @Autowired
-    FieldLiteralAssignmentsGenerator(FieldAssignments fieldAssignments, JavaParserFacade solver, ValueFactory valueFactory) {
-        this.fieldAssignments = fieldAssignments
+    FieldLiteralAssignmentsGenerator(JavaParserFacade solver, ValueFactory valueFactory) {
         this.solver = solver
+        this.fieldResolver = new FieldResolver(solver)
         this.valueFactory = valueFactory
     }
 
@@ -45,35 +48,20 @@ class FieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator 
         TestGeneratorResult result = new TestGeneratorResult()
         String instanceName = cd.nameAsString.uncapitalize()
         Expression scope = new NameExpr(instanceName)
+        FieldAccessBuilder fieldAccessBuilder = new FieldAccessBuilder(scope)
 
-        List<AssignExpr> assignExprs = cd.body.findAll(AssignExpr)
-        Collection<AssignExpr> onlyLastAssignExprs = fieldAssignments.findLastAssignExpressionsByField(assignExprs)
-        Collection<AssignExpr> onlyLiteralAssignExprs = onlyLastAssignExprs.findAll { it.value.literalExpr }
-        AssertionBuilder builder = new AssertionBuilder().softly(onlyLiteralAssignExprs.size() > 1)
-        for (AssignExpr assignExpr : onlyLiteralAssignExprs) {
-            FieldAccessExpr fieldAccessExpr = assignExpr.target.asFieldAccessExpr()
-            try {
-                Expression expected = assignExpr.value
-                Optional<ResolvedFieldDeclaration> maybeField = fieldAccessExpr.findField(solver)
-                if (maybeField.present) {
-                    Optional<Expression> maybeFieldAccessExpression = fieldAssignments.buildFieldAccessExpression(assignExpr, scope)
-                    maybeFieldAccessExpression.ifPresent { fieldAccessExpression ->
-                        builder.with(maybeField.get().getType(), fieldAccessExpression, expected)
-                    }
-                } else {
-                    result.errors << new TestGeneratorError("Failed to solve field access $fieldAccessExpr")
-                }
-            } catch (UnsolvedSymbolException use) {
-                result.errors << new TestGeneratorError("Failed to solve field access $fieldAccessExpr")
-            }
+        ArrayList<AssignExpr> literalAssignExpressions = findLiteralAssignmentExpressions(cd)
+        AssertionBuilder assertionBuilder = new AssertionBuilder().softly(literalAssignExpressions.size() > 1)
+        literalAssignExpressions.each {
+            addAssertion(it, fieldAccessBuilder, assertionBuilder, result)
         }
-        List<TestNodeStatement> assertions = builder.build()
+        List<TestNodeStatement> assertions = assertionBuilder.build()
         if (!assertions.empty) {
             TestNodeMethod assignConstants = new TestNodeMethod()
             TestNodeMerger.appendDependencies(assignConstants, assertions)
             Optional<TestNodeExpression> constructorCall = new InvocationBuilder(valueFactory).build(cd)
             constructorCall.ifPresent { constructCallExpr ->
-                TestMethodNomenclature testMethodNomenclature = namerFactory.getTestMethodNomenclature(unitUnderTest.javaClass)
+                TestMethodNomenclature testMethodNomenclature = nomenclatures.getTestMethodNomenclature(unitUnderTest.javaClass)
                 TestNodeMerger.appendDependencies(assignConstants, constructCallExpr)
                 String testName = testMethodNomenclature.requestTestMethodName(getType(), cd)
                 String assignsConstantsCode = """
@@ -92,6 +80,33 @@ class FieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator 
             }
         }
         result
+    }
+
+    private static Collection<AssignExpr> findLiteralAssignmentExpressions(ConstructorDeclaration cd) {
+        List<AssignExpr> assignExprs = cd.body.findAll(AssignExpr)
+        Collection<AssignExpr> onlyLastAssignExprs = FieldAssignments.findLastAssignExpressionsByField(assignExprs)
+        onlyLastAssignExprs.findAll { it.value.literalExpr }
+    }
+
+    private void addAssertion(AssignExpr assignExpr,
+                              FieldAccessBuilder fieldAccessBuilder,
+                              AssertionBuilder assertionBuilder,
+                              TestGeneratorResult result) {
+        FieldAccessExpr fieldAccessExpr = assignExpr.target.asFieldAccessExpr()
+        Optional<ResolvedFieldDeclaration> maybeField = fieldResolver.resolve(fieldAccessExpr)
+        if (maybeField.present) {
+            ResolvedFieldDeclaration field = maybeField.get()
+            FieldAccessResult fieldAccessResult = fieldAccessBuilder.build(field)
+            if (fieldAccessResult.type == FieldAccessResult.Type.SUCCESS) {
+                ResolvedType fieldType = field.getType()
+                Expression expected = assignExpr.value
+                assertionBuilder.with(fieldType, fieldAccessResult.expression, expected)
+            } else if (fieldAccessResult.type == FieldAccessResult.Type.FAILED) {
+                result.errors << fieldAccessResult.error
+            }
+        } else {
+            result.errors << new TestGeneratorError("Failed to solve field access $fieldAccessExpr")
+        }
     }
 
     @Override

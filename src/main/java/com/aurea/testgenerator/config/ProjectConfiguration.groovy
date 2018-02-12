@@ -8,6 +8,7 @@ import org.springframework.validation.annotation.Validated
 
 import javax.validation.constraints.NotNull
 import java.nio.file.Path
+import java.nio.file.Paths
 
 @Configuration
 @ConfigurationProperties(prefix = "project")
@@ -15,14 +16,32 @@ import java.nio.file.Path
 @Canonical
 @Validated
 class ProjectConfiguration {
-    @NotNull
-    Path src
+    boolean blank
 
     @NotNull
-    Path testSrc
+    String src
 
-    @NotNull
-    Path out
+    String testSrc
+    String out
+    String jacoco
 
-    Path jacoco
+    Path getSrcPath() {
+        Paths.get(src)
+    }
+
+    Path getJacocoPath() {
+        Paths.get(jacoco)
+    }
+
+    Path getTestSrcPath() {
+        Paths.get(testSrc)
+    }
+
+    Path getOutPath() {
+        Paths.get(out)
+    }
+
+    boolean isBlank() {
+        return blank
+    }
 }

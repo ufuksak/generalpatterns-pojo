@@ -4,7 +4,6 @@ import groovy.transform.EqualsAndHashCode
 import groovy.transform.ToString
 
 @EqualsAndHashCode
-@ToString(includePackage = false)
 class JavaClass {
     String fullName
 
@@ -22,5 +21,10 @@ class JavaClass {
 
     String getName() {
         ParsingUtils.parseSimpleName(fullName)
+    }
+
+    @Override
+    String toString() {
+        fullName
     }
 }

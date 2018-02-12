@@ -2,7 +2,6 @@ package com.aurea.testgenerator.generation
 
 
 enum TestGeneratorEventType {
-    CLASSIFIED_BUT_FAILED,
-    NOT_CLASSIFIED,
-    GENERATED
+    GENERATION_FAILURE,
+    GENERATION_SUCCESS
 }
