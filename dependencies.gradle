@@ -9,7 +9,7 @@ dependencyManagement {
     dependencies {
         dependency 'org.codehaus.groovy:groovy-all:2.4.12'
         dependency 'com.github.javaparser:aurea-javaparser-core:3.5.11'
-        dependency 'com.github.javaparser:aurea-java-symbol-solver-core:0.6.8'
+        dependency 'com.github.javaparser:aurea-java-symbol-solver-core:0.6.9'
         dependency 'com.jason-goodwin:better-monads:0.4.1'
         dependencySet(group: 'org.apache.logging.log4j', version: '2.10.0') {
             entry 'log4j-api'
