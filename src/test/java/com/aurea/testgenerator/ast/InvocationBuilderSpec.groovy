@@ -34,11 +34,10 @@ class InvocationBuilderSpec extends Specification {
         expect:
         onConstructorCodeExpect """
             class Foo {
-             class Bar {
-                 public Bar() {}
-             } 
+                class Bar {
+                    public Bar() {}
+                } 
             }
-
         """, """
             new Foo().new Bar()
         """
@@ -84,6 +83,19 @@ class InvocationBuilderSpec extends Specification {
             }
             
         """, "new Foo.Bar.Crowd.Bazooka()"
+    }
+
+    def "simple enum invocation"() {
+        expect:
+        onConstructorCodeExpect("""
+            enum Foo {
+                I;
+                
+                class B {
+                    B() {}
+                }
+            }
+        """, "Foo.I.new B()")
     }
 
     def "with given parameters"() {

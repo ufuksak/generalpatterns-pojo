@@ -6,8 +6,12 @@ import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.ConstructorDeclaration
+import com.github.javaparser.ast.body.EnumConstantDeclaration
+import com.github.javaparser.ast.body.EnumDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.expr.Expression
+import com.github.javaparser.ast.expr.FieldAccessExpr
+import com.github.javaparser.ast.expr.NameExpr
 import com.github.javaparser.ast.expr.ObjectCreationExpr
 import com.github.javaparser.ast.expr.SimpleName
 import com.github.javaparser.ast.nodeTypes.NodeWithConstructors
@@ -47,9 +51,15 @@ class InvocationBuilder {
             for (int i = 1; i < parents.size(); i++) {
                 TypeDeclaration parent = parents[i]
                 if (isParentStatic) {
-                    prependWithType(expr, parent.nameAsString)
+                    prependWithScope(expr, parent.nameAsString)
                 } else {
-                    if (defaultConstructor(parent)) {
+                    if (parent.enumDeclaration) {
+                        Optional<FieldAccessExpr> accessFirst = parent.asEnumDeclaration().accessFirst()
+                        if (!accessFirst.present) {
+                            return Optional.empty()
+                        }
+                        appendParentScope(expr.node.asObjectCreationExpr(), accessFirst.get())
+                    } else if (defaultConstructor(parent)) {
                         TestNodeExpression defaultInvocation = new TestNodeExpression(
                                 node: new ObjectCreationExpr(null,
                                         JavaParser.parseClassOrInterfaceType(parent.nameAsString),
@@ -99,7 +109,7 @@ class InvocationBuilder {
         }.toList()
     }
 
-    private static void prependWithType(TestNodeExpression expr, String scopeName) {
+    private static void prependWithScope(TestNodeExpression expr, String scopeName) {
         ObjectCreationExpr parentScope = findParentObjectCreationScope(expr.node.asObjectCreationExpr())
         ClassOrInterfaceType parentTypeScope = findParentTypeScope(parentScope.type)
         parentTypeScope.setScope(JavaParser.parseClassOrInterfaceType(scopeName))
