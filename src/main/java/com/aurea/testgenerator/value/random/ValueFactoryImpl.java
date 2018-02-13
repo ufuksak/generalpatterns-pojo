@@ -42,7 +42,7 @@ public class ValueFactoryImpl implements ValueFactory {
                         Expression node = testValue.getNode();
                         ArrayCreationExpr arrayCreationExpr = new ArrayCreationExpr(
                                 type.asArrayType().getElementType(),
-                                NodeList.nodeList(new ArrayCreationLevel(0)),
+                                NodeList.nodeList(new ArrayCreationLevel()),
                                 new ArrayInitializerExpr(NodeList.nodeList(node)));
                         testValue.setNode(arrayCreationExpr);
                         return testValue;

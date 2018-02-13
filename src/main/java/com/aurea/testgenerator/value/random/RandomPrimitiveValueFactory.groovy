@@ -19,10 +19,10 @@ class RandomPrimitiveValueFactory implements PrimitiveValueFactory {
             case CHAR:
                 return new TestNodeExpression(node: new CharLiteralExpr(RandomStringUtils.randomAlphabetic(1)))
             case BYTE:
-                CastExpr castExpr = new CastExpr(PrimitiveType.byteType(), new IntegerLiteralExpr(RandomUtils.nextInt(-127, 127)))
+                CastExpr castExpr = new CastExpr(PrimitiveType.byteType(), new IntegerLiteralExpr(nextInt(Byte.MIN_VALUE, Byte.MAX_VALUE)))
                 return new TestNodeExpression(node: castExpr)
             case SHORT:
-                CastExpr castExpr = new CastExpr(PrimitiveType.shortType(), new IntegerLiteralExpr(RandomUtils.nextInt(-127, 127)))
+                CastExpr castExpr = new CastExpr(PrimitiveType.shortType(), new IntegerLiteralExpr(nextInt(Short.MIN_VALUE, Short.MAX_VALUE)))
                 return new TestNodeExpression(node: castExpr)
             case INT:
                 return new TestNodeExpression(node: new IntegerLiteralExpr(RandomUtils.nextInt()))
@@ -34,5 +34,9 @@ class RandomPrimitiveValueFactory implements PrimitiveValueFactory {
                 return new TestNodeExpression(node: new DoubleLiteralExpr(RandomUtils.nextDouble()))
         }
         return null
+    }
+
+    private static int nextInt(int startInclusive, int endExclusive) {
+        RandomUtils.nextInt(0, endExclusive - startInclusive) + startInclusive
     }
 }
