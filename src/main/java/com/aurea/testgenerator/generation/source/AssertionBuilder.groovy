@@ -1,14 +1,14 @@
 package com.aurea.testgenerator.generation.source
 
+import com.aurea.testgenerator.generation.DependableNode
 import com.aurea.testgenerator.generation.TestDependency
-import com.aurea.testgenerator.generation.TestNodeMethodCallExpr
-import com.aurea.testgenerator.generation.TestNodeStatement
 import com.aurea.testgenerator.value.Types
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.expr.NameExpr
 import com.github.javaparser.ast.stmt.ExpressionStmt
+import com.github.javaparser.ast.stmt.Statement
 import com.github.javaparser.ast.type.Type
 import com.github.javaparser.resolution.UnsolvedSymbolException
 import com.github.javaparser.resolution.types.ResolvedPrimitiveType
@@ -17,6 +17,14 @@ import com.github.javaparser.resolution.types.ResolvedType
 import groovy.util.logging.Log4j2
 
 import static com.github.javaparser.JavaParser.parseExpression
+import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.BOOLEAN
+import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.BYTE
+import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.CHAR
+import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.DOUBLE
+import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.FLOAT
+import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.INT
+import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.LONG
+import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.SHORT
 
 @Log4j2
 class AssertionBuilder {
@@ -25,7 +33,7 @@ class AssertionBuilder {
     static final FLOATING_POINT_OFFSET_DOUBLE = '0.001D'
 
     boolean softly
-    List<TestNodeMethodCallExpr> assertions = []
+    List<DependableNode<MethodCallExpr>> assertions = []
 
     AssertionBuilder softly(boolean softly) {
         this.softly = softly
@@ -68,7 +76,7 @@ class AssertionBuilder {
         this
     }
 
-    List<TestNodeStatement> build() {
+    List<DependableNode<Statement>> build() {
         if (assertions.empty) {
             return Collections.emptyList()
         }
@@ -76,32 +84,26 @@ class AssertionBuilder {
         softly ? asSoftStatements() : asStatements()
     }
 
-    private List<TestNodeStatement> asStatements() {
+    private List<DependableNode<Statement>> asStatements() {
         assertions.collect {
-            new TestNodeStatement(
-                    dependency: it.dependency,
-                    node: new ExpressionStmt(it.node)
-            )
+            DependableNode.from(new ExpressionStmt(it.node), it.dependency)
         }
     }
 
-    private List<TestNodeStatement> asSoftStatements() {
-        List<TestNodeStatement> softAssertions = new ArrayList<>(assertions.size() + 2)
-        softAssertions << new TestNodeStatement(
-                dependency: new TestDependency(imports: [Imports.SOFT_ASSERTIONS]),
-                //TODO: 'sa' should be taken from name registry, not hardcoded
-                node: JavaParser.parseStatement("SoftAssertions sa = new SoftAssertions();"))
+    private List<DependableNode<Statement>> asSoftStatements() {
+        List<DependableNode<Statement>> softAssertions = new ArrayList<>(assertions.size() + 2)
+        //TODO: 'sa' should be taken from name registry, not hardcoded
+        softAssertions << DependableNode.from(
+                JavaParser.parseStatement("SoftAssertions sa = new SoftAssertions();"),
+                new TestDependency(imports: [Imports.SOFT_ASSERTIONS]))
 
         assertions.each { assertion ->
             Expression sa = new NameExpr("sa")
             MethodCallExpr assertThatMethodCall = assertion.node.scope.get().asMethodCallExpr()
             assertThatMethodCall.setScope(sa)
-            softAssertions << new TestNodeStatement(
-                    dependency: assertion.dependency,
-                    node: new ExpressionStmt(assertion.node)
-            )
+            softAssertions << DependableNode.from(new ExpressionStmt(assertion.node), assertion.dependency)
         }
-        softAssertions << new TestNodeStatement(node: JavaParser.parseStatement("sa.assertAll();"))
+        softAssertions << DependableNode.from(JavaParser.parseStatement("sa.assertAll();"))
     }
 
     private void addComparableAssertion(Expression actual, Expression expected) {
@@ -109,25 +111,25 @@ class AssertionBuilder {
     }
 
     private void addPrimitiveAssertion(ResolvedPrimitiveType type, Expression actual, Expression expected) {
-        if (type == ResolvedPrimitiveType.BOOLEAN) {
-            addBooleanPrimitiveAssertion(actual, expected)
-        } else if (
-        type == ResolvedPrimitiveType.CHAR ||
-                type == ResolvedPrimitiveType.BYTE ||
-                type == ResolvedPrimitiveType.LONG ||
-                type == ResolvedPrimitiveType.SHORT ||
-                type == ResolvedPrimitiveType.INT) {
-            addEqualAssertion(actual, expected)
-        } else if (type == ResolvedPrimitiveType.FLOAT) {
-            TestNodeMethodCallExpr methodCallExpr = createAssertThatMethodCallExpression(
-                    "assertThat($actual).isCloseTo($expected, Offset.offset($FLOATING_POINT_OFFSET_FLOAT))")
-            methodCallExpr.dependency.imports << Imports.ASSERTJ_OFFSET
-            assertions << methodCallExpr
-        } else if (type == ResolvedPrimitiveType.DOUBLE) {
-            TestNodeMethodCallExpr methodCallExpr = createAssertThatMethodCallExpression(
-                    "assertThat($actual).isCloseTo($expected, Offset.offset($FLOATING_POINT_OFFSET_DOUBLE))")
-            methodCallExpr.dependency.imports << Imports.ASSERTJ_OFFSET
-            assertions << methodCallExpr
+        switch (type) {
+            case BOOLEAN:
+                addBooleanPrimitiveAssertion(actual, expected)
+                break
+            case [CHAR, BYTE, LONG, SHORT, INT]:
+                addEqualAssertion(actual, expected)
+                break
+            case FLOAT:
+                DependableNode<MethodCallExpr> methodCallExpr = createAssertThatMethodCallExpression(
+                        "assertThat($actual).isCloseTo($expected, Offset.offset($FLOATING_POINT_OFFSET_FLOAT))")
+                methodCallExpr.dependency.imports << Imports.ASSERTJ_OFFSET
+                assertions << methodCallExpr
+                break
+            case DOUBLE:
+                DependableNode<MethodCallExpr> methodCallExpr = createAssertThatMethodCallExpression(
+                        "assertThat($actual).isCloseTo($expected, Offset.offset($FLOATING_POINT_OFFSET_DOUBLE))")
+                methodCallExpr.dependency.imports << Imports.ASSERTJ_OFFSET
+                assertions << methodCallExpr
+                break
         }
     }
 
@@ -148,8 +150,8 @@ class AssertionBuilder {
         }
     }
 
-    private TestNodeMethodCallExpr createAssertThatMethodCallExpression(String expr) {
-        TestNodeMethodCallExpr testNodeMethodCallExpr = new TestNodeMethodCallExpr()
+    private DependableNode<MethodCallExpr> createAssertThatMethodCallExpression(String expr) {
+        DependableNode<MethodCallExpr> testNodeMethodCallExpr = new DependableNode<>()
         if (!softly) {
             testNodeMethodCallExpr.dependency.imports << Imports.ASSERTJ_ASSERTTHAT
         }

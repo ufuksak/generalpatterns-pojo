@@ -3,5 +3,6 @@ package com.aurea.testgenerator.generation
 
 enum TestGeneratorEventType {
     GENERATION_FAILURE,
-    GENERATION_SUCCESS
+    GENERATION_SUCCESS,
+    NOT_APPLICABLE
 }

@@ -5,7 +5,6 @@ import com.aurea.testgenerator.ast.FieldAccessResult
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.FieldDeclaration
-import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
 
 import static org.assertj.core.api.Assertions.assertThat

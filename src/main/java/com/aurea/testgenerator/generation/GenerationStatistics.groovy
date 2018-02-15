@@ -6,6 +6,8 @@ import com.google.common.collect.Multimap
 import com.google.common.collect.Multimaps
 import groovy.util.logging.Log4j2
 import one.util.streamex.EntryStream
+import one.util.streamex.MoreCollectors
+import one.util.streamex.StreamEx
 import org.springframework.context.ApplicationListener
 import org.springframework.stereotype.Component
 
@@ -25,6 +27,10 @@ class GenerationStatistics implements ApplicationListener<TestGeneratorEvent> {
     EnumMap<TestGeneratorEventType, LongAdder> counters = new EnumMap<>(TestGeneratorEventType)
     Map<JavaClass, AtomicInteger> testsPerUnit = new ConcurrentHashMap<>()
     Multimap<JavaClass, TestGeneratorError> errorsPerUnit = Multimaps.synchronizedListMultimap(ArrayListMultimap.create())
+    Multimap<String, String> skippedCallablesByGenerator = Multimaps.synchronizedListMultimap(ArrayListMultimap.create())
+    Map<String, String> callables = new ConcurrentHashMap<>()
+    Map<String, String> generatedTestTypes = new ConcurrentHashMap<>()
+
 
     @PostConstruct
     setupCounters() {
@@ -47,6 +53,13 @@ class GenerationStatistics implements ApplicationListener<TestGeneratorEvent> {
             a1.addAndGet(a2.intValue())
             a1
         })
+
+        String callableFullName = event.unit.fullName + ': ' + event.callable.nameAsString
+        callables.put(callableFullName, callableFullName)
+        generatedTestTypes.put(event.result.type.name(), event.result.type.name())
+        if (event.eventType == TestGeneratorEventType.NOT_APPLICABLE) {
+            skippedCallablesByGenerator.put(event.result.type.name(), callableFullName)
+        }
     }
 
     @PreDestroy
@@ -57,7 +70,8 @@ class GenerationStatistics implements ApplicationListener<TestGeneratorEvent> {
 \tGenerated tests per type: $tests                                            
 \t${EntryStream.of(testsPerType).join(': ', '\t', System.lineSeparator() + '\t').join("")}
 \tGenerated tests per unit:
-\t${EntryStream.of(testsPerUnit).join(': ', '\t', System.lineSeparator() + '\t').join("")}        
+\t${EntryStream.of(testsPerUnit).join(': ', '\t', System.lineSeparator() + '\t').join("")}
+\t${printSkippedCallables()}      
 \tErrors per unit:
 ${printErrorsPerUnit()}
         """
@@ -76,5 +90,15 @@ ${printErrorsPerUnit()}
               .append(errors.join(System.lineSeparator() + '\t\t'))
         }
         sb.toString()
+    }
+
+    private String printSkippedCallables() {
+        Set<String> missedByAllGenerators = StreamEx.of(generatedTestTypes.keySet())
+                                                    .map { skippedCallablesByGenerator.get(it) }
+                                                    .collect(MoreCollectors.<String, List<String>>intersecting())
+        String andMore = missedByAllGenerators.size() > 10 ? System.lineSeparator() + '\t...' : ''
+        long totalNumberOfCallables = callables.size()
+        return "Misses: ${missedByAllGenerators.size()} / ${totalNumberOfCallables} " + System.lineSeparator() +
+               '\t' + StreamEx.of(missedByAllGenerators).limit(10).joining(System.lineSeparator() + '\t') + andMore
     }
 }

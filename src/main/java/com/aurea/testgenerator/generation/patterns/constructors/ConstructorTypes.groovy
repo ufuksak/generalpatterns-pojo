@@ -1,4 +1,4 @@
-package com.aurea.testgenerator.generation.constructors
+package com.aurea.testgenerator.generation.patterns.constructors
 
 import com.aurea.testgenerator.generation.TestType
 

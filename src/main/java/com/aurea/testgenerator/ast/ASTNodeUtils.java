@@ -69,17 +69,6 @@ public final class ASTNodeUtils {
         return findChildsSubTypesOf(clazz, parent, new ArrayList<T>());
     }
 
-    private static <T> List<T> findChildsSubTypesOf(Class<T> clazz, Node node, List<T> childs) {
-        if (clazz.isAssignableFrom(node.getClass())) {
-            childs.add(clazz.cast(node));
-        }
-
-        for (Node child : node.getChildNodes()) {
-            findChildsSubTypesOf(clazz, child, childs);
-        }
-        return childs;
-    }
-
     public static int countNodes(Node n) {
         LongAdder accumulator = new LongAdder();
         countNodes(n, accumulator);
@@ -135,6 +124,17 @@ public final class ASTNodeUtils {
 
     public static <T extends Node> StreamEx<T> parents(Node childNode, Class<T> clazzOfParent, Predicate<T> condition) {
         return parents(childNode, clazzOfParent).filter(condition);
+    }
+
+    private static <T> List<T> findChildsSubTypesOf(Class<T> clazz, Node node, List<T> childs) {
+        if (clazz.isAssignableFrom(node.getClass())) {
+            childs.add(clazz.cast(node));
+        }
+
+        for (Node child : node.getChildNodes()) {
+            findChildsSubTypesOf(clazz, child, childs);
+        }
+        return childs;
     }
 
     private static <T> Optional<T> findAncestorSubTypeOf(Class<T> clazz, Node node, T candidate) {

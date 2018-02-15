@@ -22,6 +22,8 @@ class TestGeneratorResultReporter {
             publisher.publishEvent(new TestGeneratorEvent(this, unit, callable, result, TestGeneratorEventType.GENERATION_FAILURE))
         } else if (!result.tests.empty) {
             publisher.publishEvent(new TestGeneratorEvent(this, unit, callable, result, TestGeneratorEventType.GENERATION_SUCCESS))
+        } else {
+            publisher.publishEvent(new TestGeneratorEvent(this, unit, callable, result, TestGeneratorEventType.NOT_APPLICABLE))
         }
     }
 }

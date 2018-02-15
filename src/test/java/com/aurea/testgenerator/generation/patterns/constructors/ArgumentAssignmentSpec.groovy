@@ -1,8 +1,8 @@
-package com.aurea.testgenerator.pattern.general.constructors
+package com.aurea.testgenerator.generation.patterns.constructors
 
 import com.aurea.testgenerator.MatcherPipelineTest
 import com.aurea.testgenerator.generation.TestGenerator
-import com.aurea.testgenerator.generation.constructors.ArgumentAssignmentGenerator
+import com.aurea.testgenerator.generation.patterns.constructors.ArgumentAssignmentGenerator
 
 class ArgumentAssignmentSpec extends MatcherPipelineTest {
 
@@ -102,11 +102,41 @@ class ArgumentAssignmentSpec extends MatcherPipelineTest {
         """
     }
 
+    def "type of the variable should be fully qualified"() {
+        expect:
+        onClassCodeExpect """
+            class Foo {
+                static class Bar {
+                    int i;
+                    Bar(int i) {
+                        this.i = i;
+                    }
+                } 
+            }   
+        """, """                   
+            package sample;
+            
+            import static org.assertj.core.api.Assertions.assertThat;
+            import org.junit.Test;
+            
+            public class FooTest {
+                
+                @Test
+                public void test_BarWithOneArgument_AssignsGivenArguments() throws Exception {
+                    int i = 42;
+                    Foo.Bar bar = new Foo.Bar(i);
+                    assertThat(bar.i).isEqualTo(i);
+                }
+            }
+        """
+    }
+
     @Override
     TestGenerator generator() {
         TestGenerator generator = new ArgumentAssignmentGenerator(solver, valueFactory)
         generator.reporter = reporter
         generator.nomenclatures = nomenclatureFactory
+        generator.visitReporter = visitReporter
         generator
     }
 }

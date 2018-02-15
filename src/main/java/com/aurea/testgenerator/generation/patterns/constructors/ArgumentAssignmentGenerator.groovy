@@ -1,4 +1,4 @@
-package com.aurea.testgenerator.generation.constructors
+package com.aurea.testgenerator.generation.patterns.constructors
 
 import com.aurea.testgenerator.ast.ASTNodeUtils
 import com.aurea.testgenerator.ast.Callability
@@ -7,7 +7,10 @@ import com.aurea.testgenerator.ast.FieldAccessResult
 import com.aurea.testgenerator.ast.FieldAssignments
 import com.aurea.testgenerator.ast.FieldResolver
 import com.aurea.testgenerator.ast.InvocationBuilder
-import com.aurea.testgenerator.generation.*
+import com.aurea.testgenerator.generation.DependableNode
+import com.aurea.testgenerator.generation.TestGeneratorError
+import com.aurea.testgenerator.generation.TestGeneratorResult
+import com.aurea.testgenerator.generation.TestType
 import com.aurea.testgenerator.generation.merge.TestNodeMerger
 import com.aurea.testgenerator.generation.names.TestMethodNomenclature
 import com.aurea.testgenerator.generation.source.AssertionBuilder
@@ -16,76 +19,108 @@ import com.aurea.testgenerator.source.Unit
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.body.ConstructorDeclaration
+import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.expr.AssignExpr
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.FieldAccessExpr
 import com.github.javaparser.ast.expr.NameExpr
+import com.github.javaparser.ast.expr.ObjectCreationExpr
+import com.github.javaparser.ast.expr.SimpleName
+import com.github.javaparser.ast.expr.VariableDeclarationExpr
+import com.github.javaparser.ast.stmt.ExpressionStmt
+import com.github.javaparser.ast.stmt.Statement
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
 import com.github.javaparser.resolution.types.ResolvedType
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import groovy.util.logging.Log4j2
+import one.util.streamex.StreamEx
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
 @Component
 @Log4j2
-class FieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator {
+class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
 
     JavaParserFacade solver
     FieldResolver fieldResolver
     ValueFactory valueFactory
 
     @Autowired
-    FieldLiteralAssignmentsGenerator(JavaParserFacade solver, ValueFactory valueFactory) {
+    ArgumentAssignmentGenerator(JavaParserFacade solver, ValueFactory valueFactory) {
         this.solver = solver
-        this.fieldResolver = new FieldResolver(solver)
         this.valueFactory = valueFactory
+        fieldResolver = new FieldResolver(solver)
     }
 
     @Override
     protected TestGeneratorResult generate(ConstructorDeclaration cd, Unit unitUnderTest) {
         TestGeneratorResult result = new TestGeneratorResult()
+        Collection<AssignExpr> argumentAssignExpressions = findArgumentAssignExpressions(cd)
+        if (!argumentAssignExpressions) {
+            return result
+        }
+
         String instanceName = cd.nameAsString.uncapitalize()
         Expression scope = new NameExpr(instanceName)
         FieldAccessBuilder fieldAccessBuilder = new FieldAccessBuilder(scope)
 
-        ArrayList<AssignExpr> literalAssignExpressions = findLiteralAssignmentExpressions(cd)
-        AssertionBuilder assertionBuilder = new AssertionBuilder().softly(literalAssignExpressions.size() > 1)
-        literalAssignExpressions.each {
+        AssertionBuilder assertionBuilder = new AssertionBuilder().softly(argumentAssignExpressions.size() > 1)
+        argumentAssignExpressions.each {
             addAssertion(it, fieldAccessBuilder, assertionBuilder, result)
         }
-        List<TestNodeStatement> assertions = assertionBuilder.build()
+        List<DependableNode<Statement>> assertions = assertionBuilder.build()
         if (!assertions.empty) {
-            TestNodeMethod assignConstants = new TestNodeMethod()
-            TestNodeMerger.appendDependencies(assignConstants, assertions)
-            Optional<TestNodeExpression> constructorCall = new InvocationBuilder(valueFactory).build(cd)
+            DependableNode<MethodDeclaration> assignsArguments = new DependableNode<>()
+            List<DependableNode<VariableDeclarationExpr>> variables = StreamEx.of(cd.parameters).map { p ->
+                valueFactory.getVariable(p.nameAsString, p.type).orElseThrow {
+                    new RuntimeException("Failed to build variable for parameter $p of $cd")
+                }
+            }.toList()
+            TestNodeMerger.appendDependencies(assignsArguments, variables)
+            TestNodeMerger.appendDependencies(assignsArguments, assertions)
+            List<Statement> variableStatements = variables.collect { new ExpressionStmt(it.node) }
+
+            Map<SimpleName, DependableNode<Expression>> variableExpressionsByNames = StreamEx.of(variables)
+                                                                                             .toMap(
+                    { it.node.getVariable(0).name },
+                    {
+                        DependableNode.from(new NameExpr(it.node.getVariable(0).name))
+                    })
+
+            Optional<DependableNode<ObjectCreationExpr>> constructorCall = new InvocationBuilder(valueFactory)
+                    .usingForParameters(variableExpressionsByNames)
+                    .build(cd)
             constructorCall.ifPresent { constructCallExpr ->
                 TestMethodNomenclature testMethodNomenclature = nomenclatures.getTestMethodNomenclature(unitUnderTest.javaClass)
-                TestNodeMerger.appendDependencies(assignConstants, constructCallExpr)
+                TestNodeMerger.appendDependencies(assignsArguments, constructCallExpr)
                 String testName = testMethodNomenclature.requestTestMethodName(getType(), cd)
-                String assignsConstantsCode = """
+                String assignsArgumentsCode = """
                     @Test
                     public void ${testName}() throws Exception {
-                        ${cd.nameAsString} $instanceName = ${constructCallExpr.node};
+                        ${variableStatements.join(System.lineSeparator())}
+        
+                        ${constructCallExpr.node.type} $instanceName = ${constructCallExpr.node};
                         
                         ${assertions.collect { it.node }.join(System.lineSeparator())}
                     }
                 """
-
-                assignConstants.node = JavaParser.parseBodyDeclaration(assignsConstantsCode)
-                                                   .asMethodDeclaration()
-                assignConstants.dependency.imports << Imports.JUNIT_TEST
-                result.tests = [assignConstants]
+                assignsArguments.node = JavaParser.parseBodyDeclaration(assignsArgumentsCode)
+                                                  .asMethodDeclaration()
+                assignsArguments.dependency.imports << Imports.JUNIT_TEST
+                result.tests = [assignsArguments]
             }
         }
         result
     }
 
-    private static Collection<AssignExpr> findLiteralAssignmentExpressions(ConstructorDeclaration cd) {
+    private static Collection<AssignExpr> findArgumentAssignExpressions(ConstructorDeclaration cd) {
         List<AssignExpr> assignExprs = cd.body.findAll(AssignExpr)
         Collection<AssignExpr> onlyLastAssignExprs = FieldAssignments.findLastAssignExpressionsByField(assignExprs)
-        onlyLastAssignExprs.findAll { it.value.literalExpr }
+        Collection<AssignExpr> onlyArgumentAssignExprs = onlyLastAssignExprs.findAll {
+            it.value.nameExpr && cd.isNameOfArgument(it.value.asNameExpr().name)
+        }
+        onlyArgumentAssignExprs
     }
 
     private void addAssertion(AssignExpr assignExpr,
@@ -111,7 +146,7 @@ class FieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator 
 
     @Override
     protected TestType getType() {
-        ConstructorTypes.FIELD_LITERAL_ASSIGNMENTS
+        ConstructorTypes.ARGUMENT_ASSIGNMENTS
     }
 
     @Override

@@ -1,11 +1,11 @@
 package com.aurea.testgenerator.value.random;
 
-import com.aurea.testgenerator.generation.TestNodeExpression;
-import com.aurea.testgenerator.generation.TestNodeVariable;
-import com.aurea.testgenerator.value.ClassOrInterfaceTypeFactory;
+import com.aurea.testgenerator.generation.DependableNode;
+import com.aurea.testgenerator.value.MockExpressionBuilder;
 import com.aurea.testgenerator.value.PrimitiveValueFactory;
-import com.aurea.testgenerator.value.Types;
+import com.aurea.testgenerator.value.ReferenceTypeFactory;
 import com.aurea.testgenerator.value.ValueFactory;
+import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.ArrayCreationLevel;
 import com.github.javaparser.ast.NodeList;
 import com.github.javaparser.ast.body.VariableDeclarator;
@@ -14,6 +14,7 @@ import com.github.javaparser.ast.expr.ArrayInitializerExpr;
 import com.github.javaparser.ast.expr.Expression;
 import com.github.javaparser.ast.expr.VariableDeclarationExpr;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.resolution.types.ResolvedType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,50 +23,67 @@ import java.util.Optional;
 @Component
 public class ValueFactoryImpl implements ValueFactory {
 
-    private final ClassOrInterfaceTypeFactory typesFactory;
+    private final ReferenceTypeFactory typesFactory;
     private final PrimitiveValueFactory primitiveFactory;
 
     @Autowired
-    public ValueFactoryImpl(ClassOrInterfaceTypeFactory typesFactory,
+    public ValueFactoryImpl(ReferenceTypeFactory typesFactory,
                             PrimitiveValueFactory primitiveFactory) {
         typesFactory.setValueFactory(this);
         this.typesFactory = typesFactory;
         this.primitiveFactory = primitiveFactory;
     }
 
-    public Optional<TestNodeExpression> getExpression(Type type) {
-        if (type.isPrimitiveType()) {
-            return Optional.of(primitiveFactory.get(type.asPrimitiveType()));
-        } else if (type.isArrayType()) {
+    @Override
+    public Optional<DependableNode<Expression>> getExpression(ResolvedType type) {
+        if (type.isPrimitive()) {
+            return Optional.of(primitiveFactory.get(type.asPrimitive()));
+        }
+        if (type.isArray()) {
             return getExpression(type.asArrayType().getComponentType())
                     .map(testValue -> {
                         Expression node = testValue.getNode();
-                        ArrayCreationExpr arrayCreationExpr = new ArrayCreationExpr(
-                                type.asArrayType().getElementType(),
-                                NodeList.nodeList(new ArrayCreationLevel()),
-                                new ArrayInitializerExpr(NodeList.nodeList(node)));
+                        ResolvedType componentType = type.asArrayType().getComponentType();
+                        ArrayCreationExpr arrayCreationExpr;
+                        if (componentType.isPrimitive()) {
+                            arrayCreationExpr = new ArrayCreationExpr(
+                                    JavaParser.parseType(componentType.asPrimitive().describe()),
+                                    NodeList.nodeList(new ArrayCreationLevel()),
+                                    new ArrayInitializerExpr(NodeList.nodeList(node)));
+
+                        } else if (componentType.isReferenceType()) {
+                            arrayCreationExpr = new ArrayCreationExpr(
+                                    JavaParser.parseClassOrInterfaceType(componentType.asReferenceType().getQualifiedName()),
+                                    NodeList.nodeList(new ArrayCreationLevel()),
+                                    new ArrayInitializerExpr(NodeList.nodeList(node)));
+                        } else {
+                            throw new UnsupportedOperationException("Unknown component type of the array: " + componentType);
+                        }
                         testValue.setNode(arrayCreationExpr);
                         return testValue;
                     });
-        } else if (Types.isString(type)) {
-            TestNodeExpression testNodeExpression = new TestNodeExpression();
-            testNodeExpression.setNode(typesFactory.get(type.asClassOrInterfaceType()).get().getNode());
-            return Optional.of(testNodeExpression);
-        } else if (type.isClassOrInterfaceType()) {
-            return typesFactory.get(type.asClassOrInterfaceType());
+        }
+        if (type.isReferenceType()) {
+            return typesFactory.get(type.asReferenceType());
         }
         return Optional.empty();
     }
 
-    public Optional<TestNodeVariable> getVariable(String name, Type type) {
-        Optional<TestNodeExpression> maybeNodeExpression = getExpression(type);
+    @Override
+    public DependableNode<Expression> getStubExpression(Type type) {
+        return MockExpressionBuilder.build(type.toString());
+    }
+
+    @Override
+    public Optional<DependableNode<VariableDeclarationExpr>> getVariable(String name, Type type) {
+        Optional<DependableNode<Expression>> maybeNodeExpression = getExpression(type.resolve());
         return maybeNodeExpression.map(nodeExpression -> {
             Expression initializer = nodeExpression.getNode();
-            VariableDeclarator variableDeclarator = new VariableDeclarator(type, name, initializer);
-            TestNodeVariable testNodeVariable = new TestNodeVariable();
-            testNodeVariable.setDependency(nodeExpression.getDependency());
-            testNodeVariable.setNode(new VariableDeclarationExpr(variableDeclarator));
-            return Optional.of(testNodeVariable);
+            VariableDeclarator variableDeclarator = new VariableDeclarator(type.clone(), name, initializer);
+            DependableNode<VariableDeclarationExpr> dependableNode = DependableNode.from(
+                    new VariableDeclarationExpr(variableDeclarator),
+                    nodeExpression.getDependency());
+            return Optional.of(dependableNode);
         }).orElse(Optional.empty());
     }
 }

@@ -1,8 +1,8 @@
-package com.aurea.testgenerator.pattern.general.constructors
+package com.aurea.testgenerator.generation.patterns.constructors
 
 import com.aurea.testgenerator.MatcherPipelineTest
 import com.aurea.testgenerator.generation.TestGenerator
-import com.aurea.testgenerator.generation.constructors.IsInstantiableConstructorGenerator
+import com.aurea.testgenerator.generation.patterns.constructors.IsInstantiableConstructorGenerator
 
 class IsInstantiableConstructorSpec extends MatcherPipelineTest {
 
@@ -106,11 +106,65 @@ class IsInstantiableConstructorSpec extends MatcherPipelineTest {
         """
     }
 
+    def "inner enum as a type"() {
+        expect:
+        onClassCodeExpect """
+            class Foo {
+                
+                enum Status {
+                    SUCCESS
+                }
+                
+                Foo(Status status) {}
+            }
+        """, """
+            package sample;
+            
+            import org.junit.Test;
+            
+            public class FooTest {
+                
+                @Test
+                public void test_FooWithOneArgument_IsInstantiable() throws Exception {
+                    new Foo(Foo.Status.SUCCESS);
+                }
+            }
+        """
+    }
+
+    def "inner static class as a type"() {
+        expect:
+        onClassCodeExpect """
+            class Foo {
+                
+                static class Status {
+                }
+                
+                Foo(Status status) {}
+            }
+        """, """
+            package sample;
+            
+            import static org.mockito.Mockito.mock;
+            import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+            import org.junit.Test;
+            
+            public class FooTest {
+                
+                @Test
+                public void test_FooWithOneArgument_IsInstantiable() throws Exception {
+                    new Foo(mock(Foo.Status.class, RETURNS_DEEP_STUBS));
+                }
+            }
+        """
+    }
+
     @Override
     TestGenerator generator() {
-        TestGenerator generator = new IsInstantiableConstructorGenerator(valueFactory)
+        IsInstantiableConstructorGenerator generator = new IsInstantiableConstructorGenerator(valueFactory)
         generator.reporter = reporter
         generator.nomenclatures = nomenclatureFactory
+        generator.visitReporter = visitReporter
         generator
     }
 }

@@ -1,10 +1,10 @@
-package com.aurea.testgenerator.pattern.general.constructors
+package com.aurea.testgenerator.generation.patterns.constructors
 
 import com.aurea.testgenerator.MatcherPipelineTest
 import com.aurea.testgenerator.generation.TestGenerator
-import com.aurea.testgenerator.generation.constructors.FieldLiteralAssignmentsGenerator
+import com.aurea.testgenerator.generation.patterns.constructors.FieldLiteralAssignmentsGenerator
 
-class NFieldLiteralAssignmentsSpec extends MatcherPipelineTest {
+class FieldLiteralAssignmentsSpec extends MatcherPipelineTest {
 
     def "assigning integral literals should be asserted"() {
         expect:
@@ -141,6 +141,7 @@ class NFieldLiteralAssignmentsSpec extends MatcherPipelineTest {
         TestGenerator generator = new FieldLiteralAssignmentsGenerator(solver, valueFactory)
         generator.reporter = reporter
         generator.nomenclatures = nomenclatureFactory
+        generator.visitReporter = visitReporter
         generator
     }
 }

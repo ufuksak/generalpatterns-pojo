@@ -1,7 +1,6 @@
 package com.aurea.testgenerator.coverage
 
 import com.aurea.testgenerator.source.Unit
-import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
 import groovy.transform.Immutable
 

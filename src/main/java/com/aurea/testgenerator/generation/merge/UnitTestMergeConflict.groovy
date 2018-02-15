@@ -1,10 +1,11 @@
 package com.aurea.testgenerator.generation.merge
 
-import com.aurea.testgenerator.generation.TestNodeMethod
+import com.aurea.testgenerator.generation.DependableNode
+import com.github.javaparser.ast.body.MethodDeclaration
 import groovy.transform.Immutable
 
 @Immutable
 class UnitTestMergeConflict {
-    TestNodeMethod left, right
+    DependableNode<MethodDeclaration> left, right
     UnitTestMergeConflictReason reason
 }
