@@ -1,12 +1,14 @@
 package com.aurea.testgenerator
 
 import com.aurea.common.JavaClass
+import com.aurea.testgenerator.extensions.Extensions
 import com.aurea.testgenerator.generation.TestUnit
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.type.Type
 import com.github.javaparser.symbolsolver.JavaSymbolSolver
+import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
@@ -18,6 +20,7 @@ import java.nio.file.Paths
 
 
 class TestUnitSpec extends Specification {
+
     @Rule
     TemporaryFolder folder = new TemporaryFolder()
 
@@ -29,6 +32,10 @@ class TestUnitSpec extends Specification {
         ))
     }
 
+    def setupSpec() {
+        Extensions.enable()
+    }
+
     Type wrapWithCompilationUnit(Type type) {
         CompilationUnit cu = new CompilationUnit("sample")
         injectSolver(cu)
@@ -38,11 +45,21 @@ class TestUnitSpec extends Specification {
         type
     }
 
-    void injectSolver(CompilationUnit cu) {
-        JavaSymbolSolver solver = new JavaSymbolSolver(new CombinedTypeSolver(
+    JavaSymbolSolver getSymbolSolver() {
+        new JavaSymbolSolver(new CombinedTypeSolver(
                 new JavaParserTypeSolver(folder.root),
                 new ReflectionTypeSolver()
         ))
-        solver.inject(cu)
+    }
+
+    void injectSolver(CompilationUnit cu) {
+        getSymbolSolver().inject(cu)
+    }
+
+    JavaParserFacade getJavaParserFacade() {
+        JavaParserFacade.get(new CombinedTypeSolver(
+                new JavaParserTypeSolver(folder.root),
+                new ReflectionTypeSolver()
+        ))
     }
 }

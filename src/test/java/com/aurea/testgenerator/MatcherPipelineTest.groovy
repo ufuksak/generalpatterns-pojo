@@ -8,12 +8,18 @@ import com.aurea.testgenerator.extensions.Extensions
 import com.aurea.testgenerator.generation.TestGenerator
 import com.aurea.testgenerator.generation.TestGeneratorResultReporter
 import com.aurea.testgenerator.generation.UnitTestGenerator
+import com.aurea.testgenerator.generation.VisitReporter
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
-import com.aurea.testgenerator.source.*
-import com.aurea.testgenerator.value.ArbitraryClassOrInterfaceTypeFactory
+import com.aurea.testgenerator.source.JavaSourceFinder
+import com.aurea.testgenerator.source.PathUnitSource
+import com.aurea.testgenerator.source.SourceFilters
+import com.aurea.testgenerator.source.UnitSource
+import com.aurea.testgenerator.source.UnitTestWriter
 import com.aurea.testgenerator.value.ArbitraryPrimitiveValuesFactory
+import com.aurea.testgenerator.value.ArbitraryReferenceTypeFactory
 import com.aurea.testgenerator.value.ValueFactory
 import com.aurea.testgenerator.value.random.ValueFactoryImpl
+import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver
@@ -39,9 +45,10 @@ abstract class MatcherPipelineTest extends Specification {
     CoverageService coverageService
     CoverageCollector coverageCollector
     ValueFactory valueFactory = new ValueFactoryImpl(
-            new ArbitraryClassOrInterfaceTypeFactory(),
+            new ArbitraryReferenceTypeFactory(),
             new ArbitraryPrimitiveValuesFactory())
     TestGeneratorResultReporter reporter = new TestGeneratorResultReporter(mock(ApplicationEventPublisher))
+    VisitReporter visitReporter = new VisitReporter(mock(ApplicationEventPublisher))
     NomenclatureFactory nomenclatureFactory = new NomenclatureFactory()
 
     void setupSpec() {
@@ -53,7 +60,7 @@ abstract class MatcherPipelineTest extends Specification {
         cfg.src = folder.newFolder("src").absolutePath
         cfg.testSrc = folder.newFolder("test").absolutePath
 
-        source = new PathUnitSource(new JavaSourceFinder(cfg), cfg, SourceFilters.empty())
+        source = new PathUnitSource(new JavaSourceFinder(cfg), cfg, SourceFilters.empty(), getSymbolSolver())
         TestGenerator generator = generator()
         unitTestGenerator = new UnitTestGenerator([generator])
         unitTestWriter = new UnitTestWriter(cfg)
@@ -101,6 +108,13 @@ abstract class MatcherPipelineTest extends Specification {
 
     JavaParserFacade getSolver() {
         JavaParserFacade.get(new CombinedTypeSolver(
+                new JavaParserTypeSolver(cfg.srcPath.toFile()),
+                new ReflectionTypeSolver()
+        ))
+    }
+
+    JavaSymbolSolver getSymbolSolver() {
+        new JavaSymbolSolver(new CombinedTypeSolver(
                 new JavaParserTypeSolver(cfg.srcPath.toFile()),
                 new ReflectionTypeSolver()
         ))

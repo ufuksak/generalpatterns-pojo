@@ -3,7 +3,6 @@ package com.aurea.testgenerator.coverage;
 import com.aurea.coverage.unit.ClassCoverage;
 import com.aurea.coverage.unit.ClassCoverageImpl;
 import com.aurea.coverage.unit.MethodCoverage;
-import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.CallableDeclaration;
 import one.util.streamex.StreamEx;
 
@@ -16,8 +15,7 @@ public class NoCoverageService implements CoverageService {
     }
 
     private MethodCoverage getMethodCoverage(CallableDeclaration methodDeclaration) {
-        List<Node> childNodes = methodDeclaration.getChildNodes();
-        long count = NodeLocCounter.count(childNodes);
+        long count = NodeLocCounter.count(methodDeclaration);
         assert count < Integer.MAX_VALUE;
         return new MethodCoverage(methodDeclaration.getNameAsString(), 0, 0, 0, (int) count);
     }

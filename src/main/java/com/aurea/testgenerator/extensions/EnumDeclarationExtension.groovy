@@ -13,16 +13,16 @@ import org.springframework.stereotype.Component
 class EnumDeclarationExtension implements ASTExtension {
 
     EnumDeclarationExtension() {
-        log.debug "Adding EnumDeclarationExtension::accessFirst"
+        log.debug "Adding EnumDeclaration::accessFirst"
         EnumDeclaration.metaClass.accessFirst() {
-            EnumDeclaration enumDeclaration = (delegate as EnumDeclaration)
+            EnumDeclaration enumDeclaration = delegate as EnumDeclaration
             NodeList<EnumConstantDeclaration> entries = enumDeclaration.entries
             if (!entries) {
                 return Optional.empty()
-            } else {
-                String firstEnumName = entries.first().nameAsString
-                return Optional.of(new FieldAccessExpr(new NameExpr(enumDeclaration.name), firstEnumName))
             }
+            
+            String firstEnumName = entries.first().nameAsString
+            return Optional.of(new FieldAccessExpr(new NameExpr(enumDeclaration.name), firstEnumName))
         }
     }
 }

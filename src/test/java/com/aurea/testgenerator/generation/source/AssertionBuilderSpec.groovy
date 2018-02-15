@@ -1,8 +1,9 @@
 package com.aurea.testgenerator.generation.source
 
 import com.aurea.testgenerator.TestUnitSpec
-import com.aurea.testgenerator.generation.TestNodeStatement
+import com.aurea.testgenerator.generation.DependableNode
 import com.github.javaparser.ast.ImportDeclaration
+import com.github.javaparser.ast.stmt.Statement
 import com.github.javaparser.ast.type.PrimitiveType
 import one.util.streamex.StreamEx
 import spock.lang.Unroll
@@ -20,7 +21,7 @@ class AssertionBuilderSpec extends TestUnitSpec {
     @Unroll
     def "correctly builds assertions for char/byte/long/short/int primitives"() {
         when:
-        List<TestNodeStatement> statements = builder.with(wrapWithCompilationUnit(type),
+        List<DependableNode<Statement>> statements = builder.with(wrapWithCompilationUnit(type),
                 parseExpression(actual),
                 parseExpression(expected)
         ).build()
@@ -52,7 +53,7 @@ class AssertionBuilderSpec extends TestUnitSpec {
     @Unroll
     def "correctly build for booleans"() {
         when:
-        List<TestNodeStatement> statements = builder.with(
+        List<DependableNode<Statement>> statements = builder.with(
                 wrapWithCompilationUnit(PrimitiveType.booleanType()),
                 parseExpression(actual),
                 parseExpression(expected)
@@ -73,7 +74,7 @@ class AssertionBuilderSpec extends TestUnitSpec {
     @Unroll
     def "correctly build for boxed booleans"() {
         when:
-        List<TestNodeStatement> statements = builder.with(
+        List<DependableNode<Statement>> statements = builder.with(
                 wrapWithCompilationUnit(parseType('Boolean')),
                 parseExpression(actual),
                 parseExpression(expected)
@@ -94,7 +95,7 @@ class AssertionBuilderSpec extends TestUnitSpec {
     @Unroll
     def "correctly build for floating numbers"() {
         when:
-        List<TestNodeStatement> statements = builder.with(wrapWithCompilationUnit(type),
+        List<DependableNode<Statement>> statements = builder.with(wrapWithCompilationUnit(type),
                 parseExpression(actual),
                 parseExpression(expected)
         ).build()
@@ -117,15 +118,15 @@ class AssertionBuilderSpec extends TestUnitSpec {
 
     def "soft assertions are properly grouped"() {
         when:
-        List<TestNodeStatement> statements = builder
+        List<DependableNode<Statement>> statements = builder
                 .with(
-                    wrapWithCompilationUnit(PrimitiveType.intType()),
-                        parseExpression("3"),
-                        parseExpression("2 + 1"))
+                wrapWithCompilationUnit(PrimitiveType.intType()),
+                parseExpression("3"),
+                parseExpression("2 + 1"))
                 .with(
-                    wrapWithCompilationUnit(PrimitiveType.floatType()),
-                        parseExpression("3.4"),
-                        parseExpression("3.4"))
+                wrapWithCompilationUnit(PrimitiveType.floatType()),
+                parseExpression("3.4"),
+                parseExpression("3.4"))
                 .softly(true)
                 .build()
 
@@ -154,11 +155,11 @@ class AssertionBuilderSpec extends TestUnitSpec {
 
     def "asserting strings work"() {
         when:
-        List<TestNodeStatement> statements = builder
+        List<DependableNode<Statement>> statements = builder
                 .with(
-                    wrapWithCompilationUnit(parseType("String")),
-                    parseExpression("\"ABC\""),
-                    parseExpression("\"AAB\""))
+                wrapWithCompilationUnit(parseType("String")),
+                parseExpression("\"ABC\""),
+                parseExpression("\"AAB\""))
                 .build()
 
         then:
@@ -170,12 +171,10 @@ class AssertionBuilderSpec extends TestUnitSpec {
     @Unroll
     def "known comparable types are being asserted by isEqualByComparingTo"() {
         when:
-        List<TestNodeStatement> statements = builder
-                .with(
-                    wrapWithCompilationUnit(type),
-                    parseExpression(value),
-                    parseExpression(value))
-                .build()
+        builder.with(wrapWithCompilationUnit(type),
+                parseExpression(value),
+                parseExpression(value))
+        List<DependableNode<Statement>> statements = builder.build()
 
         then:
         statements.size() == 1

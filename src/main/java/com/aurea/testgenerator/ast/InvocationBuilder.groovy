@@ -1,22 +1,25 @@
 package com.aurea.testgenerator.ast
 
+import com.aurea.testgenerator.generation.DependableNode
 import com.aurea.testgenerator.generation.merge.TestNodeMerger
-import com.aurea.testgenerator.generation.TestNodeExpression
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.NodeList
+import com.github.javaparser.ast.body.CallableDeclaration
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.ConstructorDeclaration
-import com.github.javaparser.ast.body.EnumConstantDeclaration
-import com.github.javaparser.ast.body.EnumDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.FieldAccessExpr
+import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.expr.NameExpr
 import com.github.javaparser.ast.expr.ObjectCreationExpr
 import com.github.javaparser.ast.expr.SimpleName
 import com.github.javaparser.ast.nodeTypes.NodeWithConstructors
 import com.github.javaparser.ast.nodeTypes.NodeWithOptionalScope
 import com.github.javaparser.ast.type.ClassOrInterfaceType
+import com.github.javaparser.resolution.types.ResolvedType
+import com.github.javaparser.symbolsolver.javaparsermodel.UnsolvedSymbolException
 import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
 
@@ -24,18 +27,18 @@ import one.util.streamex.StreamEx
 class InvocationBuilder {
 
     ValueFactory factory
-    Map<SimpleName, TestNodeExpression> expressionsForParameters
+    Map<SimpleName, DependableNode<Expression>> expressionsForParameters
 
     InvocationBuilder(ValueFactory factory) {
         this.factory = factory
     }
 
-    InvocationBuilder usingForParameters(Map<SimpleName, TestNodeExpression> expressionsForParameters) {
+    InvocationBuilder usingForParameters(Map<SimpleName, DependableNode<Expression>> expressionsForParameters) {
         this.expressionsForParameters = expressionsForParameters
         this
     }
 
-    Optional<TestNodeExpression> build(ConstructorDeclaration cd) {
+    Optional<DependableNode<ObjectCreationExpr>> build(ConstructorDeclaration cd) {
         if (!Callability.isCallableFromTests(cd)) {
             return Optional.empty()
         }
@@ -47,7 +50,7 @@ class InvocationBuilder {
                 log.error "No type declaration for $cd"
             }
             boolean isParentStatic = parents.first().static
-            TestNodeExpression expr = buildConstructorInvocation(cd)
+            DependableNode<ObjectCreationExpr> expr = buildConstructorInvocation(cd)
             for (int i = 1; i < parents.size(); i++) {
                 TypeDeclaration parent = parents[i]
                 if (isParentStatic) {
@@ -60,18 +63,17 @@ class InvocationBuilder {
                         }
                         appendParentScope(expr.node.asObjectCreationExpr(), accessFirst.get())
                     } else if (defaultConstructor(parent)) {
-                        TestNodeExpression defaultInvocation = new TestNodeExpression(
-                                node: new ObjectCreationExpr(null,
+                        DependableNode<Expression> defaultInvocation = DependableNode.from(
+                                new ObjectCreationExpr(null,
                                         JavaParser.parseClassOrInterfaceType(parent.nameAsString),
-                                        NodeList.nodeList())
-                        )
+                                        NodeList.nodeList()))
                         prependWithInvocation(defaultInvocation, expr)
                     } else {
                         Optional<ConstructorDeclaration> simplestConstructor = findSimplestConstructor(parent)
                         if (!simplestConstructor.present) {
                             return Optional.empty()
                         }
-                        TestNodeExpression invocation = buildConstructorInvocation(simplestConstructor.get())
+                        DependableNode<Expression> invocation = buildConstructorInvocation(simplestConstructor.get())
                         prependWithInvocation(invocation, expr)
                     }
                 }
@@ -81,42 +83,66 @@ class InvocationBuilder {
         }
     }
 
-    private TestNodeExpression buildConstructorInvocation(ConstructorDeclaration cd) {
-        TestNodeExpression expr = new TestNodeExpression()
-        List<TestNodeExpression> parameterExpressions
-        if (expressionsForParameters) {
-            parameterExpressions = getFromGivenParameters(cd)
-        } else {
-            parameterExpressions = StreamEx.of(cd.parameters).map { parameter ->
-                factory.getExpression(parameter.type).orElseThrow {
-                    throw new IllegalArgumentException("Failed to create expression for ${parameter} of ${cd}")
-                }
-            }.toList()
+    Optional<DependableNode<MethodCallExpr>> buildMethodInvocation(CallableDeclaration cd) {
+        def argumentsList = createArgumentsList(cd)
+        def dependency = TestNodeMerger.merge(argumentsList.dependency)
+        def scope = null
+        if (cd.static) {
+            // TODO: Probably mostly the same scope magic required as with constructor invocation above
+            // Issue: https://github.com/trilogy-group/BigCodeTestGenerator/issues/31
+            def methodClass = cd.getParentNode().get() as ClassOrInterfaceDeclaration
+            scope = new NameExpr(methodClass.nameAsString)
         }
-        expr.dependency = TestNodeMerger.merge(StreamEx.of(parameterExpressions.stream().map { it.dependency }).toList())
-        expr.node = new ObjectCreationExpr(null,
-                JavaParser.parseClassOrInterfaceType(cd.nameAsString),
-                NodeList.nodeList(StreamEx.of(parameterExpressions).map { it.node }.toList()))
-        expr
+        def node = new MethodCallExpr(scope, cd.nameAsString, NodeList.nodeList(argumentsList.node))
+
+        Optional.of(DependableNode.from(node, dependency))
     }
 
-    private List<TestNodeExpression> getFromGivenParameters(ConstructorDeclaration cd) {
+    private List<DependableNode<Expression>> createArgumentsList(CallableDeclaration cd) {
+        if (expressionsForParameters) {
+            return getFromGivenParameters(cd)
+        }
+
+        cd.parameters.collect { parameter ->
+            try {
+                ResolvedType resolvedType = parameter.type.resolve()
+                return factory.getExpression(resolvedType).orElseThrow {
+                    new IllegalArgumentException("Failed to create expression for ${parameter} of ${cd}")
+                }
+            } catch (UnsolvedSymbolException ignore) {
+                return factory.getStubExpression(parameter.type)
+            }
+        }
+    }
+
+    private DependableNode<ObjectCreationExpr> buildConstructorInvocation(CallableDeclaration cd) {
+        List<DependableNode<Expression>> argumentsList = createArgumentsList(cd)
+        def dependency = TestNodeMerger.merge(argumentsList.dependency)
+        def type = JavaParser.parseClassOrInterfaceType(cd.nameAsString)
+        ObjectCreationExpr node = new ObjectCreationExpr(null,
+                type,
+                NodeList.nodeList(argumentsList.node))
+
+        DependableNode.from(node, dependency)
+    }
+
+    private List<DependableNode<Expression>> getFromGivenParameters(CallableDeclaration cd) {
         StreamEx.of(cd.parameters).map { parameter ->
             Optional.ofNullable(expressionsForParameters.get(parameter.name)).orElseThrow {
-                throw new IllegalArgumentException("Failed to find a parameter value for $parameter in $cd. " +
+                new IllegalArgumentException("Failed to find a parameter value for $parameter in $cd. " +
                         "Only $expressionsForParameters were provided!")
             }
         }.toList()
     }
 
-    private static void prependWithScope(TestNodeExpression expr, String scopeName) {
+    private static void prependWithScope(DependableNode<ObjectCreationExpr> expr, String scopeName) {
         ObjectCreationExpr parentScope = findParentObjectCreationScope(expr.node.asObjectCreationExpr())
         ClassOrInterfaceType parentTypeScope = findParentTypeScope(parentScope.type)
         parentTypeScope.setScope(JavaParser.parseClassOrInterfaceType(scopeName))
     }
 
-    private static void prependWithInvocation(TestNodeExpression invocation, TestNodeExpression expr) {
-        appendParentScope(expr.node.asObjectCreationExpr(), invocation.node)
+    private static void prependWithInvocation(DependableNode<Expression> invocation, DependableNode<ObjectCreationExpr> expr) {
+        appendParentScope(expr.node, invocation.node)
     }
 
     private static ClassOrInterfaceType findParentTypeScope(ClassOrInterfaceType type) {

@@ -1,10 +1,11 @@
 package com.aurea.testgenerator.generation.merge
 
-import com.aurea.testgenerator.generation.TestNodeMethod
+import com.aurea.testgenerator.generation.DependableNode
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Modifier
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
+import com.github.javaparser.ast.body.MethodDeclaration
 import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
 import org.springframework.stereotype.Component
@@ -13,14 +14,14 @@ import org.springframework.stereotype.Component
 @Log4j2
 class UnitTestMergeEngine {
 
-    UnitTestMergeResult merge(Unit unitUnderTest, List<TestNodeMethod> uts) {
+    UnitTestMergeResult merge(Unit unitUnderTest, List<DependableNode<MethodDeclaration>> uts) {
         new UnitTestMergeEngineProcess(unit: unitUnderTest, uts: uts)
                 .merge()
     }
 
     private static class UnitTestMergeEngineProcess {
         Unit unit
-        List<TestNodeMethod> uts
+        List<DependableNode<MethodDeclaration>> uts
         CompilationUnit cu = new CompilationUnit()
         List<UnitTestMergeConflict> conflicts = []
         ClassOrInterfaceDeclaration coid
@@ -79,8 +80,6 @@ class UnitTestMergeEngine {
         private void addTests() {
             StreamEx.of(uts)
                     .map { it.node }
-                    .filter { it.present }
-                    .map { it.get() }
                     .forEach {
                 coid.addMember(it)
             }

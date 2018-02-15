@@ -57,21 +57,69 @@ class Types {
     static boolean isString(Type type) {
         if (type.isClassOrInterfaceType()) {
             ClassOrInterfaceType coit = type.asClassOrInterfaceType()
-            if (coit.nameAsString == 'String' || coit.nameAsString == 'java.lang.String') {
-                return true
-            }
+            return coit.nameAsString in ['String', 'java.lang.String']
         }
         return false
     }
 
+    static boolean isString(ResolvedType type) {
+        type.referenceType && type.asReferenceType().qualifiedName in ['String' , 'java.lang.String']
+    }
+
     static boolean isDate(ClassOrInterfaceType type) {
-        String name = type.nameAsString
-        name == 'Date' || name == 'java.util.Date' || name == 'java.sql.Date'
+        type.nameAsString in ['Date', 'java.util.Date', 'java.sql.Date']
+    }
+
+    static boolean isDate(ResolvedReferenceType type) {
+        type.qualifiedName in ['Date', 'java.util.Date', 'java.sql.Date']
     }
 
     static boolean isSqlDate(ClassOrInterfaceType type) {
-        String name = type.nameAsString
-        name == 'java.sql.Date'
+        type.nameAsString == 'java.sql.Date'
+    }
+
+    static boolean isSqlDate(ResolvedReferenceType type) {
+        type.qualifiedName == 'java.sql.Date'
+    }
+
+    static boolean isException(ClassOrInterfaceType type) {
+        type.nameAsString == 'Exception'
+    }
+
+    static boolean isException(ResolvedReferenceType type) {
+        type.qualifiedName == 'java.lang.Exception'
+    }
+
+    static boolean isThrowable(ClassOrInterfaceType type) {
+        type.nameAsString == 'Throwable'
+    }
+
+    static boolean isThrowable(ResolvedReferenceType type) {
+        type.qualifiedName == 'java.lang.Throwable'
+    }
+
+    static boolean isRuntimeException(ClassOrInterfaceType type) {
+        type.nameAsString == 'RuntimeException'
+    }
+
+    static boolean isRuntimeException(ResolvedReferenceType type) {
+        type.qualifiedName == 'java.lang.RuntimeException'
+    }
+
+    static boolean isLocale(ClassOrInterfaceType type) {
+        type.nameAsString == 'Locale'
+    }
+
+    static boolean isLocale(ResolvedReferenceType type) {
+        type.qualifiedName == 'java.util.Locale'
+    }
+
+    static boolean isObject(ClassOrInterfaceType type) {
+        type.nameAsString == 'java.lang.Object'
+    }
+
+    static boolean isObject(ResolvedReferenceType type) {
+        type.qualifiedName == 'java.lang.Object'
     }
 
     static boolean isCollection(ClassOrInterfaceType type) {
@@ -144,6 +192,14 @@ class Types {
 
     static boolean isMap(ResolvedType type) {
         type.referenceType && (type.asReferenceType().qualifiedName in KNOWN_MAP_TYPES)
+    }
+
+    static boolean isEnumeration(ResolvedReferenceType type) {
+        type.typeDeclaration.isEnum()
+    }
+
+    static boolean isEnumeration(ResolvedType type) {
+        type.referenceType && (type.asReferenceType().typeDeclaration.isEnum())
     }
 
     static boolean isBoxedPrimitive(ResolvedReferenceType type) {

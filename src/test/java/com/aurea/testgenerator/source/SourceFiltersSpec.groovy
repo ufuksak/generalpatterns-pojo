@@ -5,9 +5,7 @@ import org.junit.rules.TemporaryFolder
 import spock.lang.Specification
 
 import java.nio.file.Path
-import java.util.function.BinaryOperator
 import java.util.function.UnaryOperator
-
 
 class SourceFiltersSpec extends Specification {
 

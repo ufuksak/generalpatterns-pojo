@@ -1,6 +1,7 @@
 package com.aurea.testgenerator.source;
 
 import com.aurea.testgenerator.config.ProjectConfiguration;
+import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import groovy.transform.Memoized;
 import one.util.streamex.StreamEx;
 import org.apache.logging.log4j.LogManager;
@@ -20,13 +21,15 @@ public class PathUnitSource implements UnitSource {
     private final SourceFinder sourceFinder;
     private final PathToUnitMapper pathToUnitMapper;
     private final SourceFilter filter;
+    private final JavaSymbolSolver solver;
     private final Path root;
 
-    public PathUnitSource(SourceFinder sourceFinder, ProjectConfiguration cfg, SourceFilter filter) {
+    public PathUnitSource(SourceFinder sourceFinder, ProjectConfiguration cfg, SourceFilter filter, JavaSymbolSolver solver) {
         this.sourceFinder = sourceFinder;
         this.pathToUnitMapper = new PathToUnitMapper(cfg.getSrcPath());
         this.filter = filter;
         this.root = cfg.getSrcPath();
+        this.solver = solver;
     }
 
     @Override
@@ -35,7 +38,8 @@ public class PathUnitSource implements UnitSource {
             return sources(anotherFilter)
                     .map(pathToUnitMapper)
                     .filter(Optional::isPresent)
-                    .map(Optional::get);
+                    .map(Optional::get)
+                    .map(this::injectSolver);
         } catch (IOException e) {
             logger.error("Failed to fetch units", e);
             return StreamEx.empty();
@@ -44,6 +48,11 @@ public class PathUnitSource implements UnitSource {
 
     private StreamEx<Path> sources(Predicate<Path> anotherFilter) throws IOException {
         return sourceFinder.javaClasses().parallel().filter(filter.and(anotherFilter));
+    }
+
+    private Unit injectSolver(Unit unit) {
+        solver.inject(unit.getCu());
+        return unit;
     }
 
     @Override

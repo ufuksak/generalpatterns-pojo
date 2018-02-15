@@ -1,7 +1,6 @@
 package com.aurea.common
 
 import groovy.transform.EqualsAndHashCode
-import groovy.transform.ToString
 
 @EqualsAndHashCode
 class JavaClass {

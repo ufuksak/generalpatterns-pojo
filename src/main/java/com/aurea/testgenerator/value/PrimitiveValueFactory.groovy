@@ -1,9 +1,12 @@
 package com.aurea.testgenerator.value
 
-import com.aurea.testgenerator.generation.TestNodeExpression
+import com.aurea.testgenerator.generation.DependableNode
+import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.type.PrimitiveType
-
+import com.github.javaparser.resolution.types.ResolvedPrimitiveType
 
 interface PrimitiveValueFactory {
-    TestNodeExpression get(PrimitiveType type)
+    DependableNode<Expression> get(PrimitiveType type)
+
+    DependableNode<Expression> get(ResolvedPrimitiveType type)
 }

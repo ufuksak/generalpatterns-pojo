@@ -38,6 +38,10 @@ public class NodeLocCounter {
                     p -> p instanceof DoStmt
             );
 
+    public static long count(Node node) {
+        return count(node.getChildNodes());
+    }
+
     public static long count(List<Node> nodes) {
         long count = countRecursively(nodes);
         count += nodes.stream().map(Node::getChildNodes).mapToLong(NodeLocCounter::count).sum();
