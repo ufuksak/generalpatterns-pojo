@@ -13,16 +13,12 @@ import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.TestMethodNomenclature
 import com.aurea.testgenerator.generation.pojo.PojoTestTypes
 import com.aurea.testgenerator.generation.source.Imports
-import com.aurea.testgenerator.generation.source.PojoFinder
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ParseProblemException
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
-import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.stmt.Statement
-import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
-import com.github.javaparser.symbolsolver.javaparsermodel.UnsolvedSymbolException
 import groovy.util.logging.Log4j2
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Profile
@@ -55,7 +51,7 @@ class OpenPojoTestGenerator implements TestGenerator {
         for (ClassOrInterfaceDeclaration coid : classes) {
             TestGeneratorResult result = new TestGeneratorResult()
             result.type = PojoTestTypes.OPEN_POJO
-            if (isPojo(coid)) {
+            if (Pojos.isPojo(coid)) {
                 DependableNode<Statement> validatorStatement = buildValidatorStatement(coid)
                 String testName = testMethodNomenclature.requestTestMethodName(result.type, coid)
                 String fullTypeName = ASTNodeUtils.getFullTypeName(coid)
@@ -92,11 +88,11 @@ class OpenPojoTestGenerator implements TestGenerator {
         List<String> testers = ['GetterTester']
         dependency.imports = [Imports.OPEN_POJO_VALIDATOR, Imports.OPEN_POJO_GETTER_TESTER,
                               Imports.OPEN_POJO_VALIDATOR, Imports.OPEN_POJO_TEST_CHAIN]
-        if (hasAtLeastOneSetter(coid)) {
+        if (Pojos.hasAtLeastOneSetter(coid)) {
             testers << 'SetterTester'
             dependency.imports << Imports.OPEN_POJO_SETTER_TESTER
         }
-        if (hasToStringMethod(coid)) {
+        if (Pojos.hasToStringMethod(coid)) {
             testers << 'ToStringTester'
             dependency.imports << Imports.OPEN_POJO_TO_STRING_TESTER
         }
@@ -108,45 +104,5 @@ class OpenPojoTestGenerator implements TestGenerator {
         statementCode.append(lineSeparator()).append("\t\t").append(".buildValidator();")
         Statement statement = JavaParser.parseStatement(statementCode.toString())
         DependableNode.from(statement, dependency)
-    }
-
-    static boolean isPojo(ClassOrInterfaceDeclaration coid) {
-        hasAtleastOneGetter(coid)
-    }
-
-    static boolean hasToStringMethod(ClassOrInterfaceDeclaration coid) {
-        coid.methods.any {
-            it.nameAsString == 'toString' && it.type.toString() == 'String' && it.public && !it.parameters
-        }
-    }
-
-    static boolean hasAtLeastOneSetter(ClassOrInterfaceDeclaration coid) {
-        for (FieldDeclaration field : coid.fields) {
-            try {
-                ResolvedFieldDeclaration resolvedField = field.resolve()
-                PojoFinder setterFinder = new PojoFinder(resolvedField)
-                if (setterFinder.tryToFindSetter().present) {
-                    return true
-                }
-            } catch (UnsolvedSymbolException use) {
-                log.debug "Failed to solve $field in $coid", use
-            }
-        }
-        return false
-    }
-
-    static boolean hasAtleastOneGetter(ClassOrInterfaceDeclaration coid) {
-        for (FieldDeclaration field : coid.fields) {
-            try {
-                ResolvedFieldDeclaration resolvedField = field.resolve()
-                PojoFinder getterFinder = new PojoFinder(resolvedField)
-                if (getterFinder.tryToFindGetter().present) {
-                    return true
-                }
-            } catch (UnsolvedSymbolException use) {
-                log.debug "Failed to solve $field in $coid", use
-            }
-        }
-        return false
     }
 }

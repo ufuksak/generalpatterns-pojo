@@ -25,11 +25,24 @@ class TestMethodNomenclature {
             (ConstructorTypes.EMPTY_CONSTRUCTOR)                    : 'IsInstantiable',
             (ConstructorTypes.CONSTRUCTOR_FIELD_LITERAL_ASSIGNMENTS): 'AssignsConstants',
             (ConstructorTypes.CONSTRUCTOR_ARGUMENT_ASSIGNMENTS)     : 'AssignsGivenArguments',
-            (PojoTestTypes.OPEN_POJO)                               : 'PojoMethods'
+            (PojoTestTypes.OPEN_POJO)                               : 'PojoMethods',
+            (PojoTestTypes.POJO_TESTER_GETTER)                      : 'Getters',
+            (PojoTestTypes.POJO_TESTER_SETTER)                      : 'Setters',
+            (PojoTestTypes.POJO_TESTER_TO_STRING)                   : 'ToString',
+            (PojoTestTypes.POJO_TESTER_EQUALS)                      : 'Equals',
+            (PojoTestTypes.POJO_TESTER_HASH_CODE)                   : 'HashCode',
+            (PojoTestTypes.POJO_TESTER_CONSTRUCTORS)                : 'Constructors',
     ].asImmutable()
 
     private static final Map<? extends TestType, String> TEST_METHOD_NAME_PREFIXES = [
-            (PojoTestTypes.OPEN_POJO)                               : 'validate'
+            (PojoTestTypes.OPEN_POJO)               : 'validate',
+            (PojoTestTypes.POJO_TESTER_GETTER)      : 'validate',
+            (PojoTestTypes.POJO_TESTER_GETTER)      : 'validate',
+            (PojoTestTypes.POJO_TESTER_SETTER)      : 'validate',
+            (PojoTestTypes.POJO_TESTER_TO_STRING)   : 'validate',
+            (PojoTestTypes.POJO_TESTER_EQUALS)      : 'validate',
+            (PojoTestTypes.POJO_TESTER_HASH_CODE)   : 'validate',
+            (PojoTestTypes.POJO_TESTER_CONSTRUCTORS): 'validate'
     ].asImmutable()
 
     Set<String> takenNames = []

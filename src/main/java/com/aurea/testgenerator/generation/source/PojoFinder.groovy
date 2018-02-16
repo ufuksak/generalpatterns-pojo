@@ -61,7 +61,7 @@ class PojoFinder {
                 (isStatic ? rmd.isStatic() : !rmd.isStatic()) &&
                 rmd.returnType.isVoid() &&
                 rmd.getNumberOfParams() == 1 ||
-                rmd.getParam(0).type == fieldDeclaration.type &&
+                rmd.getParam(0).getType() == fieldDeclaration.getType() &&
                 isSetterImplementation(rmd)
     }
 

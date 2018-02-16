@@ -29,6 +29,11 @@ class Imports {
     static final ImportDeclaration OPEN_POJO_TEST_CHAIN = parse('com.aurea.unittest.commons.pojo.chain.TestChain')
     static final ImportDeclaration OPEN_POJO_TO_STRING_TESTER = parse('com.aurea.unittest.commons.pojo.ToStringTester')
 
+    //PojoTester
+    static final ImportDeclaration POJO_TESTER_ASSERTIONS = parse('pl.pojo.tester.api.assertion.Assertions')
+    static final ImportDeclaration POJO_TESTER_METHOD = parse('pl.pojo.tester.api.assertion.Method')
+
+
 
     static ImportDeclaration parse(String fullClassName) {
         JavaParser.parseImport("import $fullClassName;")
