@@ -1,6 +1,7 @@
 package com.aurea.testgenerator.generation
 
 import com.aurea.common.JavaClass
+import com.aurea.testgenerator.generation.patterns.constructors.IsInstantiableConstructorGenerator
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Modifier
@@ -20,7 +21,7 @@ class UnitTestGenerator {
 
     @Autowired
     UnitTestGenerator(List<TestGenerator> generators) {
-        this.generators = generators
+        this.generators = generators.findAll { it.class != IsInstantiableConstructorGenerator }
         log.info "Registered generators: $generators"
     }
 

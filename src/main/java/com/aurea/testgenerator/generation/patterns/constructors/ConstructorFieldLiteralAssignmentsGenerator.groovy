@@ -4,7 +4,8 @@ import com.aurea.testgenerator.ast.ASTNodeUtils
 import com.aurea.testgenerator.ast.Callability
 import com.aurea.testgenerator.ast.FieldAccessBuilder
 import com.aurea.testgenerator.ast.FieldAccessResult
-import com.aurea.testgenerator.ast.FieldAssignments
+import com.aurea.testgenerator.ast.FieldAssignment
+import com.aurea.testgenerator.ast.FieldAssignmentsVisitor
 import com.aurea.testgenerator.ast.FieldResolver
 import com.aurea.testgenerator.ast.InvocationBuilder
 import com.aurea.testgenerator.generation.DependableNode
@@ -36,14 +37,14 @@ import org.springframework.stereotype.Component
 
 @Component
 @Log4j2
-class FieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator {
+class ConstructorFieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator {
 
     JavaParserFacade solver
     FieldResolver fieldResolver
     ValueFactory valueFactory
 
     @Autowired
-    FieldLiteralAssignmentsGenerator(JavaParserFacade solver, ValueFactory valueFactory) {
+    ConstructorFieldLiteralAssignmentsGenerator(JavaParserFacade solver, ValueFactory valueFactory) {
         this.solver = solver
         this.fieldResolver = new FieldResolver(solver)
         this.valueFactory = valueFactory
@@ -56,13 +57,16 @@ class FieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator 
         Expression scope = new NameExpr(instanceName)
         FieldAccessBuilder fieldAccessBuilder = new FieldAccessBuilder(scope)
 
-        ArrayList<AssignExpr> literalAssignExpressions = findLiteralAssignmentExpressions(cd)
-        AssertionBuilder assertionBuilder = new AssertionBuilder().softly(literalAssignExpressions.size() > 1)
-        literalAssignExpressions.each {
-            addAssertion(it, fieldAccessBuilder, assertionBuilder, result)
+        FieldAssignmentsVisitor visitor = new FieldAssignmentsVisitor(cd)
+        Collection<FieldAssignment> fieldAssignments = visitor.visit()
+        Collection<FieldAssignment> lastLiteralAssignments = fieldAssignments.findAll { it.last && it.literalAssignment }
+
+        AssertionBuilder assertionBuilder = new AssertionBuilder().softly(lastLiteralAssignments.size() > 1)
+        lastLiteralAssignments.each {
+            addAssertion(it.expr, fieldAccessBuilder, assertionBuilder, result)
         }
         List<DependableNode<Statement>> assertions = assertionBuilder.build()
-        if (!assertions.empty) {
+        if (assertions) {
             DependableNode<MethodDeclaration> assignConstants = new DependableNode<>()
             TestNodeMerger.appendDependencies(assignConstants, assertions)
             Optional<DependableNode<ObjectCreationExpr>> constructorCall = new InvocationBuilder(valueFactory).build(cd)
@@ -88,12 +92,6 @@ class FieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator 
         result
     }
 
-    private static Collection<AssignExpr> findLiteralAssignmentExpressions(ConstructorDeclaration cd) {
-        List<AssignExpr> assignExprs = cd.body.findAll(AssignExpr)
-        Collection<AssignExpr> onlyLastAssignExprs = FieldAssignments.findLastAssignExpressionsByField(assignExprs)
-        onlyLastAssignExprs.findAll { it.value.literalExpr }
-    }
-
     private void addAssertion(AssignExpr assignExpr,
                               FieldAccessBuilder fieldAccessBuilder,
                               AssertionBuilder assertionBuilder,
@@ -117,7 +115,7 @@ class FieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator 
 
     @Override
     protected TestType getType() {
-        ConstructorTypes.FIELD_LITERAL_ASSIGNMENTS
+        ConstructorTypes.CONSTRUCTOR_FIELD_LITERAL_ASSIGNMENTS
     }
 
     @Override

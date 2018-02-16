@@ -5,6 +5,6 @@ import com.aurea.testgenerator.generation.TestType
 
 enum ConstructorTypes implements TestType {
     EMPTY_CONSTRUCTOR,
-    FIELD_LITERAL_ASSIGNMENTS,
-    ARGUMENT_ASSIGNMENTS
+    CONSTRUCTOR_FIELD_LITERAL_ASSIGNMENTS,
+    CONSTRUCTOR_ARGUMENT_ASSIGNMENTS
 }

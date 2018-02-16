@@ -16,12 +16,12 @@ class TestMethodNomenclature {
     static final String TEST_NAME_SPACE = "_"
 
     private static final Map<? extends TestType, String> TEST_METHOD_NAME_SUFFIXES = [
-            (AbstractFactoryMethodTypes.IS_CALLABLE)         : 'IsCallable',
-            (AbstractFactoryMethodTypes.ARGUMENT_ASSIGNMENTS): 'AssignsGivenArguments',
+            (AbstractFactoryMethodTypes.IS_CALLABLE)                : 'IsCallable',
+            (AbstractFactoryMethodTypes.ARGUMENT_ASSIGNMENTS)       : 'AssignsGivenArguments',
 
-            (ConstructorTypes.EMPTY_CONSTRUCTOR)             : 'IsInstantiable',
-            (ConstructorTypes.FIELD_LITERAL_ASSIGNMENTS)     : 'AssignsConstants',
-            (ConstructorTypes.ARGUMENT_ASSIGNMENTS)          : 'AssignsGivenArguments'
+            (ConstructorTypes.EMPTY_CONSTRUCTOR)                    : 'IsInstantiable',
+            (ConstructorTypes.CONSTRUCTOR_FIELD_LITERAL_ASSIGNMENTS): 'AssignsConstants',
+            (ConstructorTypes.CONSTRUCTOR_ARGUMENT_ASSIGNMENTS)     : 'AssignsGivenArguments'
     ].asImmutable()
 
     Set<String> takenNames = []

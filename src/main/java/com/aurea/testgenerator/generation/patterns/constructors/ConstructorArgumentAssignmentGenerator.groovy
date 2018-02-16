@@ -4,7 +4,8 @@ import com.aurea.testgenerator.ast.ASTNodeUtils
 import com.aurea.testgenerator.ast.Callability
 import com.aurea.testgenerator.ast.FieldAccessBuilder
 import com.aurea.testgenerator.ast.FieldAccessResult
-import com.aurea.testgenerator.ast.FieldAssignments
+import com.aurea.testgenerator.ast.FieldAssignment
+import com.aurea.testgenerator.ast.FieldAssignmentsVisitor
 import com.aurea.testgenerator.ast.FieldResolver
 import com.aurea.testgenerator.ast.InvocationBuilder
 import com.aurea.testgenerator.generation.DependableNode
@@ -40,14 +41,14 @@ import org.springframework.stereotype.Component
 
 @Component
 @Log4j2
-class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
+class ConstructorArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
 
     JavaParserFacade solver
     FieldResolver fieldResolver
     ValueFactory valueFactory
 
     @Autowired
-    ArgumentAssignmentGenerator(JavaParserFacade solver, ValueFactory valueFactory) {
+    ConstructorArgumentAssignmentGenerator(JavaParserFacade solver, ValueFactory valueFactory) {
         this.solver = solver
         this.valueFactory = valueFactory
         fieldResolver = new FieldResolver(solver)
@@ -56,8 +57,9 @@ class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
     @Override
     protected TestGeneratorResult generate(ConstructorDeclaration cd, Unit unitUnderTest) {
         TestGeneratorResult result = new TestGeneratorResult()
-        Collection<AssignExpr> argumentAssignExpressions = findArgumentAssignExpressions(cd)
-        if (!argumentAssignExpressions) {
+        FieldAssignmentsVisitor fieldAssignmentsVisitor = new FieldAssignmentsVisitor(cd)
+        Collection<FieldAssignment> fieldAssignments = fieldAssignmentsVisitor.visit()
+        if (!fieldAssignments) {
             return result
         }
 
@@ -65,12 +67,12 @@ class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
         Expression scope = new NameExpr(instanceName)
         FieldAccessBuilder fieldAccessBuilder = new FieldAccessBuilder(scope)
 
-        AssertionBuilder assertionBuilder = new AssertionBuilder().softly(argumentAssignExpressions.size() > 1)
-        argumentAssignExpressions.each {
-            addAssertion(it, fieldAccessBuilder, assertionBuilder, result)
+        AssertionBuilder assertionBuilder = new AssertionBuilder().softly(fieldAssignments.size() > 1)
+        fieldAssignments.each {
+            addAssertion(it.expr, fieldAccessBuilder, assertionBuilder, result)
         }
         List<DependableNode<Statement>> assertions = assertionBuilder.build()
-        if (!assertions.empty) {
+        if (assertions) {
             DependableNode<MethodDeclaration> assignsArguments = new DependableNode<>()
             List<DependableNode<VariableDeclarationExpr>> variables = StreamEx.of(cd.parameters).map { p ->
                 valueFactory.getVariable(p.nameAsString, p.type).orElseThrow {
@@ -114,15 +116,6 @@ class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
         result
     }
 
-    private static Collection<AssignExpr> findArgumentAssignExpressions(ConstructorDeclaration cd) {
-        List<AssignExpr> assignExprs = cd.body.findAll(AssignExpr)
-        Collection<AssignExpr> onlyLastAssignExprs = FieldAssignments.findLastAssignExpressionsByField(assignExprs)
-        Collection<AssignExpr> onlyArgumentAssignExprs = onlyLastAssignExprs.findAll {
-            it.value.nameExpr && cd.isNameOfArgument(it.value.asNameExpr().name)
-        }
-        onlyArgumentAssignExprs
-    }
-
     private void addAssertion(AssignExpr assignExpr,
                               FieldAccessBuilder fieldAccessBuilder,
                               AssertionBuilder assertionBuilder,
@@ -146,7 +139,7 @@ class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
 
     @Override
     protected TestType getType() {
-        ConstructorTypes.ARGUMENT_ASSIGNMENTS
+        ConstructorTypes.CONSTRUCTOR_ARGUMENT_ASSIGNMENTS
     }
 
     @Override

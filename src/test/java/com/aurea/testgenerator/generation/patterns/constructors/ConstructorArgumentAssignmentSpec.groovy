@@ -2,9 +2,8 @@ package com.aurea.testgenerator.generation.patterns.constructors
 
 import com.aurea.testgenerator.MatcherPipelineTest
 import com.aurea.testgenerator.generation.TestGenerator
-import com.aurea.testgenerator.generation.patterns.constructors.ArgumentAssignmentGenerator
 
-class ArgumentAssignmentSpec extends MatcherPipelineTest {
+class ConstructorArgumentAssignmentSpec extends MatcherPipelineTest {
 
     def "assigning integral arguments should be asserted"() {
         expect:
@@ -131,9 +130,44 @@ class ArgumentAssignmentSpec extends MatcherPipelineTest {
         """
     }
 
+    def "assigning in super should be tested"() {
+        expect:
+        withClass("""
+            class Base {
+                int i;
+                
+                Base(int i) {
+                    this.i = i;
+                }
+            }
+        """).onClassCodeExpect """
+            
+            class Foo extends Base {
+                Foo(int i) {
+                    super(i);
+                }
+            }   
+        """, """                   
+            package sample;
+            
+            import static org.assertj.core.api.Assertions.assertThat;
+            import org.junit.Test;
+            
+            public class FooTest {
+                
+                @Test
+                public void test_FooWithOneArgument_AssignsGivenArguments() throws Exception {
+                    int i = 42;
+                    Foo foo = new Foo(i);
+                    assertThat(foo.i).isEqualTo(i);
+                }
+            }
+        """
+    }
+
     @Override
     TestGenerator generator() {
-        TestGenerator generator = new ArgumentAssignmentGenerator(solver, valueFactory)
+        TestGenerator generator = new ConstructorArgumentAssignmentGenerator(solver, valueFactory)
         generator.reporter = reporter
         generator.nomenclatures = nomenclatureFactory
         generator.visitReporter = visitReporter

@@ -19,6 +19,7 @@ import com.aurea.testgenerator.value.ArbitraryPrimitiveValuesFactory
 import com.aurea.testgenerator.value.ArbitraryReferenceTypeFactory
 import com.aurea.testgenerator.value.ValueFactory
 import com.aurea.testgenerator.value.random.ValueFactoryImpl
+import com.github.javaparser.JavaParser
 import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
@@ -84,6 +85,20 @@ abstract class MatcherPipelineTest extends Specification {
         String resultingTest = cfg.outPath.resolve('sample').resolve('FooTest.java').toFile().text
 
         assertThat(resultingTest).isEqualToNormalizingWhitespace(expectedTest)
+    }
+    
+    MatcherPipelineTest withClass(String code) {
+        String fullText = """
+            package sample;
+            
+            $code
+            """
+        
+        String fileName = JavaParser.parse(code).types.first().nameAsString + ".java"
+        File file = new File(cfg.srcPath.toFile().absolutePath + "/sample", fileName)
+        file.parentFile.mkdirs()
+        file.write fullText
+        this
     }
 
     void onClassCodeDoNotExpectTest(String code) {
