@@ -6,10 +6,12 @@ import com.aurea.testgenerator.coverage.CoverageService
 import com.aurea.testgenerator.coverage.NoCoverageService
 import com.aurea.testgenerator.extensions.Extensions
 import com.aurea.testgenerator.generation.MethodLevelTestGenerator
+import com.aurea.testgenerator.generation.TestGenerator
 import com.aurea.testgenerator.generation.TestGeneratorResultReporter
 import com.aurea.testgenerator.generation.UnitTestGenerator
 import com.aurea.testgenerator.generation.VisitReporter
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
+import com.aurea.testgenerator.generation.names.StandardTestClassNomenclatureFactory
 import com.aurea.testgenerator.source.JavaSourceFinder
 import com.aurea.testgenerator.source.PathUnitSource
 import com.aurea.testgenerator.source.SourceFilters
@@ -50,7 +52,7 @@ abstract class MatcherPipelineTest extends Specification {
             new ArbitraryPrimitiveValuesFactory())
     TestGeneratorResultReporter reporter = new TestGeneratorResultReporter(mock(ApplicationEventPublisher))
     VisitReporter visitReporter = new VisitReporter(mock(ApplicationEventPublisher))
-    NomenclatureFactory nomenclatureFactory = new NomenclatureFactory()
+    NomenclatureFactory nomenclatureFactory = new NomenclatureFactory(new StandardTestClassNomenclatureFactory())
 
     void setupSpec() {
         Extensions.enable()
@@ -62,8 +64,8 @@ abstract class MatcherPipelineTest extends Specification {
         cfg.testSrc = folder.newFolder("test").absolutePath
 
         source = new PathUnitSource(new JavaSourceFinder(cfg), cfg, SourceFilters.empty(), getSymbolSolver())
-        MethodLevelTestGenerator generator = generator()
-        unitTestGenerator = new UnitTestGenerator([generator])
+        TestGenerator generator = generator()
+        unitTestGenerator = new UnitTestGenerator([generator], nomenclatureFactory)
         unitTestWriter = new UnitTestWriter(cfg)
         coverageService = new NoCoverageService()
         coverageCollector = new CoverageCollector(coverageService)
@@ -135,5 +137,5 @@ abstract class MatcherPipelineTest extends Specification {
         ))
     }
 
-    abstract MethodLevelTestGenerator generator()
+    abstract TestGenerator generator()
 }
