@@ -139,7 +139,7 @@ class PojoTesterGenerator implements TestGenerator {
                       .areWellImplemented();    
         """)
         DependableNode<Statement> assertionStatement = DependableNode.from(assertStmt, new TestDependency(
-                imports: [Imports.POJO_TESTER_METHOD, Imports.POJO_TESTER_ASSERTIONS]
+                imports: [Imports.POJO_TESTER_METHOD, Imports.POJO_TESTER_ASSERTIONS, Imports.POJO_TESTER_ASSERTIONS_POJO_METHODS_FOR]
         ))
         String testName = testMethodNomenclature.requestTestMethodName(result.type, coid)
         String testText = """

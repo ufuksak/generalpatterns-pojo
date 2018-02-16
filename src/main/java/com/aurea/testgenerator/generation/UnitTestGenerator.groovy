@@ -1,6 +1,8 @@
 package com.aurea.testgenerator.generation
 
 import com.aurea.common.JavaClass
+import com.aurea.testgenerator.generation.names.NomenclatureFactory
+import com.aurea.testgenerator.generation.names.TestClassNomenclature
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Modifier
@@ -17,20 +19,24 @@ import org.springframework.stereotype.Component
 class UnitTestGenerator {
 
     List<TestGenerator> generators
+    NomenclatureFactory nomenclatureFactory
 
     @Autowired
-    UnitTestGenerator(List<MethodLevelTestGenerator> generators) {
+    UnitTestGenerator(List<TestGenerator> generators, NomenclatureFactory nomenclatureFactory) {
         this.generators = generators
+        this.nomenclatureFactory = nomenclatureFactory
         log.info "Registered generators: $generators"
     }
 
     Optional<TestUnit> tryGenerateTest(Unit unitUnderTest) {
         PackageDeclaration pd = unitUnderTest.cu.getPackageDeclaration().get()
-        ClassOrInterfaceDeclaration testClass = newTestClass(unitUnderTest)
+        TestClassNomenclature classNomenclature = nomenclatureFactory.getTestClassNomenclature(unitUnderTest.javaClass)
+        String testName = classNomenclature.requestTestClassName(unitUnderTest)
+        ClassOrInterfaceDeclaration testClass = newTestClass(testName)
         CompilationUnit testCu = new CompilationUnit(pd,
                 unitUnderTest.cu.getImports(),
                 NodeList.nodeList(testClass), null)
-        Unit test = new Unit(testCu, new JavaClass(pd.nameAsString, getTestName(unitUnderTest)), null)
+        Unit test = new Unit(testCu, new JavaClass(pd.nameAsString, testName), null)
         TestUnit testUnit = new TestUnit(test)
         List<TestGeneratorResult> testGeneratorResults = StreamEx.of(generators).flatMap {
             it.generate(unitUnderTest).stream()
@@ -51,12 +57,7 @@ class UnitTestGenerator {
         generators
     }
 
-    private static ClassOrInterfaceDeclaration newTestClass(Unit unit) {
-        new ClassOrInterfaceDeclaration(EnumSet.of(Modifier.PUBLIC), false, getTestName(unit))
+    private static ClassOrInterfaceDeclaration newTestClass(String testName) {
+        new ClassOrInterfaceDeclaration(EnumSet.of(Modifier.PUBLIC), false, testName)
     }
-
-    private static String getTestName(Unit unit) {
-        unit.className + "Test"
-    }
-
 }

@@ -60,7 +60,7 @@ class GenerationByClassStatistics implements ApplicationListener<TestGeneratorTy
 \tGenerated tests per type: $tests                                            
 \t${EntryStream.of(testsPerType).join(': ', '\t', System.lineSeparator() + '\t').join("")}
 \tGenerated tests per unit:
-\t${EntryStream.of(testsPerUnit).join(': ', '\t', System.lineSeparator() + '\t').join("")}
+\t${EntryStream.of(testsPerUnit).filterValues{it.intValue() > 0}.join(': ', '\t', System.lineSeparator() + '\t').join("")}
 \tErrors per unit:
 ${printErrorsPerUnit()}
         """
