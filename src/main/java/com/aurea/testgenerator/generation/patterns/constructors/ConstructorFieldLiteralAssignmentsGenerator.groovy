@@ -11,8 +11,11 @@ import com.aurea.testgenerator.ast.InvocationBuilder
 import com.aurea.testgenerator.generation.DependableNode
 import com.aurea.testgenerator.generation.TestGeneratorError
 import com.aurea.testgenerator.generation.TestGeneratorResult
+import com.aurea.testgenerator.generation.TestGeneratorResultReporter
 import com.aurea.testgenerator.generation.TestType
+import com.aurea.testgenerator.generation.VisitReporter
 import com.aurea.testgenerator.generation.merge.TestNodeMerger
+import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.TestMethodNomenclature
 import com.aurea.testgenerator.generation.source.AssertionBuilder
 import com.aurea.testgenerator.generation.source.Imports
@@ -41,25 +44,22 @@ import org.springframework.stereotype.Component
 @Log4j2
 class ConstructorFieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator {
 
-    JavaParserFacade solver
     FieldResolver fieldResolver
-    ValueFactory valueFactory
 
     @Autowired
     ConstructorFieldLiteralAssignmentsGenerator(JavaParserFacade solver, ValueFactory valueFactory) {
-        this.solver = solver
+        super(solver, reporter, visitReporter, nomenclatures, valueFactory)
         this.fieldResolver = new FieldResolver(solver)
-        this.valueFactory = valueFactory
     }
 
     @Override
-    protected TestGeneratorResult generate(ConstructorDeclaration cd, Unit unitUnderTest) {
+    protected TestGeneratorResult generate(ConstructorDeclaration constructorDeclaration, Unit unitUnderTest) {
         TestGeneratorResult result = new TestGeneratorResult()
-        String instanceName = cd.nameAsString.uncapitalize()
+        String instanceName = constructorDeclaration.nameAsString.uncapitalize()
         Expression scope = new NameExpr(instanceName)
         FieldAccessBuilder fieldAccessBuilder = new FieldAccessBuilder(scope)
 
-        ArrayList<AssignExpr> literalAssignExpressions = findLiteralAssignmentExpressions(cd)
+        ArrayList<AssignExpr> literalAssignExpressions = findLiteralAssignmentExpressions(constructorDeclaration)
         AssertionBuilder assertionBuilder = new AssertionBuilder().softly(literalAssignExpressions.size() > 1)
         literalAssignExpressions.each {
             addAssertion(it, fieldAccessBuilder, assertionBuilder, result)
@@ -68,11 +68,11 @@ class ConstructorFieldLiteralAssignmentsGenerator extends AbstractConstructorTes
         if (!assertions.empty) {
             DependableNode<MethodDeclaration> assignConstants = new DependableNode<>()
             TestNodeMerger.appendDependencies(assignConstants, assertions)
-            Optional<DependableNode<ObjectCreationExpr>> constructorCall = new InvocationBuilder(valueFactory).build(cd)
+            Optional<DependableNode<ObjectCreationExpr>> constructorCall = new InvocationBuilder(valueFactory).build(constructorDeclaration)
             constructorCall.ifPresent { constructCallExpr ->
                 TestMethodNomenclature testMethodNomenclature = nomenclatures.getTestMethodNomenclature(unitUnderTest.javaClass)
                 TestNodeMerger.appendDependencies(assignConstants, constructCallExpr)
-                String testName = testMethodNomenclature.requestTestMethodName(getType(), cd)
+                String testName = testMethodNomenclature.requestTestMethodName(getType(), constructorDeclaration)
                 String assignsConstantsCode = """
                     @Test
                     public void ${testName}() throws Exception {
@@ -124,7 +124,7 @@ class ConstructorFieldLiteralAssignmentsGenerator extends AbstractConstructorTes
     }
 
     @Override
-    protected boolean shouldBeVisited(Unit unit, ConstructorDeclaration cd) {
-        Callability.isCallableFromTests(cd) && ASTNodeUtils.parents(cd, TypeDeclaration).noneMatch { it.enumDeclaration }
+    protected boolean shouldBeVisited(Unit unit, ConstructorDeclaration callableDeclaration) {
+        Callability.isCallableFromTests(callableDeclaration) && ASTNodeUtils.parents(callableDeclaration, TypeDeclaration).noneMatch { it.enumDeclaration }
     }
 }

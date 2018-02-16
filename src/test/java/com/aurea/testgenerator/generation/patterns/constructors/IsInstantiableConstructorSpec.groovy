@@ -161,10 +161,6 @@ class IsInstantiableConstructorSpec extends MatcherPipelineTest {
 
     @Override
     TestGenerator generator() {
-        IsInstantiableConstructorGenerator generator = new IsInstantiableConstructorGenerator(valueFactory)
-        generator.reporter = reporter
-        generator.nomenclatures = nomenclatureFactory
-        generator.visitReporter = visitReporter
-        generator
+        new IsInstantiableConstructorGenerator(solver, reporter, visitReporter, nomenclatureFactory, valueFactory)
     }
 }

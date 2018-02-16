@@ -1,11 +1,13 @@
-package com.aurea.testgenerator.generation.patterns
+package com.aurea.testgenerator.generation.patterns.methods
 
 import com.aurea.testgenerator.ast.Callability
 import com.aurea.testgenerator.ast.InvocationBuilder
 import com.aurea.testgenerator.generation.DependableNode
 import com.aurea.testgenerator.generation.TestGeneratorError
 import com.aurea.testgenerator.generation.TestGeneratorResult
+import com.aurea.testgenerator.generation.TestGeneratorResultReporter
 import com.aurea.testgenerator.generation.TestType
+import com.aurea.testgenerator.generation.VisitReporter
 import com.aurea.testgenerator.generation.merge.TestNodeMerger
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.TestMethodNomenclature
@@ -18,6 +20,7 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.ObjectCreationExpr
 import com.github.javaparser.ast.type.Type
+import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import groovy.util.logging.Log4j2
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Profile
@@ -31,7 +34,8 @@ class IsCallableAbstractFactoryMethodTestGenerator extends AbstractMethodTestGen
     ValueFactory valueFactory
 
     @Autowired
-    IsCallableAbstractFactoryMethodTestGenerator(ValueFactory valueFactory) {
+    IsCallableAbstractFactoryMethodTestGenerator(JavaParserFacade solver, TestGeneratorResultReporter reporter, VisitReporter visitReporter, NomenclatureFactory nomenclatures, ValueFactory valueFactory) {
+        super(solver, reporter, visitReporter, nomenclatures)
         this.valueFactory = valueFactory
     }
 
@@ -65,26 +69,20 @@ class IsCallableAbstractFactoryMethodTestGenerator extends AbstractMethodTestGen
     }
 
     @Override
-    protected boolean shouldBeVisited(Unit unit, MethodDeclaration method) {
-        return super.shouldBeVisited(unit, method) &&
-                Callability.isCallableFromTests(method) &&
-                method.static &&
-                returnsCreatedClassOrInterface(method)
+    protected boolean shouldBeVisited(Unit unit, MethodDeclaration callableDeclaration) {
+        super.shouldBeVisited(unit, callableDeclaration) &&
+                Callability.isCallableFromTests(callableDeclaration) &&
+                callableDeclaration.static &&
+                returnsCreatedClassOrInterface(callableDeclaration)
     }
 
     private static boolean returnsCreatedClassOrInterface(MethodDeclaration method) {
         Type returnType = method.type
-        if (!returnType?.classOrInterfaceType) {
-            return false
-        }
-        if (!method.findAll(ObjectCreationExpr) { it.type == returnType }) {
-            return false
-        }
-        return true
+        returnType?.classOrInterfaceType && method.findAll(ObjectCreationExpr) { it.type == returnType }
     }
 
     @Override
     protected TestType getType() {
-        return AbstractFactoryMethodTypes.IS_CALLABLE
+        AbstractFactoryMethodTypes.IS_CALLABLE
     }
 }

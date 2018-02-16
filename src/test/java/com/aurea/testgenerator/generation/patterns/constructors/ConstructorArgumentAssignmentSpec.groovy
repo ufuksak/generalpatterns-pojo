@@ -132,10 +132,6 @@ class ConstructorArgumentAssignmentSpec extends MatcherPipelineTest {
 
     @Override
     TestGenerator generator() {
-        TestGenerator generator = new ConstructorArgumentAssignmentGenerator(solver, valueFactory)
-        generator.reporter = reporter
-        generator.nomenclatures = nomenclatureFactory
-        generator.visitReporter = visitReporter
-        generator
+        new ConstructorArgumentAssignmentGenerator(solver, reporter, visitReporter, nomenclatureFactory, valueFactory)
     }
 }
