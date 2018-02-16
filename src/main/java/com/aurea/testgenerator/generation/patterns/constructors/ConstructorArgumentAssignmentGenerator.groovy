@@ -4,8 +4,7 @@ import com.aurea.testgenerator.ast.ASTNodeUtils
 import com.aurea.testgenerator.ast.Callability
 import com.aurea.testgenerator.ast.FieldAccessBuilder
 import com.aurea.testgenerator.ast.FieldAccessResult
-import com.aurea.testgenerator.ast.FieldAssignment
-import com.aurea.testgenerator.ast.FieldAssignmentsVisitor
+import com.aurea.testgenerator.ast.FieldAssignments
 import com.aurea.testgenerator.ast.FieldResolver
 import com.aurea.testgenerator.ast.InvocationBuilder
 import com.aurea.testgenerator.generation.DependableNode
@@ -59,9 +58,8 @@ class ConstructorArgumentAssignmentGenerator extends AbstractConstructorTestGene
     @Override
     protected TestGeneratorResult generate(ConstructorDeclaration cd, Unit unitUnderTest) {
         TestGeneratorResult result = new TestGeneratorResult()
-        FieldAssignmentsVisitor fieldAssignmentsVisitor = new FieldAssignmentsVisitor(cd)
-        Collection<FieldAssignment> fieldAssignments = fieldAssignmentsVisitor.visit()
-        if (!fieldAssignments) {
+        Collection<AssignExpr> argumentAssignExpressions = findArgumentAssignExpressions(cd)
+        if (!argumentAssignExpressions) {
             return result
         }
 
@@ -69,12 +67,12 @@ class ConstructorArgumentAssignmentGenerator extends AbstractConstructorTestGene
         Expression scope = new NameExpr(instanceName)
         FieldAccessBuilder fieldAccessBuilder = new FieldAccessBuilder(scope)
 
-        AssertionBuilder assertionBuilder = new AssertionBuilder().softly(fieldAssignments.size() > 1)
-        fieldAssignments.each {
-            addAssertion(it.expr, fieldAccessBuilder, assertionBuilder, result)
+        AssertionBuilder assertionBuilder = new AssertionBuilder().softly(argumentAssignExpressions.size() > 1)
+        argumentAssignExpressions.each {
+            addAssertion(it, fieldAccessBuilder, assertionBuilder, result)
         }
         List<DependableNode<Statement>> assertions = assertionBuilder.build()
-        if (assertions) {
+        if (!assertions.empty) {
             DependableNode<MethodDeclaration> assignsArguments = new DependableNode<>()
             List<DependableNode<VariableDeclarationExpr>> variables = StreamEx.of(cd.parameters).map { p ->
                 valueFactory.getVariable(p.nameAsString, p.type).orElseThrow {
@@ -116,6 +114,15 @@ class ConstructorArgumentAssignmentGenerator extends AbstractConstructorTestGene
             }
         }
         result
+    }
+
+    private static Collection<AssignExpr> findArgumentAssignExpressions(ConstructorDeclaration cd) {
+        List<AssignExpr> assignExprs = cd.body.findAll(AssignExpr)
+        Collection<AssignExpr> onlyLastAssignExprs = FieldAssignments.findLastAssignExpressionsByField(assignExprs)
+        Collection<AssignExpr> onlyArgumentAssignExprs = onlyLastAssignExprs.findAll {
+            it.value.nameExpr && cd.isNameOfArgument(it.value.asNameExpr().name)
+        }
+        onlyArgumentAssignExprs
     }
 
     private void addAssertion(AssignExpr assignExpr,

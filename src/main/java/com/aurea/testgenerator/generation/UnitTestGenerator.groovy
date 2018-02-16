@@ -21,7 +21,7 @@ class UnitTestGenerator {
 
     @Autowired
     UnitTestGenerator(List<TestGenerator> generators) {
-        this.generators = generators.findAll { it.class != IsInstantiableConstructorGenerator }
+        this.generators = generators
         log.info "Registered generators: $generators"
     }
 

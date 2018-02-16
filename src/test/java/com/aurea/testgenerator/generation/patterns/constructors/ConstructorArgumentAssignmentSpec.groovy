@@ -130,41 +130,6 @@ class ConstructorArgumentAssignmentSpec extends MatcherPipelineTest {
         """
     }
 
-    def "assigning in super should be tested"() {
-        expect:
-        withClass("""
-            class Base {
-                int i;
-                
-                Base(int i) {
-                    this.i = i;
-                }
-            }
-        """).onClassCodeExpect """
-            
-            class Foo extends Base {
-                Foo(int i) {
-                    super(i);
-                }
-            }   
-        """, """                   
-            package sample;
-            
-            import static org.assertj.core.api.Assertions.assertThat;
-            import org.junit.Test;
-            
-            public class FooTest {
-                
-                @Test
-                public void test_FooWithOneArgument_AssignsGivenArguments() throws Exception {
-                    int i = 42;
-                    Foo foo = new Foo(i);
-                    assertThat(foo.i).isEqualTo(i);
-                }
-            }
-        """
-    }
-
     @Override
     TestGenerator generator() {
         TestGenerator generator = new ConstructorArgumentAssignmentGenerator(solver, valueFactory)
