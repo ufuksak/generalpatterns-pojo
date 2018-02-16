@@ -10,8 +10,11 @@ import com.aurea.testgenerator.ast.InvocationBuilder
 import com.aurea.testgenerator.generation.DependableNode
 import com.aurea.testgenerator.generation.TestGeneratorError
 import com.aurea.testgenerator.generation.TestGeneratorResult
+import com.aurea.testgenerator.generation.TestGeneratorResultReporter
 import com.aurea.testgenerator.generation.TestType
+import com.aurea.testgenerator.generation.VisitReporter
 import com.aurea.testgenerator.generation.merge.TestNodeMerger
+import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.TestMethodNomenclature
 import com.aurea.testgenerator.generation.source.AssertionBuilder
 import com.aurea.testgenerator.generation.source.Imports
@@ -42,26 +45,23 @@ import org.springframework.stereotype.Component
 @Log4j2
 class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
 
-    JavaParserFacade solver
     FieldResolver fieldResolver
-    ValueFactory valueFactory
 
     @Autowired
-    ArgumentAssignmentGenerator(JavaParserFacade solver, ValueFactory valueFactory) {
-        this.solver = solver
-        this.valueFactory = valueFactory
+    ArgumentAssignmentGenerator(JavaParserFacade solver, TestGeneratorResultReporter reporter, VisitReporter visitReporter, NomenclatureFactory nomenclatures, ValueFactory valueFactory) {
+        super(solver, reporter, visitReporter, nomenclatures, valueFactory)
         fieldResolver = new FieldResolver(solver)
     }
 
     @Override
-    protected TestGeneratorResult generate(ConstructorDeclaration cd, Unit unitUnderTest) {
+    protected TestGeneratorResult generate(ConstructorDeclaration constructorDeclaration, Unit unitUnderTest) {
         TestGeneratorResult result = new TestGeneratorResult()
-        Collection<AssignExpr> argumentAssignExpressions = findArgumentAssignExpressions(cd)
+        Collection<AssignExpr> argumentAssignExpressions = findArgumentAssignExpressions(constructorDeclaration)
         if (!argumentAssignExpressions) {
             return result
         }
 
-        String instanceName = cd.nameAsString.uncapitalize()
+        String instanceName = constructorDeclaration.nameAsString.uncapitalize()
         Expression scope = new NameExpr(instanceName)
         FieldAccessBuilder fieldAccessBuilder = new FieldAccessBuilder(scope)
 
@@ -72,9 +72,9 @@ class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
         List<DependableNode<Statement>> assertions = assertionBuilder.build()
         if (!assertions.empty) {
             DependableNode<MethodDeclaration> assignsArguments = new DependableNode<>()
-            List<DependableNode<VariableDeclarationExpr>> variables = StreamEx.of(cd.parameters).map { p ->
+            List<DependableNode<VariableDeclarationExpr>> variables = StreamEx.of(constructorDeclaration.parameters).map { p ->
                 valueFactory.getVariable(p.nameAsString, p.type).orElseThrow {
-                    new RuntimeException("Failed to build variable for parameter $p of $cd")
+                    new RuntimeException("Failed to build variable for parameter $p of $constructorDeclaration")
                 }
             }.toList()
             TestNodeMerger.appendDependencies(assignsArguments, variables)
@@ -90,11 +90,11 @@ class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
 
             Optional<DependableNode<ObjectCreationExpr>> constructorCall = new InvocationBuilder(valueFactory)
                     .usingForParameters(variableExpressionsByNames)
-                    .build(cd)
+                    .build(constructorDeclaration)
             constructorCall.ifPresent { constructCallExpr ->
                 TestMethodNomenclature testMethodNomenclature = nomenclatures.getTestMethodNomenclature(unitUnderTest.javaClass)
                 TestNodeMerger.appendDependencies(assignsArguments, constructCallExpr)
-                String testName = testMethodNomenclature.requestTestMethodName(getType(), cd)
+                String testName = testMethodNomenclature.requestTestMethodName(getType(), constructorDeclaration)
                 String assignsArgumentsCode = """
                     @Test
                     public void ${testName}() throws Exception {
@@ -150,7 +150,7 @@ class ArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
     }
 
     @Override
-    protected boolean shouldBeVisited(Unit unit, ConstructorDeclaration cd) {
-        Callability.isCallableFromTests(cd) && ASTNodeUtils.parents(cd, TypeDeclaration).noneMatch { it.enumDeclaration }
+    protected boolean shouldBeVisited(Unit unit, ConstructorDeclaration callableDeclaration) {
+        Callability.isCallableFromTests(callableDeclaration) && ASTNodeUtils.parents(callableDeclaration, TypeDeclaration).noneMatch { it.enumDeclaration }
     }
 }

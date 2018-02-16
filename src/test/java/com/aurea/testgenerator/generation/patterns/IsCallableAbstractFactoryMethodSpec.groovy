@@ -2,6 +2,7 @@ package com.aurea.testgenerator.generation.patterns
 
 import com.aurea.testgenerator.MatcherPipelineTest
 import com.aurea.testgenerator.generation.TestGenerator
+import com.aurea.testgenerator.generation.patterns.methods.IsCallableAbstractFactoryMethodTestGenerator
 
 class IsCallableAbstractFactoryMethodSpec extends MatcherPipelineTest {
 
@@ -56,10 +57,6 @@ class IsCallableAbstractFactoryMethodSpec extends MatcherPipelineTest {
 
     @Override
     TestGenerator generator() {
-        IsCallableAbstractFactoryMethodTestGenerator generator = new IsCallableAbstractFactoryMethodTestGenerator(valueFactory)
-        generator.reporter = reporter
-        generator.nomenclatures = nomenclatureFactory
-        generator.visitReporter = visitReporter
-        generator
+        new IsCallableAbstractFactoryMethodTestGenerator(solver, reporter, visitReporter, nomenclatureFactory, valueFactory)
     }
 }

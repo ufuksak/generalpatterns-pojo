@@ -3,7 +3,7 @@ package com.aurea.testgenerator.generation.names
 import com.aurea.common.ParsingUtils
 import com.aurea.testgenerator.generation.TestType
 import com.aurea.testgenerator.generation.patterns.constructors.ConstructorTypes
-import com.aurea.testgenerator.generation.patterns.AbstractFactoryMethodTypes
+import com.aurea.testgenerator.generation.patterns.methods.AbstractFactoryMethodTypes
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.CallableDeclaration
 import com.google.common.base.Splitter

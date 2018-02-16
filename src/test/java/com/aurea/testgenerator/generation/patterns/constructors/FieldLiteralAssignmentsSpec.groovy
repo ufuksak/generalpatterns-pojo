@@ -138,10 +138,6 @@ class FieldLiteralAssignmentsSpec extends MatcherPipelineTest {
 
     @Override
     TestGenerator generator() {
-        TestGenerator generator = new FieldLiteralAssignmentsGenerator(solver, valueFactory)
-        generator.reporter = reporter
-        generator.nomenclatures = nomenclatureFactory
-        generator.visitReporter = visitReporter
-        generator
+        new FieldLiteralAssignmentsGenerator(solver, reporter, visitReporter, nomenclatureFactory, valueFactory)
     }
 }
