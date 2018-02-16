@@ -22,6 +22,17 @@ class Callability {
         }
     }
 
+    static boolean isTypeVisible(TypeDeclaration td) {
+        if (td.private) {
+            return false
+        }
+        ASTNodeUtils.parents(td, TypeDeclaration).noneMatch {
+            return it.private ||
+                    it.isAnonymous() ||
+                    isLocalClass(it)
+        }
+    }
+
     static boolean isLocalClass(TypeDeclaration td) {
         td instanceof ClassOrInterfaceDeclaration &&
                 (td as ClassOrInterfaceDeclaration).isLocalClassDeclaration()

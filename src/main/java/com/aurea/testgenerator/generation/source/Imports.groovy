@@ -24,10 +24,12 @@ class Imports {
     //OpenPojo
     static final ImportDeclaration OPEN_POJO_VALIDATOR = parse('com.openpojo.validation.Validator')
     static final ImportDeclaration OPEN_POJO_POJO_CLASS_FACTORY = parse('com.openpojo.reflection.impl.PojoClassFactory')
+    static final ImportDeclaration OPEN_POJO_TESTERS = parse('com.aurea.unittest.commons.pojo.Testers')
     static final ImportDeclaration OPEN_POJO_GETTER_TESTER = parse('com.openpojo.validation.test.impl.GetterTester')
     static final ImportDeclaration OPEN_POJO_SETTER_TESTER = parse('com.openpojo.validation.test.impl.SetterTester')
-    static final ImportDeclaration OPEN_POJO_TEST_CHAIN = parse('com.aurea.unittest.commons.pojo.chain.TestChain')
     static final ImportDeclaration OPEN_POJO_TO_STRING_TESTER = parse('com.aurea.unittest.commons.pojo.ToStringTester')
+    static final ImportDeclaration OPEN_POJO_EQUALS_VERIFIER_TESTER = parse('com.aurea.unittest.commons.pojo.equalsverifier.EqualsVerifierTesterFactory')
+    static final ImportDeclaration OPEN_POJO_TEST_CHAIN = parse('com.aurea.unittest.commons.pojo.chain.TestChain')
 
     //PojoTester
     static final ImportDeclaration POJO_TESTER_ASSERTIONS = parse('pl.pojo.tester.api.assertion.Assertions')

@@ -12,7 +12,12 @@ import groovy.util.logging.Log4j2
 class Pojos {
 
     static boolean isPojo(ClassOrInterfaceDeclaration coid) {
-        hasAtleastOneGetter(coid)
+        hasAtleastOneGetter(coid) ||
+                hasToStringMethod(coid) ||
+                hasEquals(coid) ||
+                hasHashCode(coid) ||
+                hasConstructors(coid) || 
+                hasAtLeastOneSetter(coid)
     }
 
     static boolean hasToStringMethod(ClassOrInterfaceDeclaration coid) {
