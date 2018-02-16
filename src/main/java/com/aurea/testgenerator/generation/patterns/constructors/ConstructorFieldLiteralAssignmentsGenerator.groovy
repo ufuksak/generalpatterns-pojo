@@ -33,9 +33,11 @@ import com.github.javaparser.resolution.types.ResolvedType
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import groovy.util.logging.Log4j2
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Component
+@Profile("manual")
 @Log4j2
 class ConstructorFieldLiteralAssignmentsGenerator extends AbstractConstructorTestGenerator {
 
@@ -109,7 +111,7 @@ class ConstructorFieldLiteralAssignmentsGenerator extends AbstractConstructorTes
                 result.errors << fieldAccessResult.error
             }
         } else {
-            result.errors << new TestGeneratorError("Failed to solve field access $fieldAccessExpr")
+            result.errors << TestGeneratorError.unsolved(fieldAccessExpr)
         }
     }
 

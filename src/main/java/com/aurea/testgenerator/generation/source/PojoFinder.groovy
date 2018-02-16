@@ -13,12 +13,12 @@ import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParse
 import one.util.streamex.StreamEx
 
 
-class GetterFinder {
+class PojoFinder {
 
     ResolvedFieldDeclaration fieldDeclaration
     boolean isStatic
 
-    GetterFinder(ResolvedFieldDeclaration fieldDeclaration, boolean isStatic = false) {
+    PojoFinder(ResolvedFieldDeclaration fieldDeclaration, boolean isStatic = false) {
         this.fieldDeclaration = fieldDeclaration
         this.isStatic = isStatic
     }
@@ -36,14 +36,36 @@ class GetterFinder {
         return Optional.empty()
     }
 
+    Optional<ResolvedMethodDeclaration> tryToFindSetter() {
+        String expectedSetterName = "set" + fieldDeclaration.name.capitalize()
+        ResolvedTypeDeclaration rtd = fieldDeclaration.declaringType()
+        if (rtd.class || rtd.anonymousClass) {
+            return StreamEx.of(rtd.asClass().declaredMethods).findFirst {
+                it.name == expectedSetterName && isSetter(it)
+            }
+        } else if (rtd.enum) {
+            //TODO: Add enum support
+        }
+        return Optional.empty()
+    }
+
     private boolean isGetter(ResolvedMethodDeclaration rmd) {
         rmd.accessSpecifier() != AccessSpecifier.PRIVATE &&
                 (isStatic ? rmd.isStatic() : !rmd.isStatic()) &&
                 rmd.returnType == fieldDeclaration.getType() &&
-                checkSizeForJavaParserDeclaration(rmd)
+                isGetterImplementation(rmd)
     }
 
-    private boolean checkSizeForJavaParserDeclaration(ResolvedMethodDeclaration rmd) {
+    private boolean isSetter(ResolvedMethodDeclaration rmd) {
+        rmd.accessSpecifier() != AccessSpecifier.PRIVATE &&
+                (isStatic ? rmd.isStatic() : !rmd.isStatic()) &&
+                rmd.returnType.isVoid() &&
+                rmd.getNumberOfParams() == 1 ||
+                rmd.getParam(0).type == fieldDeclaration.type &&
+                isSetterImplementation(rmd)
+    }
+
+    private boolean isGetterImplementation(ResolvedMethodDeclaration rmd) {
         if (rmd instanceof JavaParserMethodDeclaration) {
             MethodDeclaration md = (rmd as JavaParserMethodDeclaration).wrappedNode
             md.body.present && simplyReturnsFieldValue(md.body.get())
@@ -51,8 +73,20 @@ class GetterFinder {
         true
     }
 
+    private boolean isSetterImplementation(ResolvedMethodDeclaration rmd) {
+        if (rmd instanceof JavaParserMethodDeclaration) {
+            MethodDeclaration md = (rmd as JavaParserMethodDeclaration).wrappedNode
+            md.body.present && simplyAssignsValue(md.body.get())
+        }
+        true
+    }
+
     private boolean simplyReturnsFieldValue(BlockStmt block) {
         block.statements.size() == 1 && isReturnFieldValueStatement(block.statements.first())
+    }
+
+    private boolean simplyAssignsValue(BlockStmt block) {
+        block.statements.size() == 1 && isAssignExpr(block.statements.first())
     }
 
     private boolean isReturnFieldValueStatement(Statement statement) {
@@ -68,5 +102,13 @@ class GetterFinder {
             }.orElse(false)
         }
         false
+    }
+
+    private boolean isAssignExpr(Statement statement) {
+        if (statement.expressionStmt) {
+            Expression expr = statement.asExpressionStmt().expression
+            return expr.assignExpr
+        }
+        return false
     }
 }

@@ -1,11 +1,14 @@
 package com.aurea.testgenerator.generation.names
 
 import com.aurea.common.ParsingUtils
+import com.aurea.testgenerator.ast.ASTNodeUtils
 import com.aurea.testgenerator.generation.TestType
-import com.aurea.testgenerator.generation.patterns.constructors.ConstructorTypes
 import com.aurea.testgenerator.generation.patterns.AbstractFactoryMethodTypes
+import com.aurea.testgenerator.generation.patterns.constructors.ConstructorTypes
+import com.aurea.testgenerator.generation.pojo.PojoTestTypes
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.CallableDeclaration
+import com.github.javaparser.ast.body.TypeDeclaration
 import com.google.common.base.Splitter
 import one.util.streamex.StreamEx
 import pl.allegro.finance.tradukisto.ValueConverters
@@ -21,7 +24,12 @@ class TestMethodNomenclature {
 
             (ConstructorTypes.EMPTY_CONSTRUCTOR)                    : 'IsInstantiable',
             (ConstructorTypes.CONSTRUCTOR_FIELD_LITERAL_ASSIGNMENTS): 'AssignsConstants',
-            (ConstructorTypes.CONSTRUCTOR_ARGUMENT_ASSIGNMENTS)     : 'AssignsGivenArguments'
+            (ConstructorTypes.CONSTRUCTOR_ARGUMENT_ASSIGNMENTS)     : 'AssignsGivenArguments',
+            (PojoTestTypes.OPEN_POJO)                               : 'PojoMethods'
+    ].asImmutable()
+
+    private static final Map<? extends TestType, String> TEST_METHOD_NAME_PREFIXES = [
+            (PojoTestTypes.OPEN_POJO)                               : 'validate'
     ].asImmutable()
 
     Set<String> takenNames = []
@@ -32,6 +40,11 @@ class TestMethodNomenclature {
 
             if (type instanceof ConstructorTypes || type instanceof AbstractFactoryMethodTypes) {
                 return new CallableNameRepository(suffix, context as CallableDeclaration).get()
+            }
+
+            if (type instanceof PojoTestTypes) {
+                String prefix = TEST_METHOD_NAME_PREFIXES[type]
+                return new TypeNameRepository(prefix, suffix, context as TypeDeclaration).get()
             }
 
             throw new IllegalArgumentException("Cannot generate name for $type in $context")
@@ -92,6 +105,27 @@ class TestMethodNomenclature {
 
         String wrap(String main) {
             [TEST_NAME_PREFIX, main, suffix].join(TEST_NAME_SPACE)
+        }
+    }
+
+    class TypeNameRepository {
+
+        String prefix, suffix
+        TypeDeclaration typeDeclaration
+
+        TypeNameRepository(String prefix, String suffix, TypeDeclaration typeDeclaration) {
+            this.prefix = prefix
+            this.suffix = suffix
+            this.typeDeclaration = typeDeclaration
+        }
+
+        String get() {
+            String fullTypeName = ASTNodeUtils.getFullTypeName(typeDeclaration).replace('.', '')
+            String name = [TEST_NAME_PREFIX, prefix, fullTypeName, suffix].join(TEST_NAME_SPACE)
+            if (name in takenNames) {
+                name = [TEST_NAME_PREFIX, prefix, fullTypeName, suffix, 'Generated'].join(TEST_NAME_SPACE)
+            }
+            name
         }
     }
 

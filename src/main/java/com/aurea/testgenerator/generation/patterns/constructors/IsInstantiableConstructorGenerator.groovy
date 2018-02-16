@@ -21,9 +21,11 @@ import com.github.javaparser.ast.expr.ObjectCreationExpr
 import groovy.transform.ToString
 import groovy.util.logging.Log4j2
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Component
+@Profile("manual")
 @ToString
 @Log4j2
 class IsInstantiableConstructorGenerator extends AbstractConstructorTestGenerator {
@@ -59,7 +61,7 @@ class IsInstantiableConstructorGenerator extends AbstractConstructorTestGenerato
                 result.tests = [isInstantiable]
             } catch (ParseProblemException ppe) {
                 log.error "Failed to parse $testText", ppe
-                result.errors << new TestGeneratorError(cause: "Failed to parse $testText")
+                result.errors << TestGeneratorError.parseFailure(testText)
             }
         }
         result

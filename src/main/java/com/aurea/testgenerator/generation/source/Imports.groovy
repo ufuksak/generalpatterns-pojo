@@ -21,6 +21,15 @@ class Imports {
     static final ImportDeclaration STATIC_MOCK = new ImportDeclaration(new Name('org.mockito.Mockito.mock'), true, false)
     static final ImportDeclaration STATIC_RETURNS_DEEP_STUBS = new ImportDeclaration(new Name('org.mockito.Mockito.RETURNS_DEEP_STUBS'), true, false)
 
+    //OpenPojo
+    static final ImportDeclaration OPEN_POJO_VALIDATOR = parse('com.openpojo.validation.Validator')
+    static final ImportDeclaration OPEN_POJO_POJO_CLASS_FACTORY = parse('com.openpojo.reflection.impl.PojoClassFactory')
+    static final ImportDeclaration OPEN_POJO_GETTER_TESTER = parse('com.openpojo.validation.test.impl.GetterTester')
+    static final ImportDeclaration OPEN_POJO_SETTER_TESTER = parse('com.openpojo.validation.test.impl.SetterTester')
+    static final ImportDeclaration OPEN_POJO_TEST_CHAIN = parse('com.aurea.unittest.commons.pojo.chain.TestChain')
+    static final ImportDeclaration OPEN_POJO_TO_STRING_TESTER = parse('com.aurea.unittest.commons.pojo.ToStringTester')
+
+
     static ImportDeclaration parse(String fullClassName) {
         JavaParser.parseImport("import $fullClassName;")
     }

@@ -1,7 +1,7 @@
 package com.aurea.testgenerator.coverage
 
 import com.aurea.common.JavaClass
-import com.aurea.testgenerator.generation.TestGeneratorEvent
+import com.aurea.testgenerator.generation.TestGeneratorCallableEvent
 import com.aurea.testgenerator.source.Unit
 import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong
 
 @Component
 @Log4j2
-class CoverageCollector implements ApplicationListener<TestGeneratorEvent> {
+class CoverageCollector implements ApplicationListener<TestGeneratorCallableEvent> {
     private CoverageService coverageService
     private Map<JavaClass, AtomicLong> coverageByUnit = new ConcurrentHashMap<>()
     private Map<JavaClass, Integer> totalByUnit = new HashMap<>()
@@ -29,7 +29,7 @@ class CoverageCollector implements ApplicationListener<TestGeneratorEvent> {
     }
 
     @Override
-    void onApplicationEvent(TestGeneratorEvent event) {
+    void onApplicationEvent(TestGeneratorCallableEvent event) {
         def unit = event.unit
         int currentUnitCoverage = incrementUnitCoverage(unit, event)
         Integer classLocs = totalByUnit.computeIfAbsent(unit.javaClass, { javaClass ->
@@ -41,7 +41,7 @@ class CoverageCollector implements ApplicationListener<TestGeneratorEvent> {
         log.trace "$unit.fullName: covered $currentUnitCoverage of $classLocs loc"
     }
 
-    private int incrementUnitCoverage(Unit unit, TestGeneratorEvent event) {
+    private int incrementUnitCoverage(Unit unit, TestGeneratorCallableEvent event) {
         int coverage = coverageService.getMethodCoverage(MethodCoverageQuery.of(unit, event.callable)).uncovered
         AtomicLong atomicCoverage = new AtomicLong(coverage)
 

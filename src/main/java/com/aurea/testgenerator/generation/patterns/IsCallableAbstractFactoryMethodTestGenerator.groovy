@@ -20,9 +20,11 @@ import com.github.javaparser.ast.expr.ObjectCreationExpr
 import com.github.javaparser.ast.type.Type
 import groovy.util.logging.Log4j2
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Component
+@Profile("manual")
 @Log4j2
 class IsCallableAbstractFactoryMethodTestGenerator extends AbstractMethodTestGenerator {
 
@@ -56,7 +58,7 @@ class IsCallableAbstractFactoryMethodTestGenerator extends AbstractMethodTestGen
                 result.tests = [methodCallTest]
             } catch (ParseProblemException ppe) {
                 log.error "Failed to parse $testText", ppe
-                result.errors << new TestGeneratorError(cause: "Failed to parse $testText")
+                result.errors << TestGeneratorError.parseFailure(testText)
             }
         }
         result

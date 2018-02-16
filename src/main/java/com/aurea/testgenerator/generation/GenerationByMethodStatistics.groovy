@@ -7,7 +7,9 @@ import com.google.common.collect.Multimaps
 import groovy.util.logging.Log4j2
 import one.util.streamex.EntryStream
 import one.util.streamex.StreamEx
+import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.ApplicationListener
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 import javax.annotation.PostConstruct
@@ -18,7 +20,8 @@ import java.util.concurrent.atomic.LongAdder
 
 @Component
 @Log4j2
-class GenerationStatistics implements ApplicationListener<TestGeneratorEvent> {
+@Profile("method-level")
+class GenerationByMethodStatistics implements ApplicationListener<TestGeneratorCallableEvent> {
 
     LongAdder generations = new LongAdder()
     LongAdder tests = new LongAdder()
@@ -38,7 +41,7 @@ class GenerationStatistics implements ApplicationListener<TestGeneratorEvent> {
     }
 
     @Override
-    void onApplicationEvent(TestGeneratorEvent event) {
+    void onApplicationEvent(TestGeneratorCallableEvent event) {
         generations.increment()
         counters[event.eventType].increment()
         tests.add(event.result.tests.size())

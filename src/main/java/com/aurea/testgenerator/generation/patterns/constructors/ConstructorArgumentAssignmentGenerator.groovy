@@ -37,9 +37,11 @@ import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Component
+@Profile("manual")
 @Log4j2
 class ConstructorArgumentAssignmentGenerator extends AbstractConstructorTestGenerator {
 
@@ -133,7 +135,7 @@ class ConstructorArgumentAssignmentGenerator extends AbstractConstructorTestGene
                 result.errors << fieldAccessResult.error
             }
         } else {
-            result.errors << new TestGeneratorError("Failed to solve field access $fieldAccessExpr")
+            result.errors << TestGeneratorError.unsolved(fieldAccessExpr)
         }
     }
 

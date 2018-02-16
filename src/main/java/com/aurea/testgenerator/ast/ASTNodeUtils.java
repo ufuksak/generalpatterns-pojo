@@ -1,9 +1,14 @@
 package com.aurea.testgenerator.ast;
 
+import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.Modifier;
 import com.github.javaparser.ast.Node;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
+import com.github.javaparser.ast.body.TypeDeclaration;
+import com.github.javaparser.ast.expr.MethodCallExpr;
+import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
+import com.github.javaparser.resolution.declarations.ResolvedTypeDeclaration;
 import com.google.common.collect.ImmutableSet;
 import one.util.streamex.StreamEx;
 
@@ -124,6 +129,13 @@ public final class ASTNodeUtils {
 
     public static <T extends Node> StreamEx<T> parents(Node childNode, Class<T> clazzOfParent, Predicate<T> condition) {
         return parents(childNode, clazzOfParent).filter(condition);
+    }
+
+    public static String getFullTypeName(TypeDeclaration typeDeclaration) {
+        List<String> types = new ArrayList<>();
+        types.add(typeDeclaration.getNameAsString());
+        parents(typeDeclaration, TypeDeclaration.class).forEach( parentType -> types.add(parentType.getNameAsString()));
+        return StreamEx.ofReversed(types).joining(".");
     }
 
     private static <T> List<T> findChildsSubTypesOf(Class<T> clazz, Node node, List<T> childs) {
