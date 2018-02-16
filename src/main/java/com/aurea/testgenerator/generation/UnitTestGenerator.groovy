@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component
 @Log4j2
 class UnitTestGenerator {
 
-    List<MethodLevelTestGenerator> generators
+    List<TestGenerator> generators
 
     @Autowired
     UnitTestGenerator(List<MethodLevelTestGenerator> generators) {
