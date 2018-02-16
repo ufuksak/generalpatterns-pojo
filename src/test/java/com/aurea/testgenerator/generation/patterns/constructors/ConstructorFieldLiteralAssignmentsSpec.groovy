@@ -1,7 +1,7 @@
 package com.aurea.testgenerator.generation.patterns.constructors
 
 import com.aurea.testgenerator.MatcherPipelineTest
-import com.aurea.testgenerator.generation.TestGenerator
+import com.aurea.testgenerator.generation.MethodLevelTestGenerator
 
 class ConstructorFieldLiteralAssignmentsSpec extends MatcherPipelineTest {
 
@@ -136,7 +136,7 @@ class ConstructorFieldLiteralAssignmentsSpec extends MatcherPipelineTest {
     }
 
     @Override
-    TestGenerator generator() {
+    MethodLevelTestGenerator generator() {
         new ConstructorFieldLiteralAssignmentsGenerator(solver, reporter, visitReporter, nomenclatureFactory, valueFactory)
     }
 }

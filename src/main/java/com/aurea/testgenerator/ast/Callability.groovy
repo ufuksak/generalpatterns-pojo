@@ -38,7 +38,7 @@ class Callability {
             return false
         }
 
-        for (int i = 0 ; i < parameters.size() ; i++) {
+        for (int i = 0; i < parameters.size(); i++) {
             Parameter parameter = parameters[i]
             Expression argument = arguments[i]
             ResolvedType parameterType = parameter.type.resolve()

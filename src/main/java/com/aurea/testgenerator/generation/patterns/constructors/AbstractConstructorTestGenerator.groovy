@@ -1,6 +1,6 @@
 package com.aurea.testgenerator.generation.patterns.constructors
 
-import com.aurea.testgenerator.generation.TestGenerator
+import com.aurea.testgenerator.generation.MethodLevelTestGenerator
 import com.aurea.testgenerator.generation.TestGeneratorResult
 import com.aurea.testgenerator.generation.TestGeneratorResultReporter
 import com.aurea.testgenerator.generation.VisitReporter
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component
 
 @Component
 @Log4j2
-abstract class AbstractConstructorTestGenerator extends TestGenerator<ConstructorDeclaration> {
+abstract class AbstractConstructorTestGenerator extends MethodLevelTestGenerator<ConstructorDeclaration> {
 
     ValueFactory valueFactory
 

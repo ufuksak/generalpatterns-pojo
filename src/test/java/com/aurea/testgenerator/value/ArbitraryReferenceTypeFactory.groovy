@@ -113,7 +113,7 @@ class ArbitraryReferenceTypeFactory implements ReferenceTypeFactory {
         if (typeParameters.empty) {
             return Optional.empty()
         }
-        
+
         ResolvedType componentType = typeParameters.first().b
         return valueFactory.getExpression(componentType)
     }

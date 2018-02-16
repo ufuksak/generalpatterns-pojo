@@ -34,7 +34,6 @@ class Imports {
     static final ImportDeclaration POJO_TESTER_METHOD = parse('pl.pojo.tester.api.assertion.Method')
 
 
-
     static ImportDeclaration parse(String fullClassName) {
         JavaParser.parseImport("import $fullClassName;")
     }

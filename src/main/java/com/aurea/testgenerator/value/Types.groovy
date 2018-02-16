@@ -63,7 +63,7 @@ class Types {
     }
 
     static boolean isString(ResolvedType type) {
-        type.referenceType && type.asReferenceType().qualifiedName in ['String' , 'java.lang.String']
+        type.referenceType && type.asReferenceType().qualifiedName in ['String', 'java.lang.String']
     }
 
     static boolean isDate(ClassOrInterfaceType type) {

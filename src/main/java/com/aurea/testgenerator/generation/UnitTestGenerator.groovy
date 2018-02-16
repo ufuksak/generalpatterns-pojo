@@ -1,7 +1,6 @@
 package com.aurea.testgenerator.generation
 
 import com.aurea.common.JavaClass
-import com.aurea.testgenerator.generation.patterns.constructors.IsInstantiableConstructorGenerator
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Modifier
@@ -17,10 +16,10 @@ import org.springframework.stereotype.Component
 @Log4j2
 class UnitTestGenerator {
 
-    List<TestGenerator> generators
+    List<MethodLevelTestGenerator> generators
 
     @Autowired
-    UnitTestGenerator(List<TestGenerator> generators) {
+    UnitTestGenerator(List<MethodLevelTestGenerator> generators) {
         this.generators = generators
         log.info "Registered generators: $generators"
     }

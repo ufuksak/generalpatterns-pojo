@@ -1,8 +1,7 @@
 package com.aurea.testgenerator.generation.patterns.constructors
 
 import com.aurea.testgenerator.MatcherPipelineTest
-import com.aurea.testgenerator.generation.TestGenerator
-import com.aurea.testgenerator.generation.patterns.constructors.IsInstantiableConstructorGenerator
+import com.aurea.testgenerator.generation.MethodLevelTestGenerator
 
 class IsInstantiableConstructorSpec extends MatcherPipelineTest {
 
@@ -160,7 +159,7 @@ class IsInstantiableConstructorSpec extends MatcherPipelineTest {
     }
 
     @Override
-    TestGenerator generator() {
+    MethodLevelTestGenerator generator() {
         new IsInstantiableConstructorGenerator(solver, reporter, visitReporter, nomenclatureFactory, valueFactory)
     }
 }

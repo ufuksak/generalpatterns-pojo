@@ -26,21 +26,21 @@ class TestNodeMerger {
 
     static TestDependency merge(TestDependency left, TestDependency right) {
         new TestDependency(
-                classAnnotations:   left.classAnnotations + right.classAnnotations,
-                imports:            left.imports + right.imports,
-                fields:             left.fields + right.fields,
-                methodSetups:       left.methodSetups + right.methodSetups,
-                classSetups:        left.classSetups + right.classSetups,
-                assignFields:       left.assignFields + right.assignFields)
+                classAnnotations: left.classAnnotations + right.classAnnotations,
+                imports: left.imports + right.imports,
+                fields: left.fields + right.fields,
+                methodSetups: left.methodSetups + right.methodSetups,
+                classSetups: left.classSetups + right.classSetups,
+                assignFields: left.assignFields + right.assignFields)
     }
 
     static TestDependency merge(List<TestDependency> dependencies) {
         new TestDependency(
-                classAnnotations:   dependencies.classAnnotations.flatten(),
-                imports:            dependencies.imports.flatten(),
-                fields:             dependencies.fields.flatten(),
-                methodSetups:       dependencies.methodSetups.flatten(),
-                classSetups:        dependencies.classSetups.flatten(),
-                assignFields:       dependencies.assignFields.flatten())
+                classAnnotations: dependencies.classAnnotations.flatten(),
+                imports: dependencies.imports.flatten(),
+                fields: dependencies.fields.flatten(),
+                methodSetups: dependencies.methodSetups.flatten(),
+                classSetups: dependencies.classSetups.flatten(),
+                assignFields: dependencies.assignFields.flatten())
     }
 }

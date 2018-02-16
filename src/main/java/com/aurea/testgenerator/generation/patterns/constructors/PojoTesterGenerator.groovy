@@ -104,7 +104,7 @@ class PojoTesterGenerator implements TestGenerator {
                     publishAndAdd(
                             buildTest(coid,
                                     testMethodNomenclature,
-                                    'CONSTRUCTOR', 
+                                    'CONSTRUCTOR',
                                     PojoTestTypes.POJO_TESTER_CONSTRUCTORS),
                             tests,
                             unit,

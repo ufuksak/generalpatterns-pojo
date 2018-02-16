@@ -1,7 +1,6 @@
 package com.aurea.testgenerator.generation
 
 import com.aurea.testgenerator.source.Unit
-import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.CallableDeclaration
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher

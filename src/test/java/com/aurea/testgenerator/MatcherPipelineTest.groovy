@@ -5,7 +5,7 @@ import com.aurea.testgenerator.coverage.CoverageCollector
 import com.aurea.testgenerator.coverage.CoverageService
 import com.aurea.testgenerator.coverage.NoCoverageService
 import com.aurea.testgenerator.extensions.Extensions
-import com.aurea.testgenerator.generation.TestGenerator
+import com.aurea.testgenerator.generation.MethodLevelTestGenerator
 import com.aurea.testgenerator.generation.TestGeneratorResultReporter
 import com.aurea.testgenerator.generation.UnitTestGenerator
 import com.aurea.testgenerator.generation.VisitReporter
@@ -62,7 +62,7 @@ abstract class MatcherPipelineTest extends Specification {
         cfg.testSrc = folder.newFolder("test").absolutePath
 
         source = new PathUnitSource(new JavaSourceFinder(cfg), cfg, SourceFilters.empty(), getSymbolSolver())
-        TestGenerator generator = generator()
+        MethodLevelTestGenerator generator = generator()
         unitTestGenerator = new UnitTestGenerator([generator])
         unitTestWriter = new UnitTestWriter(cfg)
         coverageService = new NoCoverageService()
@@ -86,14 +86,14 @@ abstract class MatcherPipelineTest extends Specification {
 
         assertThat(resultingTest).isEqualToNormalizingWhitespace(expectedTest)
     }
-    
+
     MatcherPipelineTest withClass(String code) {
         String fullText = """
             package sample;
             
             $code
             """
-        
+
         String fileName = JavaParser.parse(code).types.first().nameAsString + ".java"
         File file = new File(cfg.srcPath.toFile().absolutePath + "/sample", fileName)
         file.parentFile.mkdirs()
@@ -135,5 +135,5 @@ abstract class MatcherPipelineTest extends Specification {
         ))
     }
 
-    abstract TestGenerator generator()
+    abstract MethodLevelTestGenerator generator()
 }

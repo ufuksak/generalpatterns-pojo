@@ -1,6 +1,6 @@
 package com.aurea.testgenerator.generation.patterns.methods
 
-import com.aurea.testgenerator.generation.TestGenerator
+import com.aurea.testgenerator.generation.MethodLevelTestGenerator
 import com.aurea.testgenerator.generation.TestGeneratorResult
 import com.aurea.testgenerator.generation.TestGeneratorResultReporter
 import com.aurea.testgenerator.generation.VisitReporter
@@ -12,7 +12,7 @@ import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import org.springframework.stereotype.Component
 
 @Component
-abstract class AbstractMethodTestGenerator extends TestGenerator<MethodDeclaration> {
+abstract class AbstractMethodTestGenerator extends MethodLevelTestGenerator<MethodDeclaration> {
     AbstractMethodTestGenerator(JavaParserFacade solver, TestGeneratorResultReporter reporter, VisitReporter visitReporter, NomenclatureFactory nomenclatures) {
         super(solver, reporter, visitReporter, nomenclatures)
     }

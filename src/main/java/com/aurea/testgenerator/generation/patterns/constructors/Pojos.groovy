@@ -24,7 +24,7 @@ class Pojos {
     static boolean hasEquals(ClassOrInterfaceDeclaration coid) {
         coid.methods.any {
             it.nameAsString == 'equals' && it.type.toString() == 'boolean' && it.public &&
-            it.parameters.size() == 1 && it.parameters.first().type.toString() == 'Object'
+                    it.parameters.size() == 1 && it.parameters.first().type.toString() == 'Object'
         }
     }
 

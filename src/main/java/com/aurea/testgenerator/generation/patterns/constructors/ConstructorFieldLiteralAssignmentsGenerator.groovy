@@ -4,7 +4,6 @@ import com.aurea.testgenerator.ast.ASTNodeUtils
 import com.aurea.testgenerator.ast.Callability
 import com.aurea.testgenerator.ast.FieldAccessBuilder
 import com.aurea.testgenerator.ast.FieldAccessResult
-
 import com.aurea.testgenerator.ast.FieldAssignments
 import com.aurea.testgenerator.ast.FieldResolver
 import com.aurea.testgenerator.ast.InvocationBuilder
@@ -47,7 +46,7 @@ class ConstructorFieldLiteralAssignmentsGenerator extends AbstractConstructorTes
     FieldResolver fieldResolver
 
     @Autowired
-    ConstructorFieldLiteralAssignmentsGenerator(JavaParserFacade solver, ValueFactory valueFactory) {
+    ConstructorFieldLiteralAssignmentsGenerator(JavaParserFacade solver, TestGeneratorResultReporter reporter, VisitReporter visitReporter, NomenclatureFactory nomenclatures, ValueFactory valueFactory) {
         super(solver, reporter, visitReporter, nomenclatures, valueFactory)
         this.fieldResolver = new FieldResolver(solver)
     }

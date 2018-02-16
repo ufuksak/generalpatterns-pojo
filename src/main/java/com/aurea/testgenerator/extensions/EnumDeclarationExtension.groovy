@@ -20,7 +20,7 @@ class EnumDeclarationExtension implements ASTExtension {
             if (!entries) {
                 return Optional.empty()
             }
-            
+
             String firstEnumName = entries.first().nameAsString
             return Optional.of(new FieldAccessExpr(new NameExpr(enumDeclaration.name), firstEnumName))
         }

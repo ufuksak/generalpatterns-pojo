@@ -7,7 +7,6 @@ import com.google.common.collect.Multimaps
 import groovy.util.logging.Log4j2
 import one.util.streamex.EntryStream
 import one.util.streamex.StreamEx
-import org.springframework.context.ApplicationEventPublisher
 import org.springframework.context.ApplicationListener
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component

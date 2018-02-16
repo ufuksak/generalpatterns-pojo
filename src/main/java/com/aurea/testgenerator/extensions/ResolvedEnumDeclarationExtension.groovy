@@ -18,7 +18,7 @@ class ResolvedEnumDeclarationExtension implements ASTExtension {
             Collection<ResolvedEnumConstantDeclaration> entries = enumDeclaration.enumConstants
             if (!entries) {
                 return Optional.empty()
-            } 
+            }
             String firstEnumName = entries.first().name
             return Optional.of(new FieldAccessExpr(new NameExpr(enumDeclaration.className), firstEnumName))
         }

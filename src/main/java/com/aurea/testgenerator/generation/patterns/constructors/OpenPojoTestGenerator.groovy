@@ -2,6 +2,7 @@ package com.aurea.testgenerator.generation.patterns.constructors
 
 import com.aurea.testgenerator.ast.ASTNodeUtils
 import com.aurea.testgenerator.generation.DependableNode
+import com.aurea.testgenerator.generation.MethodLevelTestGenerator
 import com.aurea.testgenerator.generation.TestDependency
 import com.aurea.testgenerator.generation.TestGenerator
 import com.aurea.testgenerator.generation.TestGeneratorError
