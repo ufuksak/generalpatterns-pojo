@@ -25,17 +25,21 @@ class PojoFinder {
     }
 
     Optional<ResolvedMethodDeclaration> tryToFindGetter() {
-        if (Types.ofBooleanType(fieldDeclaration.type)) {
-            String expectedGetterName = 'is' + fieldDeclaration.name.capitalize()
-            if (expectedGetterName.startsWith('isIs')) {
-                expectedGetterName = 'is' + expectedGetterName.substring('isIs'.length())
+        try {
+            if (Types.ofBooleanType(fieldDeclaration.getType())) {
+                String expectedGetterName = 'is' + fieldDeclaration.name.capitalize()
+                if (expectedGetterName.startsWith('isIs')) {
+                    expectedGetterName = 'is' + expectedGetterName.substring('isIs'.length())
+                }
+                Optional<ResolvedMethodDeclaration> withIsName = findGetterWithName(expectedGetterName)
+                if (withIsName.present) {
+                    return withIsName
+                }
             }
-            Optional<ResolvedMethodDeclaration> withIsName = findGetterWithName(expectedGetterName)
-            if (withIsName.present) {
-                return withIsName
-            }
+            return findGetterWithName('get' + fieldDeclaration.name.capitalize())
+        } catch (Exception e) {
+            return Optional.empty()
         }
-        return findGetterWithName('get' + fieldDeclaration.name.capitalize())
     }
 
     Optional<ResolvedMethodDeclaration> findGetterWithName(String expectedName) {
@@ -49,17 +53,21 @@ class PojoFinder {
     }
 
     Optional<ResolvedMethodDeclaration> tryToFindSetter() {
-        if (Types.ofBooleanType(fieldDeclaration.type)) {
-            String fieldName = fieldDeclaration.name
-            if (fieldName.startsWith('is')) {
-                String expectedName = 'set' + fieldName.substring('is'.length())
-                Optional<ResolvedMethodDeclaration> withIsName = findSetterWithName(expectedName)
-                if (withIsName.present) {
-                    return withIsName
+        try {
+            if (Types.ofBooleanType(fieldDeclaration.getType())) {
+                String fieldName = fieldDeclaration.name
+                if (fieldName.startsWith('is')) {
+                    String expectedName = 'set' + fieldName.substring('is'.length())
+                    Optional<ResolvedMethodDeclaration> withIsName = findSetterWithName(expectedName)
+                    if (withIsName.present) {
+                        return withIsName
+                    }
                 }
             }
+            return findSetterWithName('set' + fieldDeclaration.name.capitalize())
+        } catch (Exception e) {
+            return Optional.empty()
         }
-        return findSetterWithName('set' + fieldDeclaration.name.capitalize())
     }
 
     Optional<ResolvedMethodDeclaration> findSetterWithName(String name) {

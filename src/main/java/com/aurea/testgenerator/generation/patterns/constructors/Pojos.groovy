@@ -2,11 +2,9 @@ package com.aurea.testgenerator.generation.patterns.constructors
 
 import com.aurea.testgenerator.generation.source.PojoFinder
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
-import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
-import com.github.javaparser.symbolsolver.javaparsermodel.UnsolvedSymbolException
 import groovy.util.logging.Log4j2
-
+import one.util.streamex.StreamEx
 
 @Log4j2
 class Pojos {
@@ -44,32 +42,23 @@ class Pojos {
     }
 
     static boolean hasAtleastOneGetter(ClassOrInterfaceDeclaration coid) {
-        for (FieldDeclaration field : coid.fields) {
-            try {
-                ResolvedFieldDeclaration resolvedField = field.resolve()
-                PojoFinder getterFinder = new PojoFinder(resolvedField)
-                if (getterFinder.tryToFindGetter().present) {
-                    return true
-                }
-            } catch (UnsolvedSymbolException use) {
-                log.debug "Failed to solve $field in $coid", use
-            }
+        resolvedFields(coid).anyMatch { resolvedField ->
+            PojoFinder getterFinder = new PojoFinder(resolvedField)
+            getterFinder.tryToFindGetter().present
         }
-        return false
     }
 
     static boolean hasAtLeastOneSetter(ClassOrInterfaceDeclaration coid) {
-        for (FieldDeclaration field : coid.fields) {
-            try {
-                ResolvedFieldDeclaration resolvedField = field.resolve()
-                PojoFinder setterFinder = new PojoFinder(resolvedField)
-                if (setterFinder.tryToFindSetter().present) {
-                    return true
-                }
-            } catch (UnsolvedSymbolException use) {
-                log.debug "Failed to solve $field in $coid", use
-            }
+        resolvedFields(coid).anyMatch { resolvedField ->
+            PojoFinder setterFinder = new PojoFinder(resolvedField)
+            setterFinder.tryToFindSetter().present
         }
-        return false
+    }
+
+    private static StreamEx<ResolvedFieldDeclaration> resolvedFields(ClassOrInterfaceDeclaration coid) {
+        StreamEx.of(coid.fields)
+                .map { it.tryResolve() as Optional<ResolvedFieldDeclaration> }
+                .filter { it.present }
+                .map { it.get() }
     }
 }

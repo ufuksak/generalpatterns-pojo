@@ -13,9 +13,11 @@ class FieldDeclarationExtension implements ASTExtension {
         FieldDeclaration.metaClass.getNameAsString() {
             (delegate as FieldDeclaration).variables[0].nameAsString
         }
+        log.debug "Adding FieldDeclaration::getType"
         FieldDeclaration.metaClass.getType() {
             (delegate as FieldDeclaration).variables[0].type
         }
+        log.debug "Adding FieldDeclaration::getVariableByName"
         FieldDeclaration.metaClass.getVariableByName() { String name ->
             Optional.ofNullable((delegate as FieldDeclaration).variables.find { it.nameAsString == name })
         }

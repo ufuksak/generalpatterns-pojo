@@ -26,6 +26,10 @@ dependencyManagement {
         dependency 'org.aspectj:aspectjweaver:1.8.8'
         dependency 'javax.validation:validation-api:2.0.1.Final'
         dependency 'org.hibernate.validator:hibernate-validator:6.0.7.Final'
+        dependency 'com.esotericsoftware.yamlbeans:yamlbeans:1.13'
+        dependency 'org.reflections:reflections:0.9.11'
+
+
 
         //Test dependencies
         dependency 'junit:junit:4.12'
@@ -60,6 +64,8 @@ dependencies {
     compile 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml'
     compile 'com.fasterxml.jackson.core:jackson-databind'
     compile 'pl.allegro.finance:tradukisto'
+    compile 'com.esotericsoftware.yamlbeans:yamlbeans'
+    compile 'org.reflections:reflections'
 
     testCompile 'junit:junit'
     testCompile 'pl.pragmatists:JUnitParams'
