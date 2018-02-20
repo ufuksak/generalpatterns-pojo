@@ -25,7 +25,7 @@ class SanityChecker {
                     project.modules.each {
                         String src = it.src.replace('trilogy-group-java', 'D:/trilogy-group-only-java')
                         String projectSrc = "--project.src=${src}"
-                        Path pathToSrc = Paths.get(src)
+                        Path pathToSrc = Paths.get(projectSrc)
                         Path pathToTest = pathToSrc.subpath(0, pathToSrc.nameCount - 1).resolve('test')
                         String projectOut = "--project.out=$pathToTest"
                         ProcessBuilder builder = new ProcessBuilder(
