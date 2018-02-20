@@ -1,3 +1,5 @@
+import groovy.json.JsonOutput
+
 apply plugin: 'maven-publish'
 
 publishing {
@@ -15,4 +17,19 @@ publishing {
             url 'https://scm.devfactory.com/nexus/content/repositories/EngUnitTests'
         }
     }
+}
+
+//TODO: doesn't work yet, but appreciate the effort!
+task makeGithubRelease(type: Exec) {
+    String token = '123'
+    String url = "https://api.github.com/repos/trilogy-group/BigCodeTestGenerator/releases?access_token=$token"
+    String githubReleaseData = JsonOutput.toJson(
+            tag_name: "v${version}",
+            target_commitish: "master",
+            name: "v${version}",
+            body: "tbd instructions",
+            prerelease: "true",
+            draft: "false"
+    )
+    commandLine "curl", "--data", "'" + githubReleaseData + "'", url
 }
