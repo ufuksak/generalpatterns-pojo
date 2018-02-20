@@ -219,4 +219,22 @@ class Types {
         }
         return null
     }
+
+    static boolean ofBooleanType(ResolvedType type) {
+        (type.primitive && type.asPrimitive() == ResolvedPrimitiveType.BOOLEAN) ||
+                (type.referenceType && (type.asReferenceType().qualifiedName in ['Boolean', 'java.lang.Boolean']))
+    }
+
+    static boolean areSameOrBoxedSame(ResolvedType left, ResolvedType right) {
+        unboxIfBoxed(left) == unboxIfBoxed(right)
+    }
+
+    static ResolvedType unboxIfBoxed(ResolvedType type) {
+        if (type.referenceType) {
+            if (isBoxedPrimitive(type.asReferenceType())) {
+                return unbox(type.asReferenceType())
+            }
+        }
+        type
+    }
 }

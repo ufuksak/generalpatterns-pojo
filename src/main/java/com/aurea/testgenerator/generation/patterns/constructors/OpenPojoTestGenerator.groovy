@@ -10,7 +10,6 @@ import com.aurea.testgenerator.generation.TestGeneratorResult
 import com.aurea.testgenerator.generation.TestGeneratorResultReporter
 import com.aurea.testgenerator.generation.TestType
 import com.aurea.testgenerator.generation.VisitReporter
-import com.aurea.testgenerator.generation.merge.TestNodeMerger
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.TestMethodNomenclature
 import com.aurea.testgenerator.generation.pojo.PojoTestTypes
@@ -20,13 +19,10 @@ import com.github.javaparser.JavaParser
 import com.github.javaparser.ParseProblemException
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
-import com.github.javaparser.ast.stmt.Statement
 import groovy.util.logging.Log4j2
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-
-import static java.lang.System.lineSeparator
 
 @Component
 @Profile("open-pojo")

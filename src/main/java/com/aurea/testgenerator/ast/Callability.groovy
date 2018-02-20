@@ -33,7 +33,7 @@ class Callability {
         }
     }
 
-`    static boolean isInstantiable(TypeDeclaration td) {
+    static boolean isInstantiable(TypeDeclaration td) {
         if (!isTypeVisible(td)) {
             return false
         }

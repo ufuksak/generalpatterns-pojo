@@ -1,5 +1,6 @@
 package com.aurea.testgenerator.generation.source
 
+import com.aurea.testgenerator.value.Types
 import com.github.javaparser.ast.AccessSpecifier
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.Expression
@@ -24,24 +25,48 @@ class PojoFinder {
     }
 
     Optional<ResolvedMethodDeclaration> tryToFindGetter() {
-        String expectedGetterName = "get" + fieldDeclaration.name.capitalize()
+        if (Types.ofBooleanType(fieldDeclaration.type)) {
+            String expectedGetterName = 'is' + fieldDeclaration.name.capitalize()
+            if (expectedGetterName.startsWith('isIs')) {
+                expectedGetterName = 'is' + expectedGetterName.substring('isIs'.length())
+            }
+            Optional<ResolvedMethodDeclaration> withIsName = findGetterWithName(expectedGetterName)
+            if (withIsName.present) {
+                return withIsName
+            }
+        }
+        return findGetterWithName('get' + fieldDeclaration.name.capitalize())
+    }
+
+    Optional<ResolvedMethodDeclaration> findGetterWithName(String expectedName) {
         ResolvedTypeDeclaration rtd = fieldDeclaration.declaringType()
         if (rtd.class || rtd.anonymousClass) {
             return StreamEx.of(rtd.asClass().declaredMethods).findFirst {
-                it.name == expectedGetterName && isGetter(it)
+                it.name == expectedName && isGetter(it)
             }
-        } else if (rtd.enum) {
-            //TODO: Add enum support
         }
         return Optional.empty()
     }
 
     Optional<ResolvedMethodDeclaration> tryToFindSetter() {
-        String expectedSetterName = "set" + fieldDeclaration.name.capitalize()
+        if (Types.ofBooleanType(fieldDeclaration.type)) {
+            String fieldName = fieldDeclaration.name
+            if (fieldName.startsWith('is')) {
+                String expectedName = 'set' + fieldName.substring('is'.length())
+                Optional<ResolvedMethodDeclaration> withIsName = findSetterWithName(expectedName)
+                if (withIsName.present) {
+                    return withIsName
+                }
+            }
+        }
+        return findSetterWithName('set' + fieldDeclaration.name.capitalize())
+    }
+
+    Optional<ResolvedMethodDeclaration> findSetterWithName(String name) {
         ResolvedTypeDeclaration rtd = fieldDeclaration.declaringType()
         if (rtd.class || rtd.anonymousClass) {
             return StreamEx.of(rtd.asClass().declaredMethods).findFirst {
-                it.name == expectedSetterName && isSetter(it)
+                it.name == name && isSetter(it)
             }
         } else if (rtd.enum) {
             //TODO: Add enum support
@@ -52,7 +77,7 @@ class PojoFinder {
     private boolean isGetter(ResolvedMethodDeclaration rmd) {
         rmd.accessSpecifier() != AccessSpecifier.PRIVATE &&
                 (isStatic ? rmd.isStatic() : !rmd.isStatic()) &&
-                rmd.returnType == fieldDeclaration.getType() &&
+                Types.areSameOrBoxedSame(rmd.returnType, fieldDeclaration.getType()) &&
                 isGetterImplementation(rmd)
     }
 
@@ -61,7 +86,7 @@ class PojoFinder {
                 (isStatic ? rmd.isStatic() : !rmd.isStatic()) &&
                 rmd.returnType.isVoid() &&
                 rmd.getNumberOfParams() == 1 ||
-                rmd.getParam(0).getType() == fieldDeclaration.getType() &&
+                Types.areSameOrBoxedSame(rmd.getParam(0).getType(), fieldDeclaration.getType()) &&
                 isSetterImplementation(rmd)
     }
 
