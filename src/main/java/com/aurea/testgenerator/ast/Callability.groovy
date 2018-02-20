@@ -33,6 +33,24 @@ class Callability {
         }
     }
 
+`    static boolean isInstantiable(TypeDeclaration td) {
+        if (!isTypeVisible(td)) {
+            return false
+        }
+
+        boolean hasInstantiableConstructor = hasInstantiableConstructor(td)
+        boolean allParentsAreVisible = ASTNodeUtils.parents(td, TypeDeclaration).allMatch {
+            isInstantiable(it)
+        }
+
+        hasInstantiableConstructor && allParentsAreVisible
+    }
+
+    static boolean hasInstantiableConstructor(TypeDeclaration td) {
+        td.classOrInterfaceDeclaration && (td.asClassOrInterfaceDeclaration().constructors.any { !it.private} ||
+                !td.asClassOrInterfaceDeclaration().constructors)
+    }
+
     static boolean isLocalClass(TypeDeclaration td) {
         td instanceof ClassOrInterfaceDeclaration &&
                 (td as ClassOrInterfaceDeclaration).isLocalClassDeclaration()

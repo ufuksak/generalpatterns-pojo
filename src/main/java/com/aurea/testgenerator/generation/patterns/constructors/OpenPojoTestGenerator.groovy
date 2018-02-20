@@ -53,7 +53,7 @@ class OpenPojoTestGenerator implements TestGenerator {
         for (ClassOrInterfaceDeclaration coid : classes) {
             TestGeneratorResult result = new TestGeneratorResult()
             result.type = PojoTestTypes.OPEN_POJO
-            if (Callability.isTypeVisible(coid) && Pojos.isPojo(coid)) {
+            if (Callability.isInstantiable(coid) && Pojos.isPojo(coid)) {
                 if (Pojos.hasAtleastOneGetter(coid)) {
                     publishAndAdd(
                             buildTest(coid,
