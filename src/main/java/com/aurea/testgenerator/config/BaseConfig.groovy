@@ -24,6 +24,7 @@ class BaseConfig {
 
     @PostConstruct
     void disableCommentNodes() {
+        JavaParser.getStaticConfiguration().setStoreTokens(false)
         JavaParser.getStaticConfiguration().setAttributeComments(false)
     }
 

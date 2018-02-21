@@ -2,9 +2,11 @@ package com.aurea.testgenerator.value
 
 import com.github.javaparser.ast.type.ClassOrInterfaceType
 import com.github.javaparser.ast.type.Type
+import com.github.javaparser.resolution.Resolvable
 import com.github.javaparser.resolution.types.ResolvedPrimitiveType
 import com.github.javaparser.resolution.types.ResolvedReferenceType
 import com.github.javaparser.resolution.types.ResolvedType
+import org.reflections.Reflections
 
 
 class Types {
@@ -236,5 +238,13 @@ class Types {
             }
         }
         type
+    }
+
+    static <T> Optional<T> tryResolve(Resolvable<T> resolvable) {
+        try {
+            return Optional.ofNullable(resolvable.resolve())
+        } catch (Exception e) {
+            return Optional.empty()
+        }
     }
 }
