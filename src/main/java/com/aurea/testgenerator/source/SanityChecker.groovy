@@ -29,7 +29,7 @@ class SanityChecker {
                         Path pathToTest = pathToSrc.subpath(0, pathToSrc.nameCount - 1).resolve('test')
                         String projectOut = "--project.out=$pathToTest"
                         ProcessBuilder builder = new ProcessBuilder(
-                                "java", "-jar", "D:/crossover/repos/BigCodeTestGenerator/build/libs/big-code-1.2.1.jar",
+                                "java", "-jar", "D:/crossover/repos/BigCodeTestGenerator/build/libs/big-code-1.2.2.jar",
                                 projectSrc, projectOut, "--spring.profiles.active=open-pojo,class-level")
                         builder.inheritIO()
                         log.info """

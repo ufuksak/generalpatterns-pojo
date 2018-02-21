@@ -16,7 +16,7 @@ class SourceLocator {
 
     static void main(String[] args) {
         List<File> unstructuredProjects = []
-        new File("D:/trilogy-group-java").eachFile {
+        new File("c:/crossover/only-java").eachFile {
             if (it.directory) {
                 if (!it.toPath().resolve('project-structure.yml').toFile().exists()) {
                     unstructuredProjects << it

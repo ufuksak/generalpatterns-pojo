@@ -1,6 +1,7 @@
 package com.aurea.testgenerator.generation.patterns.constructors
 
 import com.aurea.testgenerator.generation.source.PojoFinder
+import com.aurea.testgenerator.value.Types
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
 import groovy.util.logging.Log4j2
@@ -57,7 +58,7 @@ class Pojos {
 
     private static StreamEx<ResolvedFieldDeclaration> resolvedFields(ClassOrInterfaceDeclaration coid) {
         StreamEx.of(coid.fields)
-                .map { it.tryResolve() as Optional<ResolvedFieldDeclaration> }
+                .map { Types.tryResolve(it) }
                 .filter { it.present }
                 .map { it.get() }
     }
