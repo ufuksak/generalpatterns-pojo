@@ -24,7 +24,7 @@ class StaticFieldAccessorBuilder {
         if (fieldDeclaration.accessSpecifier() != AccessSpecifier.PRIVATE && fieldDeclaration.static) {
             return FieldAccessResult.success(buildStaticAccess(fieldDeclaration))
         } else {
-            PojoFinder getterFinder = new PojoFinder(fieldDeclaration, true)
+            PojoMethodsFinder getterFinder = new PojoMethodsFinder(fieldDeclaration, true)
             Optional<ResolvedMethodDeclaration> getter = getterFinder.tryToFindGetter()
             return getter.map { FieldAccessResult.success(buildStaticAccess(it)) }
                          .orElse(FieldAccessResult.NO_ACCESS)

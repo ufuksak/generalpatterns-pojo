@@ -30,4 +30,16 @@ class FieldAccessResult {
     Type type
     Expression expression
     TestGeneratorError error
+
+    boolean isSuccess() {
+        type == Type.SUCCESS
+    }
+
+    boolean isFailed() {
+        type == Type.FAILED
+    }
+
+    boolean hasNoAccess() {
+        type == Type.NO_ACCESS
+    }
 }

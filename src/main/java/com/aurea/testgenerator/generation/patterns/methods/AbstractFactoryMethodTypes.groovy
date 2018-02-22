@@ -5,5 +5,6 @@ import com.aurea.testgenerator.generation.TestType
 
 enum AbstractFactoryMethodTypes implements TestType {
     IS_CALLABLE,
-    ARGUMENT_ASSIGNMENTS
+    ASSIGNMENT_CHECK,
+    DIFFERENT_INSTANCES
 }

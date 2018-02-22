@@ -1,13 +1,15 @@
 package com.aurea.testgenerator.value
 
+import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.type.ClassOrInterfaceType
+import com.github.javaparser.ast.type.PrimitiveType
 import com.github.javaparser.ast.type.Type
 import com.github.javaparser.resolution.Resolvable
+import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration
 import com.github.javaparser.resolution.types.ResolvedPrimitiveType
 import com.github.javaparser.resolution.types.ResolvedReferenceType
 import com.github.javaparser.resolution.types.ResolvedType
-import org.reflections.Reflections
-
+import javassist.expr.MethodCall
 
 class Types {
 
@@ -222,9 +224,16 @@ class Types {
         return null
     }
 
-    static boolean ofBooleanType(ResolvedType type) {
+    static boolean isBooleanType(ResolvedType type) {
         (type.primitive && type.asPrimitive() == ResolvedPrimitiveType.BOOLEAN) ||
                 (type.referenceType && (type.asReferenceType().qualifiedName in ['Boolean', 'java.lang.Boolean']))
+    }
+
+    static boolean isBooleanType(Type type) {
+        (type.primitiveType && type.asPrimitiveType() == PrimitiveType.booleanType()) ||
+                (type.isClassOrInterfaceType() &&
+                        type.asClassOrInterfaceType().boxedType &&
+                        type.asClassOrInterfaceType().toUnboxedType() == PrimitiveType.booleanType())
     }
 
     static boolean areSameOrBoxedSame(ResolvedType left, ResolvedType right) {
@@ -243,6 +252,22 @@ class Types {
     static <T> Optional<T> tryResolve(Resolvable<T> resolvable) {
         try {
             return Optional.ofNullable(resolvable.resolve())
+        } catch (Exception e) {
+            return Optional.empty()
+        }
+    }
+
+    static Optional<ResolvedType> tryResolve(Type type) {
+        try {
+            return Optional.ofNullable(type.resolve())
+        } catch (Exception e) {
+            return Optional.empty()
+        }
+    }
+
+    static Optional<ResolvedMethodDeclaration> tryResolve(MethodCallExpr methodCall) {
+        try {
+            return Optional.ofNullable(methodCall.resolveInvokedMethod())
         } catch (Exception e) {
             return Optional.empty()
         }
