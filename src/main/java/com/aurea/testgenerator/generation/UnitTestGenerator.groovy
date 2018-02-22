@@ -25,7 +25,7 @@ class UnitTestGenerator {
     UnitTestGenerator(List<TestGenerator> generators, NomenclatureFactory nomenclatureFactory) {
         this.generators = generators
         this.nomenclatureFactory = nomenclatureFactory
-        log.info "Registered generators: $generators"
+        log.info "Registered generators: ${this.generators}"
     }
 
     Optional<TestUnit> tryGenerateTest(Unit unitUnderTest) {

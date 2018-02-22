@@ -3,7 +3,7 @@ package com.aurea.testgenerator.generation.names
 import com.aurea.common.ParsingUtils
 import com.aurea.testgenerator.ast.ASTNodeUtils
 import com.aurea.testgenerator.generation.TestType
-import com.aurea.testgenerator.generation.patterns.constructors.ConstructorTypes
+
 import com.aurea.testgenerator.generation.patterns.methods.AbstractFactoryMethodTypes
 import com.aurea.testgenerator.generation.pojo.PojoTestTypes
 import com.github.javaparser.ast.Node
@@ -20,11 +20,9 @@ class TestMethodNomenclature {
 
     private static final Map<? extends TestType, String> TEST_METHOD_NAME_SUFFIXES = [
             (AbstractFactoryMethodTypes.IS_CALLABLE)                : 'IsCallable',
-            (AbstractFactoryMethodTypes.ARGUMENT_ASSIGNMENTS)       : 'AssignsGivenArguments',
+            (AbstractFactoryMethodTypes.ASSIGNMENT_CHECK)           : 'AssignsValues',
+            (AbstractFactoryMethodTypes.DIFFERENT_INSTANCES)        : 'OnSecondCall_CreateDifferentInstance',
 
-            (ConstructorTypes.EMPTY_CONSTRUCTOR)                    : 'IsInstantiable',
-            (ConstructorTypes.CONSTRUCTOR_FIELD_LITERAL_ASSIGNMENTS): 'AssignsConstants',
-            (ConstructorTypes.CONSTRUCTOR_ARGUMENT_ASSIGNMENTS)     : 'AssignsGivenArguments',
             (PojoTestTypes.OPEN_POJO_GETTER)                        : 'Getters',
             (PojoTestTypes.OPEN_POJO_SETTER)                        : 'Setters',
             (PojoTestTypes.OPEN_POJO_TO_STRING)                     : 'ToString',
@@ -63,7 +61,7 @@ class TestMethodNomenclature {
         try {
             String suffix = TEST_METHOD_NAME_SUFFIXES[type]
 
-            if (type instanceof ConstructorTypes || type instanceof AbstractFactoryMethodTypes) {
+            if (type instanceof AbstractFactoryMethodTypes) {
                 return new CallableNameRepository(suffix, context as CallableDeclaration).get()
             }
 
@@ -94,10 +92,8 @@ class TestMethodNomenclature {
         }
 
         String get() {
-            String name
-            if (callable.parameters.empty) {
-                name = asTypeName()
-            } else {
+            String name = asCallableName()
+            if (name in takenNames) {
                 name = asNumberOfArguments()
             }
             if (name in takenNames) {
@@ -106,7 +102,7 @@ class TestMethodNomenclature {
             name
         }
 
-        String asTypeName() {
+        String asCallableName() {
             wrap(callable.nameAsString)
         }
 

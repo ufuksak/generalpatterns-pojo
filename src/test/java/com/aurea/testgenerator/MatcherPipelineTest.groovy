@@ -5,7 +5,6 @@ import com.aurea.testgenerator.coverage.CoverageCollector
 import com.aurea.testgenerator.coverage.CoverageService
 import com.aurea.testgenerator.coverage.NoCoverageService
 import com.aurea.testgenerator.extensions.Extensions
-import com.aurea.testgenerator.generation.MethodLevelTestGenerator
 import com.aurea.testgenerator.generation.TestGenerator
 import com.aurea.testgenerator.generation.TestGeneratorResultReporter
 import com.aurea.testgenerator.generation.UnitTestGenerator

@@ -25,7 +25,7 @@ class NonStaticFieldAccessorBuilder {
         if (fieldDeclaration.accessSpecifier() != AccessSpecifier.PRIVATE) {
             return FieldAccessResult.success(new FieldAccessExpr(scope, fieldDeclaration.name))
         } else {
-            PojoFinder getterFinder = new PojoFinder(fieldDeclaration)
+            PojoMethodsFinder getterFinder = new PojoMethodsFinder(fieldDeclaration)
             Optional<ResolvedMethodDeclaration> getter = getterFinder.tryToFindGetter()
             return getter.map { FieldAccessResult.success(new MethodCallExpr(scope, it.name)) }
                          .orElse(FieldAccessResult.NO_ACCESS)

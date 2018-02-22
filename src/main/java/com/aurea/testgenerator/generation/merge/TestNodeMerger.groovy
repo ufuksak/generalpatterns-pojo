@@ -17,7 +17,7 @@ class TestNodeMerger {
         to
     }
 
-    static <T extends DependableNode> T appendDependencies(T to, Collection<Dependable> froms) {
+    static <T extends DependableNode> T appendDependencies(T to, Iterable<Dependable> froms) {
         froms.each {
             appendDependencies(to, it)
         }

@@ -36,6 +36,7 @@ class BaseConfig {
     @Bean
     SourceFilter sourceFilter() {
         SourceFilters.empty()
+//        SourceFilters.nameEquals('Record')
     }
 
     @Bean
