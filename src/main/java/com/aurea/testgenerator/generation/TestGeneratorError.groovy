@@ -6,8 +6,8 @@ import groovy.transform.ToString
 
 @Canonical
 @ToString(includePackage = false)
-class TestGeneratorError {
-    String cause
+class TestGeneratorError extends RuntimeException {
+    String message
 
     static TestGeneratorError unsolved(Node node) {
         new TestGeneratorError("Failed to solve $node")

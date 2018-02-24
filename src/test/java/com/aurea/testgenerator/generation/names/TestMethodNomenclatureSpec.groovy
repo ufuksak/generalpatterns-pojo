@@ -1,6 +1,6 @@
 package com.aurea.testgenerator.generation.names
 
-import com.aurea.testgenerator.generation.patterns.methods.AbstractFactoryMethodTypes
+import com.aurea.testgenerator.generation.patterns.staticfactory.StaticFactoryMethodTypes
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.body.ConstructorDeclaration
 import spock.lang.Specification
@@ -18,7 +18,7 @@ class TestMethodNomenclatureSpec extends Specification {
         """
 
         when:
-        String name = nameRepository.requestTestMethodName(AbstractFactoryMethodTypes.DIFFERENT_INSTANCES,
+        String name = nameRepository.requestTestMethodName(StaticFactoryMethodTypes.DIFFERENT_INSTANCES,
                 constructors.first())
 
         then:
@@ -35,9 +35,9 @@ class TestMethodNomenclatureSpec extends Specification {
         """
 
         when:
-        String noArg = nameRepository.requestTestMethodName(AbstractFactoryMethodTypes.DIFFERENT_INSTANCES,
+        String noArg = nameRepository.requestTestMethodName(StaticFactoryMethodTypes.DIFFERENT_INSTANCES,
                 constructors[0])
-        String arg = nameRepository.requestTestMethodName(AbstractFactoryMethodTypes.DIFFERENT_INSTANCES,
+        String arg = nameRepository.requestTestMethodName(StaticFactoryMethodTypes.DIFFERENT_INSTANCES,
                 constructors[1])
 
         then:
@@ -55,9 +55,9 @@ class TestMethodNomenclatureSpec extends Specification {
         """
 
         when:
-        String boolArg = nameRepository.requestTestMethodName(AbstractFactoryMethodTypes.DIFFERENT_INSTANCES,
+        String boolArg = nameRepository.requestTestMethodName(StaticFactoryMethodTypes.DIFFERENT_INSTANCES,
                 constructors[0])
-        String intArg = nameRepository.requestTestMethodName(AbstractFactoryMethodTypes.DIFFERENT_INSTANCES,
+        String intArg = nameRepository.requestTestMethodName(StaticFactoryMethodTypes.DIFFERENT_INSTANCES,
                 constructors[1])
 
         then:
@@ -75,9 +75,9 @@ class TestMethodNomenclatureSpec extends Specification {
         """
 
         when:
-        String intArrayArg = nameRepository.requestTestMethodName(AbstractFactoryMethodTypes.DIFFERENT_INSTANCES,
+        String intArrayArg = nameRepository.requestTestMethodName(StaticFactoryMethodTypes.DIFFERENT_INSTANCES,
                 constructors[0])
-        String doubleArrayArg = nameRepository.requestTestMethodName(AbstractFactoryMethodTypes.DIFFERENT_INSTANCES,
+        String doubleArrayArg = nameRepository.requestTestMethodName(StaticFactoryMethodTypes.DIFFERENT_INSTANCES,
                 constructors[1])
 
         then:

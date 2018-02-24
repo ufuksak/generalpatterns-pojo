@@ -1,7 +1,8 @@
 package com.aurea.testgenerator.source;
 
 import com.aurea.testgenerator.config.ProjectConfiguration;
-import com.github.javaparser.symbolsolver.JavaSymbolSolver;
+import com.github.javaparser.ast.Node;
+import com.github.javaparser.resolution.SymbolResolver;
 import groovy.transform.Memoized;
 import one.util.streamex.StreamEx;
 import org.apache.logging.log4j.LogManager;
@@ -21,10 +22,10 @@ public class PathUnitSource implements UnitSource {
     private final SourceFinder sourceFinder;
     private final PathToUnitMapper pathToUnitMapper;
     private final SourceFilter filter;
-    private final JavaSymbolSolver solver;
+    private final SymbolResolver solver;
     private final Path root;
 
-    public PathUnitSource(SourceFinder sourceFinder, ProjectConfiguration cfg, SourceFilter filter, JavaSymbolSolver solver) {
+    public PathUnitSource(SourceFinder sourceFinder, ProjectConfiguration cfg, SourceFilter filter, SymbolResolver solver) {
         this.sourceFinder = sourceFinder;
         this.pathToUnitMapper = new PathToUnitMapper(cfg.getSrcPath());
         this.filter = filter;
@@ -51,7 +52,7 @@ public class PathUnitSource implements UnitSource {
     }
 
     private Unit injectSolver(Unit unit) {
-        solver.inject(unit.getCu());
+        unit.getCu().setData(Node.SYMBOL_RESOLVER_KEY, solver);
         return unit;
     }
 

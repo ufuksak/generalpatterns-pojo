@@ -3,7 +3,6 @@ package com.aurea.testgenerator.source
 import com.aurea.testgenerator.config.ProjectConfiguration
 import groovy.util.logging.Log4j2
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 import java.nio.file.Path

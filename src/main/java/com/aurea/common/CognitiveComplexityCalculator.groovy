@@ -1,6 +1,5 @@
 package com.aurea.common
 
-
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.BinaryExpr
@@ -11,7 +10,17 @@ import com.github.javaparser.ast.expr.InstanceOfExpr
 import com.github.javaparser.ast.expr.LambdaExpr
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.expr.UnaryExpr
-import com.github.javaparser.ast.stmt.*
+import com.github.javaparser.ast.stmt.BreakStmt
+import com.github.javaparser.ast.stmt.CatchClause
+import com.github.javaparser.ast.stmt.ContinueStmt
+import com.github.javaparser.ast.stmt.DoStmt
+import com.github.javaparser.ast.stmt.ForStmt
+import com.github.javaparser.ast.stmt.ForeachStmt
+import com.github.javaparser.ast.stmt.IfStmt
+import com.github.javaparser.ast.stmt.Statement
+import com.github.javaparser.ast.stmt.SwitchStmt
+import com.github.javaparser.ast.stmt.SynchronizedStmt
+import com.github.javaparser.ast.stmt.WhileStmt
 
 class CognitiveComplexityCalculator {
 

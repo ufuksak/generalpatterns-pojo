@@ -1,6 +1,6 @@
 package com.aurea.testgenerator.value
 
-import com.aurea.testgenerator.generation.DependableNode
+import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.generation.source.Imports
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.expr.Expression

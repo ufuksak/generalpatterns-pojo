@@ -1,6 +1,8 @@
 package com.aurea.testgenerator.generation
 
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
+import com.aurea.testgenerator.reporting.TestGeneratorResultReporter
+import com.aurea.testgenerator.reporting.CoverageReporter
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.body.CallableDeclaration
 import com.github.javaparser.ast.visitor.VoidVisitorAdapter
@@ -14,14 +16,14 @@ abstract class MethodLevelTestGenerator<T extends CallableDeclaration> implement
 
     protected TestGeneratorResultReporter reporter
 
-    protected VisitReporter visitReporter
+    protected CoverageReporter coverageReporter
 
     protected NomenclatureFactory nomenclatures
 
-    MethodLevelTestGenerator(JavaParserFacade solver, TestGeneratorResultReporter reporter, VisitReporter visitReporter, NomenclatureFactory nomenclatures) {
+    MethodLevelTestGenerator(JavaParserFacade solver, TestGeneratorResultReporter reporter, CoverageReporter coverageReporter, NomenclatureFactory nomenclatures) {
         this.solver = solver
         this.reporter = reporter
-        this.visitReporter = visitReporter
+        this.coverageReporter = coverageReporter
         this.nomenclatures = nomenclatures
     }
 
@@ -39,14 +41,14 @@ abstract class MethodLevelTestGenerator<T extends CallableDeclaration> implement
                     result.type = getType()
                 }
                 reporter.publish(result, unit, callableDeclaration)
-                visitReporter.publishSuccessVisit(unit, callableDeclaration)
+                coverageReporter.report(unit, result, callableDeclaration)
                 results << result
             } catch (Exception e) {
                 log.error "Unhandled error while generating for $unit.fullName", e
-                visitReporter.publishFailedVisit(unit, callableDeclaration)
+                coverageReporter.reportFailure(unit, callableDeclaration)
             }
         } else {
-            visitReporter.publishSkippedVisit(unit, callableDeclaration)
+            coverageReporter.reportNotCovered(unit, callableDeclaration)
         }
     }
 

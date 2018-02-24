@@ -1,7 +1,8 @@
 package com.aurea.testgenerator.ast
 
-import com.aurea.testgenerator.generation.DependableNode
+import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.generation.merge.TestNodeMerger
+import com.aurea.testgenerator.value.Types
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.NodeList
@@ -19,7 +20,6 @@ import com.github.javaparser.ast.nodeTypes.NodeWithConstructors
 import com.github.javaparser.ast.nodeTypes.NodeWithOptionalScope
 import com.github.javaparser.ast.type.ClassOrInterfaceType
 import com.github.javaparser.resolution.types.ResolvedType
-import com.github.javaparser.symbolsolver.javaparsermodel.UnsolvedSymbolException
 import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
 
@@ -38,64 +38,76 @@ class InvocationBuilder {
         this
     }
 
-    Optional<DependableNode<ObjectCreationExpr>> build(ConstructorDeclaration cd) {
-        if (!Callability.isCallableFromTests(cd)) {
+    Optional<DependableNode<ObjectCreationExpr>> build(ConstructorDeclaration constructor) {
+        if (!Callability.isCallableFromTests(constructor)) {
             return Optional.empty()
         }
-        List<TypeDeclaration> parents = ASTNodeUtils.parents(cd, TypeDeclaration).toList()
-        if (parents.size() == 1) {
-            return Optional.of(buildConstructorInvocation(cd))
-        } else {
-            if (parents.empty) {
-                log.error "No type declaration for $cd"
-            }
-            boolean isParentStatic = parents.first().static
-            DependableNode<ObjectCreationExpr> expr = buildConstructorInvocation(cd)
-            for (int i = 1; i < parents.size(); i++) {
-                TypeDeclaration parent = parents[i]
-                if (isParentStatic) {
-                    prependWithScope(expr, parent.nameAsString)
-                } else {
-                    if (parent.enumDeclaration) {
-                        Optional<FieldAccessExpr> accessFirst = parent.asEnumDeclaration().accessFirst()
-                        if (!accessFirst.present) {
-                            return Optional.empty()
-                        }
-                        appendParentScope(expr.node.asObjectCreationExpr(), accessFirst.get())
-                    } else if (defaultConstructor(parent)) {
-                        DependableNode<Expression> defaultInvocation = DependableNode.from(
-                                new ObjectCreationExpr(null,
-                                        JavaParser.parseClassOrInterfaceType(parent.nameAsString),
-                                        NodeList.nodeList()))
-                        prependWithInvocation(defaultInvocation, expr)
-                    } else {
-                        Optional<ConstructorDeclaration> simplestConstructor = findSimplestConstructor(parent)
-                        if (!simplestConstructor.present) {
-                            return Optional.empty()
-                        }
-                        DependableNode<Expression> invocation = buildConstructorInvocation(simplestConstructor.get())
-                        prependWithInvocation(invocation, expr)
-                    }
+        List<TypeDeclaration> parents = ASTNodeUtils.parents(constructor, TypeDeclaration).toList()
+        try {
+            if (parents.size() == 1) {
+                return Optional.of(buildConstructorInvocation(constructor))
+            } else {
+                if (parents.empty) {
+                    log.error "No type declaration for $constructor"
                 }
-                isParentStatic = parent.static
+                boolean isParentStatic = parents.first().static
+                DependableNode<ObjectCreationExpr> expr = buildConstructorInvocation(constructor)
+                for (int i = 1; i < parents.size(); i++) {
+                    TypeDeclaration parent = parents[i]
+                    if (isParentStatic) {
+                        prependWithScope(expr, parent.nameAsString)
+                    } else {
+                        if (parent.enumDeclaration) {
+                            Optional<FieldAccessExpr> accessFirst = parent.asEnumDeclaration().accessFirst()
+                            if (!accessFirst.present) {
+                                return Optional.empty()
+                            }
+                            appendParentScope(expr.node.asObjectCreationExpr(), accessFirst.get())
+                        } else if (defaultConstructor(parent)) {
+                            DependableNode<Expression> defaultInvocation = DependableNode.from(
+                                    new ObjectCreationExpr(null,
+                                            JavaParser.parseClassOrInterfaceType(parent.nameAsString),
+                                            NodeList.nodeList()))
+                            prependWithInvocation(defaultInvocation, expr)
+                        } else {
+                            Optional<ConstructorDeclaration> simplestConstructor = findSimplestConstructor(parent)
+                            if (!simplestConstructor.present) {
+                                return Optional.empty()
+                            }
+                            DependableNode<Expression> invocation = buildConstructorInvocation(simplestConstructor.get())
+                            prependWithInvocation(invocation, expr)
+                        }
+                    }
+                    isParentStatic = parent.static
+                }
+                return Optional.of(expr)
             }
-            return Optional.of(expr)
+        } catch (IllegalArgumentException iae) {
+            log.debug "Failed to build constructor invocation for $constructor"
+            log.trace "Failed to build constructor invocation for $constructor", iae
+            return Optional.empty()
         }
     }
 
-    Optional<DependableNode<MethodCallExpr>> buildMethodInvocation(CallableDeclaration cd) {
-        def argumentsList = createArgumentsList(cd)
-        def dependency = TestNodeMerger.merge(argumentsList.dependency)
-        def scope = null
-        if (cd.static) {
-            // TODO: Probably mostly the same scope magic required as with constructor invocation above
-            // Issue: https://github.com/trilogy-group/BigCodeTestGenerator/issues/31
-            def methodClass = cd.getParentNode().get() as ClassOrInterfaceDeclaration
-            scope = new NameExpr(methodClass.nameAsString)
-        }
-        def node = new MethodCallExpr(scope, cd.nameAsString, NodeList.nodeList(argumentsList.node))
+    Optional<DependableNode<MethodCallExpr>> buildMethodInvocation(CallableDeclaration callable) {
+        try {
+            def argumentsList = createArgumentsList(callable)
+            def dependency = TestNodeMerger.merge(argumentsList.dependency)
+            def scope = null
+            if (callable.static) {
+                // TODO: Probably mostly the same scope magic required as with constructor invocation above
+                // Issue: https://github.com/trilogy-group/BigCodeTestGenerator/issues/31
+                def methodClass = callable.getParentNode().get() as ClassOrInterfaceDeclaration
+                scope = new NameExpr(methodClass.nameAsString)
+            }
+            def node = new MethodCallExpr(scope, callable.nameAsString, NodeList.nodeList(argumentsList.node))
 
-        Optional.of(DependableNode.from(node, dependency))
+            return Optional.of(DependableNode.from(node, dependency))
+        } catch (IllegalArgumentException iae) {
+            log.debug "Failed to build method invocation $callable"
+            log.trace "Failed to build method invocation $callable", iae
+            return Optional.empty()
+        }
     }
 
     private List<DependableNode<Expression>> createArgumentsList(CallableDeclaration cd) {
@@ -104,13 +116,9 @@ class InvocationBuilder {
         }
 
         cd.parameters.collect { parameter ->
-            try {
-                ResolvedType resolvedType = parameter.type.resolve()
-                return factory.getExpression(resolvedType).orElseThrow {
-                    new IllegalArgumentException("Failed to create expression for ${parameter} of ${cd}")
-                }
-            } catch (UnsolvedSymbolException ignore) {
-                return factory.getStubExpression(parameter.type)
+            Optional<ResolvedType> resolvedType = Types.tryResolve(parameter.type)
+            resolvedType.flatMap { factory.getExpression(it)}.orElseThrow {
+                new IllegalArgumentException("Failed to create expression for ${parameter} of ${cd}")
             }
         }
     }

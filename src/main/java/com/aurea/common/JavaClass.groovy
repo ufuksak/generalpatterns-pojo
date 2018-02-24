@@ -3,7 +3,7 @@ package com.aurea.common
 import groovy.transform.EqualsAndHashCode
 
 @EqualsAndHashCode
-class JavaClass {
+class JavaClass implements Comparable<JavaClass> {
     String fullName
 
     JavaClass(String fullName) {
@@ -25,5 +25,10 @@ class JavaClass {
     @Override
     String toString() {
         fullName
+    }
+
+    @Override
+    int compareTo(JavaClass o) {
+        this.fullName <=> o.fullName
     }
 }

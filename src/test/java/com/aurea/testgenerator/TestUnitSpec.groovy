@@ -2,7 +2,7 @@ package com.aurea.testgenerator
 
 import com.aurea.common.JavaClass
 import com.aurea.testgenerator.extensions.Extensions
-import com.aurea.testgenerator.generation.TestUnit
+import com.aurea.testgenerator.generation.ast.TestUnit
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration

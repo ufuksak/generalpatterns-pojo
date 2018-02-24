@@ -3,9 +3,8 @@ package com.aurea.testgenerator.generation.names
 import com.aurea.common.ParsingUtils
 import com.aurea.testgenerator.ast.ASTNodeUtils
 import com.aurea.testgenerator.generation.TestType
-
-import com.aurea.testgenerator.generation.patterns.methods.AbstractFactoryMethodTypes
-import com.aurea.testgenerator.generation.pojo.PojoTestTypes
+import com.aurea.testgenerator.generation.patterns.pojos.PojoTestTypes
+import com.aurea.testgenerator.generation.patterns.staticfactory.StaticFactoryMethodTypes
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.CallableDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
@@ -19,16 +18,16 @@ class TestMethodNomenclature {
     static final String TEST_NAME_SPACE = "_"
 
     private static final Map<? extends TestType, String> TEST_METHOD_NAME_SUFFIXES = [
-            (AbstractFactoryMethodTypes.IS_CALLABLE)                : 'IsCallable',
-            (AbstractFactoryMethodTypes.ASSIGNMENT_CHECK)           : 'AssignsValues',
-            (AbstractFactoryMethodTypes.DIFFERENT_INSTANCES)        : 'OnSecondCall_CreateDifferentInstance',
+            (StaticFactoryMethodTypes.IS_CALLABLE)        : 'IsCallable',
+            (StaticFactoryMethodTypes.ASSIGNMENT_CHECK)   : 'AssignsValues',
+            (StaticFactoryMethodTypes.DIFFERENT_INSTANCES): 'OnSecondCall_CreateDifferentInstance',
 
-            (PojoTestTypes.OPEN_POJO_GETTER)                        : 'Getters',
-            (PojoTestTypes.OPEN_POJO_SETTER)                        : 'Setters',
-            (PojoTestTypes.OPEN_POJO_TO_STRING)                     : 'ToString',
-            (PojoTestTypes.OPEN_POJO_EQUALS)                        : 'Equals',
-            (PojoTestTypes.OPEN_POJO_HASH_CODE)                     : 'HashCode',
-            (PojoTestTypes.OPEN_POJO_CONSTRUCTORS)                  : 'Constructors',
+            (PojoTestTypes.OPEN_POJO_GETTER)              : 'Getters',
+            (PojoTestTypes.OPEN_POJO_SETTER)              : 'Setters',
+            (PojoTestTypes.OPEN_POJO_TO_STRING)           : 'ToString',
+            (PojoTestTypes.OPEN_POJO_EQUALS)              : 'Equals',
+            (PojoTestTypes.OPEN_POJO_HASH_CODE)           : 'HashCode',
+            (PojoTestTypes.OPEN_POJO_CONSTRUCTORS)        : 'Constructors',
             (PojoTestTypes.POJO_TESTER_GETTER)                      : 'Getters',
             (PojoTestTypes.POJO_TESTER_SETTER)                      : 'Setters',
             (PojoTestTypes.POJO_TESTER_TO_STRING)                   : 'ToString',
@@ -61,7 +60,7 @@ class TestMethodNomenclature {
         try {
             String suffix = TEST_METHOD_NAME_SUFFIXES[type]
 
-            if (type instanceof AbstractFactoryMethodTypes) {
+            if (type instanceof StaticFactoryMethodTypes) {
                 return new CallableNameRepository(suffix, context as CallableDeclaration).get()
             }
 

@@ -1,8 +1,8 @@
 package com.aurea.testgenerator.generation.merge
 
-import com.aurea.testgenerator.generation.Dependable
-import com.aurea.testgenerator.generation.DependableNode
-import com.aurea.testgenerator.generation.TestDependency
+import com.aurea.testgenerator.generation.ast.Dependable
+import com.aurea.testgenerator.generation.ast.DependableNode
+import com.aurea.testgenerator.generation.ast.TestDependency
 
 class TestNodeMerger {
 

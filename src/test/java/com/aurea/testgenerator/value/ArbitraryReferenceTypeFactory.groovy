@@ -1,6 +1,6 @@
 package com.aurea.testgenerator.value
 
-import com.aurea.testgenerator.generation.DependableNode
+import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.generation.merge.TestNodeMerger
 import com.aurea.testgenerator.generation.source.Imports
 import com.github.javaparser.JavaParser
@@ -51,8 +51,8 @@ class ArbitraryReferenceTypeFactory implements ReferenceTypeFactory {
             ResolvedType keyType
             ResolvedType valueType
             if (typeParameters.size() != 2) {
-                keyType = Types.OBJECT.resolve()
-                valueType = Types.OBJECT.resolve()
+                keyType = Types.tryResolve(Types.OBJECT).get()
+                valueType = Types.tryResolve(Types.OBJECT).get()
             } else {
                 keyType = typeParameters[0].b
                 valueType = typeParameters[1].b

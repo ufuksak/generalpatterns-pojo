@@ -1,19 +1,40 @@
 package com.aurea.testgenerator.value
 
+import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.MethodCallExpr
+import com.github.javaparser.ast.expr.SimpleName
 import com.github.javaparser.ast.type.ClassOrInterfaceType
 import com.github.javaparser.ast.type.PrimitiveType
 import com.github.javaparser.ast.type.Type
 import com.github.javaparser.resolution.Resolvable
+import com.github.javaparser.resolution.declarations.ResolvedClassDeclaration
+import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration
+import com.github.javaparser.resolution.declarations.ResolvedTypeDeclaration
+import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration
 import com.github.javaparser.resolution.types.ResolvedPrimitiveType
 import com.github.javaparser.resolution.types.ResolvedReferenceType
 import com.github.javaparser.resolution.types.ResolvedType
-import javassist.expr.MethodCall
+import com.github.javaparser.symbolsolver.JavaSymbolSolver
+import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
+import com.github.javaparser.symbolsolver.model.resolution.SymbolReference
+import com.github.javaparser.symbolsolver.resolution.SymbolSolver
+import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
 
 class Types {
 
-    static final OBJECT = new ClassOrInterfaceType("Object")
+    static final ClassOrInterfaceType OBJECT
+    static final ResolvedReferenceType OBJECT_TYPE
+
+    static {
+        JavaSymbolSolver solver = new JavaSymbolSolver(new ReflectionTypeSolver(true))
+        CompilationUnit cu = new CompilationUnit("sample")
+        solver.inject(cu)
+        OBJECT = new ClassOrInterfaceType("Object")
+        OBJECT.setParentNode(cu)
+        OBJECT_TYPE = OBJECT.resolve()
+    }
 
     static final Set<String> KNOWN_COLLECTION_TYPES = [
             'Iterable',
@@ -265,11 +286,43 @@ class Types {
         }
     }
 
+    static Optional<ResolvedType> tryCalculateResolvedType(Expression expression) {
+        try {
+            return Optional.ofNullable(expression.calculateResolvedType())
+        } catch (Exception e) {
+            return Optional.empty()
+        }
+    }
+
+    static Optional<ResolvedType> tryGetType(ResolvedFieldDeclaration field) {
+        try {
+            return Optional.ofNullable(field.getType())
+        } catch (Exception e) {
+            return Optional.empty()
+        }
+    }
+
     static Optional<ResolvedMethodDeclaration> tryResolve(MethodCallExpr methodCall) {
         try {
             return Optional.ofNullable(methodCall.resolveInvokedMethod())
         } catch (Exception e) {
             return Optional.empty()
+        }
+    }
+
+    static SymbolReference<? extends ResolvedValueDeclaration> trySolveSymbolInType(SymbolSolver symbolSolver, ResolvedTypeDeclaration typeDeclaration, String name) {
+        try {
+            return symbolSolver.solveSymbolInType(typeDeclaration, name)
+        } catch (Exception e) {
+            return SymbolReference.unsolved(ResolvedValueDeclaration)
+        }
+    }
+
+    static SymbolReference<? extends ResolvedValueDeclaration> trySolve(JavaParserFacade solver, SimpleName name) {
+        try {
+            return solver.solve(name)
+        } catch (Exception e) {
+            return SymbolReference.unsolved(ResolvedValueDeclaration)
         }
     }
 }

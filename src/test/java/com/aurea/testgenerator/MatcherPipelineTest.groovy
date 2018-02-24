@@ -1,16 +1,15 @@
 package com.aurea.testgenerator
 
 import com.aurea.testgenerator.config.ProjectConfiguration
-import com.aurea.testgenerator.coverage.CoverageCollector
 import com.aurea.testgenerator.coverage.CoverageService
 import com.aurea.testgenerator.coverage.NoCoverageService
 import com.aurea.testgenerator.extensions.Extensions
 import com.aurea.testgenerator.generation.TestGenerator
-import com.aurea.testgenerator.generation.TestGeneratorResultReporter
 import com.aurea.testgenerator.generation.UnitTestGenerator
-import com.aurea.testgenerator.generation.VisitReporter
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.StandardTestClassNomenclatureFactory
+import com.aurea.testgenerator.reporting.CoverageReporter
+import com.aurea.testgenerator.reporting.TestGeneratorResultReporter
 import com.aurea.testgenerator.source.JavaSourceFinder
 import com.aurea.testgenerator.source.PathUnitSource
 import com.aurea.testgenerator.source.SourceFilters
@@ -45,12 +44,11 @@ abstract class MatcherPipelineTest extends Specification {
     UnitTestWriter unitTestWriter
     UnitTestGenerator unitTestGenerator
     CoverageService coverageService
-    CoverageCollector coverageCollector
     ValueFactory valueFactory = new ValueFactoryImpl(
             new ArbitraryReferenceTypeFactory(),
             new ArbitraryPrimitiveValuesFactory())
     TestGeneratorResultReporter reporter = new TestGeneratorResultReporter(mock(ApplicationEventPublisher))
-    VisitReporter visitReporter = new VisitReporter(mock(ApplicationEventPublisher))
+    CoverageReporter visitReporter = new CoverageReporter(mock(ApplicationEventPublisher))
     NomenclatureFactory nomenclatureFactory = new NomenclatureFactory(new StandardTestClassNomenclatureFactory())
 
     void setupSpec() {
@@ -67,7 +65,6 @@ abstract class MatcherPipelineTest extends Specification {
         unitTestGenerator = new UnitTestGenerator([generator], nomenclatureFactory)
         unitTestWriter = new UnitTestWriter(cfg)
         coverageService = new NoCoverageService()
-        coverageCollector = new CoverageCollector(coverageService)
 
         pipeline = new Pipeline(
                 source,
