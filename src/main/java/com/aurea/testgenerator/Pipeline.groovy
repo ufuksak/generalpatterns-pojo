@@ -42,7 +42,7 @@ class Pipeline {
         AtomicInteger counter = new AtomicInteger()
         log.info "Generating tests for ${totalUnits} units"
         units.map {
-            log.debug "${counter.incrementAndGet()} / $totalUnits: $it.fullName"
+            log.info "${counter.incrementAndGet()} / $totalUnits: $it.fullName"
             unitTestGenerator.tryGenerateTest(it)
         }
              .filter { it.present }

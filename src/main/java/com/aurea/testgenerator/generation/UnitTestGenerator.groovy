@@ -1,6 +1,7 @@
 package com.aurea.testgenerator.generation
 
 import com.aurea.common.JavaClass
+import com.aurea.testgenerator.generation.ast.TestUnit
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.TestClassNomenclature
 import com.aurea.testgenerator.source.Unit

@@ -1,6 +1,6 @@
 package com.aurea.testgenerator.generation.merge
 
-import com.aurea.testgenerator.generation.DependableNode
+import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Modifier

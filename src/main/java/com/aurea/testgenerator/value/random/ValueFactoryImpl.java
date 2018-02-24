@@ -1,6 +1,6 @@
 package com.aurea.testgenerator.value.random;
 
-import com.aurea.testgenerator.generation.DependableNode;
+import com.aurea.testgenerator.generation.ast.DependableNode;
 import com.aurea.testgenerator.value.MockExpressionBuilder;
 import com.aurea.testgenerator.value.PrimitiveValueFactory;
 import com.aurea.testgenerator.value.ReferenceTypeFactory;

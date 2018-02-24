@@ -7,7 +7,6 @@ import com.aurea.testgenerator.coverage.NoCoverageService
 import com.aurea.testgenerator.source.SourceFilter
 import com.aurea.testgenerator.source.SourceFilters
 import com.github.javaparser.JavaParser
-import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver
@@ -36,20 +35,11 @@ class BaseConfig {
     @Bean
     SourceFilter sourceFilter() {
         SourceFilters.empty()
-//        SourceFilters.nameEquals('Record')
     }
 
     @Bean
     JavaParserFacade javaParserFacade(ProjectConfiguration projectConfiguration) {
         JavaParserFacade.get(new CombinedTypeSolver(
-                new ReflectionTypeSolver(),
-                new JavaParserTypeSolver(projectConfiguration.srcPath.toFile())
-        ))
-    }
-
-    @Bean
-    JavaSymbolSolver javaSymbolSolver(ProjectConfiguration projectConfiguration) {
-        new JavaSymbolSolver(new CombinedTypeSolver(
                 new ReflectionTypeSolver(),
                 new JavaParserTypeSolver(projectConfiguration.srcPath.toFile())
         ))

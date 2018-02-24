@@ -1,7 +1,5 @@
 package com.aurea.testgenerator.ast
 
-import com.aurea.testgenerator.generation.source.NonStaticFieldAccessorBuilder
-import com.aurea.testgenerator.generation.source.StaticFieldAccessorBuilder
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
 

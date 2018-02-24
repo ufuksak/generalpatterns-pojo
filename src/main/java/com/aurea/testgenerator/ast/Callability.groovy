@@ -1,5 +1,6 @@
 package com.aurea.testgenerator.ast
 
+import com.aurea.testgenerator.value.Types
 import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.CallableDeclaration
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
@@ -70,9 +71,13 @@ class Callability {
         for (int i = 0; i < parameters.size(); i++) {
             Parameter parameter = parameters[i]
             Expression argument = arguments[i]
-            ResolvedType parameterType = parameter.type.resolve()
-            ResolvedType argumentType = argument.calculateResolvedType()
-            if (parameterType != argumentType) {
+            Optional<ResolvedType> parameterType = Types.tryResolve(parameter.type)
+            Optional<ResolvedType> argumentType = Types.tryCalculateResolvedType(argument)
+            if (parameterType.present && argumentType.present) {
+                if (parameterType.get() != argumentType.get()) {
+                    return false
+                }
+            } else {
                 return false
             }
         }

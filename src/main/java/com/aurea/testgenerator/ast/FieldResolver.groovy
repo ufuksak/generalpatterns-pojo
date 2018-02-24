@@ -8,7 +8,6 @@ import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
 import com.github.javaparser.resolution.declarations.ResolvedTypeDeclaration
 import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
-import com.github.javaparser.symbolsolver.javaparsermodel.UnsolvedSymbolException
 import com.github.javaparser.symbolsolver.model.resolution.SymbolReference
 import groovy.util.logging.Log4j2
 
@@ -22,34 +21,30 @@ class FieldResolver {
     }
 
     Optional<ResolvedFieldDeclaration> resolve(SimpleName name) {
-        try {
-            //There is a bug in JSS - if name of the field is the same as name of fieldAccessExpr.name it will resolve
-            //reference to be a parameter declaration, so we need to work around that
-            Optional<CallableDeclaration> callable = name.getAncestorOfType(CallableDeclaration)
-            if (callable.present) {
-                if (callable.get().parameters.any { it.name == name }) {
-                    //Solve outside of the callable scope
-                    Optional<TypeDeclaration> maybeType = callable.get().getAncestorOfType(TypeDeclaration)
-                    if (maybeType.present) {
-                        TypeDeclaration typeDeclaration = maybeType.get()
-                        Optional<? extends ResolvedTypeDeclaration> resolvedType = Optional.empty()
-                        if (typeDeclaration.classOrInterfaceDeclaration) {
-                            resolvedType = Types.tryResolve(typeDeclaration.asClassOrInterfaceDeclaration())
-                        } else if (typeDeclaration.enumDeclaration) {
-                            resolvedType = Types.tryResolve(typeDeclaration.asEnumDeclaration())
-                        }
-                        if (resolvedType.present) {
-                            SymbolReference<? extends ResolvedValueDeclaration> resolvedValueDeclaration =
-                                    solver.symbolSolver.solveSymbolInType(resolvedType.get(), name.identifier)
-                            return asSolvedField(name, resolvedValueDeclaration)
-                        }
+        //There is a bug in JSS - if name of the field is the same as name of fieldAccessExpr.name it will resolve
+        //reference to be a parameter declaration, so we need to work around that
+        Optional<CallableDeclaration> callable = name.getAncestorOfType(CallableDeclaration)
+        if (callable.present) {
+            if (callable.get().parameters.any { it.name == name }) {
+                //Solve outside of the callable scope
+                Optional<TypeDeclaration> maybeType = callable.get().getAncestorOfType(TypeDeclaration)
+                if (maybeType.present) {
+                    TypeDeclaration typeDeclaration = maybeType.get()
+                    Optional<? extends ResolvedTypeDeclaration> resolvedType = Optional.empty()
+                    if (typeDeclaration.classOrInterfaceDeclaration) {
+                        resolvedType = Types.tryResolve(typeDeclaration.asClassOrInterfaceDeclaration())
+                    } else if (typeDeclaration.enumDeclaration) {
+                        resolvedType = Types.tryResolve(typeDeclaration.asEnumDeclaration())
+                    }
+                    if (resolvedType.present) {
+                        SymbolReference<? extends ResolvedValueDeclaration> resolvedValueDeclaration =
+                                Types.trySolveSymbolInType(solver.symbolSolver, resolvedType.get(), name.identifier)
+                        return asSolvedField(name, resolvedValueDeclaration)
                     }
                 }
             }
-            SymbolReference<? extends ResolvedValueDeclaration> reference = solver.solve(name)
+            SymbolReference<? extends ResolvedValueDeclaration> reference = Types.trySolve(solver, name)
             return asSolvedField(name, reference)
-        } catch (UnsolvedSymbolException | com.github.javaparser.resolution.UnsolvedSymbolException use) {
-            log.error "Failed to solve field access $name"
         }
         return Optional.empty()
     }

@@ -2,7 +2,7 @@ package com.aurea.testgenerator.ast
 
 import com.aurea.testgenerator.TestUnitSpec
 import com.aurea.testgenerator.extensions.Extensions
-import com.aurea.testgenerator.generation.DependableNode
+import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.value.ArbitraryPrimitiveValuesFactory
 import com.aurea.testgenerator.value.ArbitraryReferenceTypeFactory
 import com.aurea.testgenerator.value.PrimitiveValueFactory
