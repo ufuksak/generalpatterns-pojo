@@ -32,10 +32,12 @@ class TestTypeStatistics implements ApplicationListener<TestGenerationEvent> {
 
     @PreDestroy
     void logStats() {
-        String text = """
+        if (log.infoEnabled) {
+            String text = """
 \tGenerated tests per type: $tests                                            
 \t${EntryStream.of(testsPerType).join(': ', '\t', System.lineSeparator() + '\t').sort().join("")}
         """
-        log.info text
+            log.info text
+        }
     }
 }

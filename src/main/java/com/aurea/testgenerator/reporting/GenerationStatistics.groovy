@@ -33,10 +33,12 @@ class GenerationStatistics implements ApplicationListener<TestGenerationEvent> {
 
     @PreDestroy
     void logStats() {
-        String text = """
+        if (log.infoEnabled) {
+            String text = """
 \tGeneration stats: $generations 
 \t${EntryStream.of(counters).join(': ', '\t', System.lineSeparator() + '\t').join("")}
         """
-        log.info text
+            log.info text
+        }
     }
 }

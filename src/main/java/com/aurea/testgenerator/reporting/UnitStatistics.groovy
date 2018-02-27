@@ -35,13 +35,15 @@ class UnitStatistics implements ApplicationListener<TestGenerationEvent> {
 
     @PreDestroy
     void logStats() {
-        String text = """
+        if (log.debugEnabled) {
+            String text = """
 \tGenerated tests per unit:
-\t${EntryStream.of(testsPerUnit).filterValues{it.intValue() > 0}.join(': ', '\t', System.lineSeparator() + '\t').sort().join("")}
+\t${EntryStream.of(testsPerUnit).filterValues { it.intValue() > 0 }.join(': ', '\t', System.lineSeparator() + '\t').sort().join("")}
 \tErrors per unit:
 ${printErrorsPerUnit()}
-        """
-        log.debug text
+"""
+            log.debug text
+        }
     }
 
     private String printErrorsPerUnit() {

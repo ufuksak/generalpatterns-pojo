@@ -47,9 +47,11 @@ class UnsolvedSymbolLog implements ApplicationListener<UnsolvedDeclarationEvent>
 
     @PreDestroy
     void log() {
-        log.debug """
+        if (log.debugEnabled) {
+            log.debug """
 Unsolved nodes:
 \t${descriptions.toSet().sort().join(System.lineSeparator() + "\t")}
 """
+        }
     }
 }

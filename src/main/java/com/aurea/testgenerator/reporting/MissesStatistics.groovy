@@ -38,9 +38,11 @@ class MissesStatistics implements ApplicationListener<TestGenerationEvent> {
 
     @PreDestroy
     void logStats() {
-        log.debug """
+        if (log.debugEnabled) {
+            log.debug """
 \t${printSkippedCallables()}      
 """
+        }
     }
 
     private String printSkippedCallables() {
