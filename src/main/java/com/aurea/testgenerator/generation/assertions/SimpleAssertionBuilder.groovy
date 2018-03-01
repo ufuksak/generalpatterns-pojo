@@ -3,6 +3,7 @@ package com.aurea.testgenerator.generation.assertions
 import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.generation.ast.TestDependency
 import com.aurea.testgenerator.generation.source.Imports
+import com.aurea.testgenerator.value.Resolution
 import com.aurea.testgenerator.value.Types
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.expr.Expression
@@ -27,29 +28,23 @@ import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.LONG
 import static com.github.javaparser.resolution.types.ResolvedPrimitiveType.SHORT
 
 @Log4j2
-class AssertionBuilder {
+class SimpleAssertionBuilder implements AssertionProducer, AssertionStatementProducer {
 
     static final FLOATING_POINT_OFFSET_FLOAT = '0.001F'
     static final FLOATING_POINT_OFFSET_DOUBLE = '0.001D'
 
-    boolean softly
-    List<DependableNode<MethodCallExpr>> assertions = []
+    protected List<DependableNode<MethodCallExpr>> assertions = []
 
-    AssertionBuilder softly(boolean softly) {
-        this.softly = softly
-        this
-    }
-
-    AssertionBuilder with(Type type, Expression actual, Expression expected) {
+    SimpleAssertionBuilder with(Type type, Expression actual, Expression expected) {
         assert type.findCompilationUnit().present
-        Optional<ResolvedType> resolvedType = Types.tryResolve(type)
+        Optional<ResolvedType> resolvedType = Resolution.tryResolve(type)
         resolvedType.ifPresent {
             with(it, actual, expected)
         }
         this
     }
 
-    AssertionBuilder with(ResolvedType type, Expression actual, Expression expected) {
+    SimpleAssertionBuilder with(ResolvedType type, Expression actual, Expression expected) {
         if (type.primitive) {
             addPrimitiveAssertion(type.asPrimitive(), actual, expected)
         } else if (type.referenceType) {
@@ -67,41 +62,18 @@ class AssertionBuilder {
         this
     }
 
-    AssertionBuilder assertListContainsSameElements(ResolvedType type, Expression actual, Expression expected) {
+    SimpleAssertionBuilder assertListContainsSameElements(ResolvedType type, Expression actual, Expression expected) {
         assert type.referenceType
         assert Types.isList(type.asReferenceType())
         addContainsAllAssertion(actual, expected)
         this
     }
 
-    List<DependableNode<Statement>> build() {
-        if (assertions.empty) {
-            return Collections.emptyList()
-        }
-
-        softly ? asSoftStatements() : asStatements()
-    }
-
-    private List<DependableNode<Statement>> asStatements() {
+    @Override
+    List<DependableNode<Statement>> getStatements() {
         assertions.collect {
             DependableNode.from(new ExpressionStmt(it.node), it.dependency)
         }
-    }
-
-    private List<DependableNode<Statement>> asSoftStatements() {
-        List<DependableNode<Statement>> softAssertions = new ArrayList<>(assertions.size() + 2)
-        //TODO: 'sa' should be taken from name registry, not hardcoded
-        softAssertions << DependableNode.from(
-                JavaParser.parseStatement("SoftAssertions sa = new SoftAssertions();"),
-                new TestDependency(imports: [Imports.SOFT_ASSERTIONS]))
-
-        assertions.each { assertion ->
-            Expression sa = new NameExpr("sa")
-            MethodCallExpr assertThatMethodCall = assertion.node.scope.get().asMethodCallExpr()
-            assertThatMethodCall.setScope(sa)
-            softAssertions << DependableNode.from(new ExpressionStmt(assertion.node), assertion.dependency)
-        }
-        softAssertions << DependableNode.from(JavaParser.parseStatement("sa.assertAll();"))
     }
 
     private void addComparableAssertion(Expression actual, Expression expected) {
@@ -148,12 +120,15 @@ class AssertionBuilder {
         }
     }
 
-    private DependableNode<MethodCallExpr> createAssertThatMethodCallExpression(String expr) {
+    private static DependableNode<MethodCallExpr> createAssertThatMethodCallExpression(String expr) {
         DependableNode<MethodCallExpr> testNodeMethodCallExpr = new DependableNode<>()
-        if (!softly) {
-            testNodeMethodCallExpr.dependency.imports << Imports.ASSERTJ_ASSERTTHAT
-        }
+        testNodeMethodCallExpr.dependency.imports << Imports.ASSERTJ_ASSERTTHAT
         testNodeMethodCallExpr.node = parseExpression(expr).asMethodCallExpr()
         testNodeMethodCallExpr
+    }
+
+    @Override
+    List<DependableNode<MethodCallExpr>> getAssertions() {
+        this.@assertions
     }
 }

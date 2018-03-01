@@ -4,7 +4,7 @@ import com.aurea.testgenerator.generation.ast.DependableNode;
 import com.aurea.testgenerator.value.MockExpressionBuilder;
 import com.aurea.testgenerator.value.PrimitiveValueFactory;
 import com.aurea.testgenerator.value.ReferenceTypeFactory;
-import com.aurea.testgenerator.value.Types;
+import com.aurea.testgenerator.value.Resolution;
 import com.aurea.testgenerator.value.ValueFactory;
 import com.github.javaparser.JavaParser;
 import com.github.javaparser.ast.ArrayCreationLevel;
@@ -77,7 +77,7 @@ public class ValueFactoryImpl implements ValueFactory {
 
     @Override
     public Optional<DependableNode<VariableDeclarationExpr>> getVariable(String name, Type type) {
-        Optional<ResolvedType> resolvedType = Types.tryResolve(type);
+        Optional<ResolvedType> resolvedType = Resolution.tryResolve(type);
         return resolvedType.flatMap(this::getExpression).flatMap(nodeExpression -> {
             Expression initializer = nodeExpression.getNode();
             VariableDeclarator variableDeclarator = new VariableDeclarator(type.clone(), name, initializer);

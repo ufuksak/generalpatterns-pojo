@@ -6,6 +6,7 @@ import com.aurea.testgenerator.generation.source.Imports
 import com.aurea.testgenerator.value.MockExpressionBuilder
 import com.aurea.testgenerator.value.PrimitiveValueFactory
 import com.aurea.testgenerator.value.ReferenceTypeFactory
+import com.aurea.testgenerator.value.Resolution
 import com.aurea.testgenerator.value.Types
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
@@ -63,8 +64,8 @@ class RandomJavaLangTypesFactory implements ReferenceTypeFactory {
             ResolvedType keyType
             ResolvedType valueType
             if (typeParameters.size() != 2) {
-                keyType = Types.tryResolve(Types.OBJECT).get()
-                valueType = Types.tryResolve(Types.OBJECT).get()
+                keyType = Resolution.tryResolve(Types.OBJECT).get()
+                valueType = Resolution.tryResolve(Types.OBJECT).get()
             } else {
                 keyType = typeParameters[0].b
                 valueType = typeParameters[1].b

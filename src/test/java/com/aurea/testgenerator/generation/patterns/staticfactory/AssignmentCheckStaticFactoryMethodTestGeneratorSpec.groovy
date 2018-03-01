@@ -30,6 +30,7 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             package sample;
              
             import org.assertj.core.api.SoftAssertions;
+            import static org.assertj.core.api.Assertions.assertThat;
             import org.assertj.core.data.Offset;
             import org.junit.Test;              
              
@@ -38,14 +39,14 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
                 @Test
                 public void test_emptyProfile_AssignsValues() throws Exception {
                     String username = "ABC";
-                    UserProfile profile = UserProfile.emptyProfile(username);
+                    UserProfile resultingInstance = UserProfile.emptyProfile(username);
                     
                     SoftAssertions sa = new SoftAssertions();
-                    sa.assertThat(profile.status).isEqualTo(new Object());
-                    sa.assertThat(profile.female).isFalse();
-                    sa.assertThat(profile.degrees).isCloseTo(42.2F, Offset.offset(0.001F));
-                    sa.assertThat(profile.age).isEqualTo(42);
-                    sa.assertThat(profile.username).isEqualTo(username);
+                    sa.assertThat(resultingInstance.female).isFalse();
+                    sa.assertThat(resultingInstance.degrees).isCloseTo(42.2F, Offset.offset(0.001F));
+                    sa.assertThat(resultingInstance.age).isEqualTo(42);
+                    sa.assertThat(resultingInstance.status).isEqualTo(new Object());
+                    sa.assertThat(resultingInstance.username).isEqualTo(username);
                     sa.assertAll();
                 }
             }
@@ -117,6 +118,7 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             package sample;
              
             import org.assertj.core.api.SoftAssertions;
+            import static org.assertj.core.api.Assertions.assertThat;
             import org.assertj.core.data.Offset;
             import org.junit.Test;
              
@@ -125,14 +127,14 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
                 @Test
                 public void test_emptyProfile_AssignsValues() throws Exception {
                     String username = "ABC";
-                    UserProfile profile = UserProfile.emptyProfile(username);
+                    UserProfile resultingInstance = UserProfile.emptyProfile(username);
                     
                     SoftAssertions sa = new SoftAssertions();
-                    sa.assertThat(profile.getUsername()).isEqualTo(username);
-                    sa.assertThat(profile.isFemale()).isFalse();
-                    sa.assertThat(profile.getAge()).isEqualTo(42);
-                    sa.assertThat(profile.getStatus()).isEqualTo(new Object());
-                    sa.assertThat(profile.getDegrees()).isCloseTo(42.2F, Offset.offset(0.001F));
+                    sa.assertThat(resultingInstance.isFemale()).isFalse();
+                    sa.assertThat(resultingInstance.getDegrees()).isCloseTo(42.2F, Offset.offset(0.001F));
+                    sa.assertThat(resultingInstance.getAge()).isEqualTo(42);
+                    sa.assertThat(resultingInstance.getStatus()).isEqualTo(new Object());
+                    sa.assertThat(resultingInstance.getUsername()).isEqualTo(username);
                     sa.assertAll();
                 }
             }
@@ -174,11 +176,154 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
                 @Test
                 public void test_emptyProfile_AssignsValues() throws Exception {
                     String username = "ABC";
-                    UserProfile profile = UserProfile.emptyProfile(username);
+                    UserProfile resultingInstance = UserProfile.emptyProfile(username);
                     
                     SoftAssertions sa = new SoftAssertions();
-                    sa.assertThat(profile.username).isEqualTo(username);
-                    sa.assertThat(profile.getAge()).isEqualTo(42);
+                    sa.assertThat(resultingInstance.getAge()).isEqualTo(42);
+                    sa.assertThat(resultingInstance.username).isEqualTo(username);
+                    sa.assertAll();
+                }
+            }
+        """
+    }
+
+    def "assignments in constructor should be tested"() {
+        expect:
+        onClassCodeExpect """
+            class Foo {
+    
+                String username;
+                private int age;
+                
+                public Foo(String username, int age) {
+                    this.username = username;
+                    setAge(age);
+                }
+                
+                public static Foo emptyProfile() {
+                    Foo foo = new Foo("Galatae, quadra!", 58);
+                    return foo;
+                }
+                
+                public void setAge(int age) {
+                    this.age = age;
+                }
+                
+                public int getAge() {
+                    return age;
+                }
+            }
+        """, """     
+            package sample;
+             
+            import org.assertj.core.api.SoftAssertions;
+            import static org.assertj.core.api.Assertions.assertThat;
+            import org.junit.Test;
+             
+            public class FooTest {
+             
+                @Test
+                public void test_emptyProfile_AssignsValues() throws Exception {
+                    Foo resultingInstance = Foo.emptyProfile();
+                    
+                    SoftAssertions sa = new SoftAssertions();
+                    sa.assertThat(resultingInstance.getAge()).isEqualTo(58);
+                    sa.assertThat(resultingInstance.username).isEqualTo("Galatae, quadra!");
+                    sa.assertAll();
+                }
+            }
+        """
+    }
+
+    def "assignments in constructor should be tested when object is created in return expr"() {
+        expect:
+        onClassCodeExpect """
+            class Foo {
+    
+                String username;
+                private int age;
+                
+                public Foo(String username, int age) {
+                    this.username = username;
+                    setAge(age);
+                }
+                
+                public static Foo emptyProfile() {
+                    return new Foo("Galatae, quadra!", 58);
+                }
+                
+                public void setAge(int age) {
+                    this.age = age;
+                }
+                
+                public int getAge() {
+                    return age;
+                }
+            }
+        """, """     
+            package sample;
+             
+            import org.assertj.core.api.SoftAssertions;
+            import static org.assertj.core.api.Assertions.assertThat;
+            import org.junit.Test;
+             
+            public class FooTest {
+             
+                @Test
+                public void test_emptyProfile_AssignsValues() throws Exception {
+                    Foo resultingInstance = Foo.emptyProfile();
+                    
+                    SoftAssertions sa = new SoftAssertions();
+                    sa.assertThat(resultingInstance.getAge()).isEqualTo(58);
+                    sa.assertThat(resultingInstance.username).isEqualTo("Galatae, quadra!");
+                    sa.assertAll();
+                }
+            }
+        """
+    }
+
+    def "assignments in constructor should be tested when static factory method delegates some arguments to constructor"() {
+        expect:
+        onClassCodeExpect """
+            class Foo {
+    
+                String username;
+                private int age;
+                
+                public Foo(String username, int age) {
+                    this.username = username;
+                    setAge(age);
+                }
+                
+                public static Foo emptyProfile(String username) {
+                    return new Foo(username, 58);
+                }
+                
+                public void setAge(int age) {
+                    this.age = age;
+                }
+                
+                public int getAge() {
+                    return age;
+                }
+            }
+        """, """     
+            package sample;
+             
+            import org.assertj.core.api.SoftAssertions;
+            import static org.assertj.core.api.Assertions.assertThat;
+            import org.junit.Test;
+             
+            public class FooTest {
+             
+                @Test
+                public void test_emptyProfile_AssignsValues() throws Exception {
+                    String username = "ABC";
+                    Foo resultingInstance = Foo.emptyProfile(username);
+                    
+                    SoftAssertions sa = new SoftAssertions();
+                    sa.assertThat(resultingInstance.getAge()).isEqualTo(58);
+                    sa.assertThat(resultingInstance.username).isEqualTo(username);
                     sa.assertAll();
                 }
             }
@@ -187,6 +332,6 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
 
     @Override
     MethodLevelTestGenerator generator() {
-        new AssignmentCheckStaticFactoryMethodTestGenerator(solver, reporter, visitReporter, nomenclatureFactory, valueFactory)
+        new AssignmentCheckStaticFactoryMethodTestGenerator(solver, reporter, visitReporter, nomenclatureFactory, valueFactory, softAssertions)
     }
 }

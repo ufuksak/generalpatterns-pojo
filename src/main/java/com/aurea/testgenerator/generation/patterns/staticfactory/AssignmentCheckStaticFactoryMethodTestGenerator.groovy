@@ -7,6 +7,7 @@ import com.aurea.testgenerator.generation.AbstractMethodTestGenerator
 import com.aurea.testgenerator.generation.TestGeneratorError
 import com.aurea.testgenerator.generation.TestGeneratorResult
 import com.aurea.testgenerator.generation.TestType
+import com.aurea.testgenerator.generation.assertions.SoftAssertions
 import com.aurea.testgenerator.generation.assertions.StateChangeAssertionBuilder
 import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.generation.merge.TestNodeMerger
@@ -14,8 +15,8 @@ import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.TestMethodNomenclature
 import com.aurea.testgenerator.generation.patterns.pojos.Pojos
 import com.aurea.testgenerator.generation.source.Imports
-import com.aurea.testgenerator.reporting.TestGeneratorResultReporter
 import com.aurea.testgenerator.reporting.CoverageReporter
+import com.aurea.testgenerator.reporting.TestGeneratorResultReporter
 import com.aurea.testgenerator.source.Unit
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
@@ -43,15 +44,18 @@ import org.springframework.stereotype.Component
 class AssignmentCheckStaticFactoryMethodTestGenerator extends AbstractMethodTestGenerator {
 
     ValueFactory valueFactory
+    SoftAssertions softAssertions
 
     @Autowired
     AssignmentCheckStaticFactoryMethodTestGenerator(JavaParserFacade solver,
                                                     TestGeneratorResultReporter reporter,
                                                     CoverageReporter visitReporter,
                                                     NomenclatureFactory nomenclatures,
-                                                    ValueFactory valueFactory) {
+                                                    ValueFactory valueFactory,
+                                                    SoftAssertions softAssertions) {
         super(solver, reporter, visitReporter, nomenclatures)
         this.valueFactory = valueFactory
+        this.softAssertions = softAssertions
     }
 
     @Override
@@ -60,11 +64,20 @@ class AssignmentCheckStaticFactoryMethodTestGenerator extends AbstractMethodTest
 
         try {
             Expression returnExpr = method.findAll(ReturnStmt).first().expression.get()
-            StateChangeAssertionBuilder assertionBuilder = new StateChangeAssertionBuilder(returnExpr, method, solver, result)
-            List<DependableNode<Statement>> assertions = assertionBuilder.buildAssertions()
-            if (assertions) {
+            NameExpr testInstanceName = new NameExpr("resultingInstance")
+            StateChangeAssertionBuilder assertionBuilder = new StateChangeAssertionBuilder(
+                    returnExpr,
+                    testInstanceName,
+                    method,
+                    solver)
+
+            TestMethodNomenclature testMethodNomenclature = nomenclatures.getTestMethodNomenclature(unitUnderTest.javaClass)
+            String testName = testMethodNomenclature.requestTestMethodName(getType(), method)
+
+            List<DependableNode<Statement>> assertionStatements = softAssertions.softly(unitUnderTest.javaClass, testName, assertionBuilder)
+            if (assertionStatements) {
                 DependableNode<MethodDeclaration> testMethod = new DependableNode<>()
-                TestNodeMerger.appendDependencies(testMethod, assertions)
+                TestNodeMerger.appendDependencies(testMethod, assertionStatements)
 
                 List<DependableNode<VariableDeclarationExpr>> variables = StreamEx.of(method.parameters).map { p ->
                     valueFactory.getVariable(p.nameAsString, p.type).orElseThrow {
@@ -84,17 +97,15 @@ class AssignmentCheckStaticFactoryMethodTestGenerator extends AbstractMethodTest
                         .buildMethodInvocation(method)
 
                 methodCall.ifPresent { methodCallExpr ->
-                    TestMethodNomenclature testMethodNomenclature = nomenclatures.getTestMethodNomenclature(unitUnderTest.javaClass)
                     TestNodeMerger.appendDependencies(testMethod, methodCallExpr)
-                    String testName = testMethodNomenclature.requestTestMethodName(getType(), method)
                     String testCode = """
                     @Test
                     public void ${testName}() throws Exception {
                         ${variableStatements.join(System.lineSeparator())}
         
-                        ${method.type} $returnExpr = ${methodCallExpr.node};
+                        ${method.type} $testInstanceName = ${methodCallExpr.node};
                         
-                        ${assertions.collect { it.node }.join(System.lineSeparator())}
+                        ${assertionStatements.collect { it.node }.join(System.lineSeparator())}
                     }
                     """
 
@@ -139,7 +150,7 @@ class AssignmentCheckStaticFactoryMethodTestGenerator extends AbstractMethodTest
     }
 
     private static boolean hasOnlySetterCalls(MethodDeclaration method) {
-        boolean hasNonSetterCalls = method.findAll(MethodCallExpr).any { it -> !Pojos.isSetterCall(it)}
+        boolean hasNonSetterCalls = method.findAll(MethodCallExpr).any { it -> !Pojos.isSetterCall(it) }
         !hasNonSetterCalls
     }
 

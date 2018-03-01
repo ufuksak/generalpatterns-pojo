@@ -51,8 +51,8 @@ class ArbitraryReferenceTypeFactory implements ReferenceTypeFactory {
             ResolvedType keyType
             ResolvedType valueType
             if (typeParameters.size() != 2) {
-                keyType = Types.tryResolve(Types.OBJECT).get()
-                valueType = Types.tryResolve(Types.OBJECT).get()
+                keyType = Resolution.tryResolve(Types.OBJECT).get()
+                valueType = Resolution.tryResolve(Types.OBJECT).get()
             } else {
                 keyType = typeParameters[0].b
                 valueType = typeParameters[1].b

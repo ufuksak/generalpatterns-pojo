@@ -270,59 +270,5 @@ class Types {
         type
     }
 
-    static <T> Optional<T> tryResolve(Resolvable<T> resolvable) {
-        try {
-            return Optional.ofNullable(resolvable.resolve())
-        } catch (Exception e) {
-            return Optional.empty()
-        }
-    }
 
-    static Optional<ResolvedType> tryResolve(Type type) {
-        try {
-            return Optional.ofNullable(type.resolve())
-        } catch (Exception e) {
-            return Optional.empty()
-        }
-    }
-
-    static Optional<ResolvedType> tryCalculateResolvedType(Expression expression) {
-        try {
-            return Optional.ofNullable(expression.calculateResolvedType())
-        } catch (Exception e) {
-            return Optional.empty()
-        }
-    }
-
-    static Optional<ResolvedType> tryGetType(ResolvedFieldDeclaration field) {
-        try {
-            return Optional.ofNullable(field.getType())
-        } catch (Exception e) {
-            return Optional.empty()
-        }
-    }
-
-    static Optional<ResolvedMethodDeclaration> tryResolve(MethodCallExpr methodCall) {
-        try {
-            return Optional.ofNullable(methodCall.resolveInvokedMethod())
-        } catch (Exception e) {
-            return Optional.empty()
-        }
-    }
-
-    static SymbolReference<? extends ResolvedValueDeclaration> trySolveSymbolInType(SymbolSolver symbolSolver, ResolvedTypeDeclaration typeDeclaration, String name) {
-        try {
-            return symbolSolver.solveSymbolInType(typeDeclaration, name)
-        } catch (Exception e) {
-            return SymbolReference.unsolved(ResolvedValueDeclaration)
-        }
-    }
-
-    static SymbolReference<? extends ResolvedValueDeclaration> trySolve(JavaParserFacade solver, SimpleName name) {
-        try {
-            return solver.solve(name)
-        } catch (Exception e) {
-            return SymbolReference.unsolved(ResolvedValueDeclaration)
-        }
-    }
 }

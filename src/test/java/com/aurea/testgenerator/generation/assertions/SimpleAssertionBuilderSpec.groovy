@@ -13,9 +13,9 @@ import static com.github.javaparser.JavaParser.parseExpression
 import static com.github.javaparser.JavaParser.parseType
 import static org.assertj.core.api.Assertions.assertThat
 
-class AssertionBuilderSpec extends TestUnitSpec {
+class SimpleAssertionBuilderSpec extends TestUnitSpec {
 
-    AssertionBuilder builder = new AssertionBuilder()
+    SimpleAssertionBuilder builder = new SimpleAssertionBuilder()
 
     @Unroll
     def "correctly builds assertions for char/byte/long/short/int primitives"() {
@@ -23,7 +23,7 @@ class AssertionBuilderSpec extends TestUnitSpec {
         List<DependableNode<Statement>> statements = builder.with(wrapWithCompilationUnit(type),
                 parseExpression(actual),
                 parseExpression(expected)
-        ).build()
+        ).statements
 
         then:
         statements.size() == 1
@@ -56,7 +56,7 @@ class AssertionBuilderSpec extends TestUnitSpec {
                 wrapWithCompilationUnit(PrimitiveType.booleanType()),
                 parseExpression(actual),
                 parseExpression(expected)
-        ).build()
+        ).statements
 
         then:
         statements.size() == 1
@@ -77,7 +77,7 @@ class AssertionBuilderSpec extends TestUnitSpec {
                 wrapWithCompilationUnit(parseType('Boolean')),
                 parseExpression(actual),
                 parseExpression(expected)
-        ).build()
+        ).statements
 
         then:
         statements.size() == 1
@@ -97,7 +97,7 @@ class AssertionBuilderSpec extends TestUnitSpec {
         List<DependableNode<Statement>> statements = builder.with(wrapWithCompilationUnit(type),
                 parseExpression(actual),
                 parseExpression(expected)
-        ).build()
+        ).statements
 
         then:
         statements.size() == 1
@@ -106,13 +106,13 @@ class AssertionBuilderSpec extends TestUnitSpec {
         statements.first().dependency.imports.contains Imports.ASSERTJ_OFFSET
 
         where:
-        actual   | expected | offset                                        | type
-        "0.1f"   | "0.2f"   | AssertionBuilder.FLOATING_POINT_OFFSET_FLOAT  | PrimitiveType.floatType()
-        "0.001f" | "2.3f"   | AssertionBuilder.FLOATING_POINT_OFFSET_FLOAT  | parseType('Float')
-        "0.001f" | "2.3f"   | AssertionBuilder.FLOATING_POINT_OFFSET_FLOAT  | parseType('java.lang.Float')
-        "0.001"  | "2.3"    | AssertionBuilder.FLOATING_POINT_OFFSET_DOUBLE | PrimitiveType.doubleType()
-        "0.001"  | "2.3"    | AssertionBuilder.FLOATING_POINT_OFFSET_DOUBLE | parseType('Double')
-        "0.001"  | "2.3"    | AssertionBuilder.FLOATING_POINT_OFFSET_DOUBLE | parseType('java.lang.Double')
+        actual   | expected | offset                                              | type
+        "0.1f"   | "0.2f"   | SimpleAssertionBuilder.FLOATING_POINT_OFFSET_FLOAT  | PrimitiveType.floatType()
+        "0.001f" | "2.3f"   | SimpleAssertionBuilder.FLOATING_POINT_OFFSET_FLOAT  | parseType('Float')
+        "0.001f" | "2.3f"   | SimpleAssertionBuilder.FLOATING_POINT_OFFSET_FLOAT  | parseType('java.lang.Float')
+        "0.001"  | "2.3"    | SimpleAssertionBuilder.FLOATING_POINT_OFFSET_DOUBLE | PrimitiveType.doubleType()
+        "0.001"  | "2.3"    | SimpleAssertionBuilder.FLOATING_POINT_OFFSET_DOUBLE | parseType('Double')
+        "0.001"  | "2.3"    | SimpleAssertionBuilder.FLOATING_POINT_OFFSET_DOUBLE | parseType('java.lang.Double')
     }
 
     def "soft assertions are properly grouped"() {
@@ -126,40 +126,31 @@ class AssertionBuilderSpec extends TestUnitSpec {
                 wrapWithCompilationUnit(PrimitiveType.floatType()),
                 parseExpression("3.4"),
                 parseExpression("3.4"))
-                .softly(true)
-                .build()
+                .statements
 
         then:
-        statements.size() == 1 + 2 + 1
+        statements.size() == 2
         Set<ImportDeclaration> imports = StreamEx.of(statements)
                                                  .flatMap { it.dependency.imports.stream() }
                                                  .toSet()
-        imports.containsAll([Imports.SOFT_ASSERTIONS,
-                             Imports.ASSERTJ_OFFSET,
+        imports.containsAll([Imports.ASSERTJ_OFFSET,
                              Imports.ASSERTJ_ASSERTTHAT])
         assertThat(statements.collect { it.node }
                              .join(System.lineSeparator()))
                 .isEqualToIgnoringWhitespace("""
-            SoftAssertions sa = new SoftAssertions();
-            sa.assertThat(3).isEqualTo(2 + 1);
-            sa.assertThat(3.4).isCloseTo(3.4, Offset.offset(${AssertionBuilder.FLOATING_POINT_OFFSET_FLOAT}));
-            sa.assertAll();
+            assertThat(3).isEqualTo(2 + 1);
+            assertThat(3.4).isCloseTo(3.4, Offset.offset(${SimpleAssertionBuilder.FLOATING_POINT_OFFSET_FLOAT}));
         """)
-    }
-
-    def "no assertions added - no statements generated"() {
-        expect:
-        builder.softly(true).build().empty
     }
 
     def "asserting strings work"() {
         when:
         List<DependableNode<Statement>> statements = builder
                 .with(
-                wrapWithCompilationUnit(parseType("String")),
-                parseExpression("\"ABC\""),
-                parseExpression("\"AAB\""))
-                .build()
+                    wrapWithCompilationUnit(parseType("String")),
+                    parseExpression("\"ABC\""),
+                    parseExpression("\"AAB\""))
+                .statements
 
         then:
         statements.size() == 1
@@ -173,7 +164,7 @@ class AssertionBuilderSpec extends TestUnitSpec {
         builder.with(wrapWithCompilationUnit(type),
                 parseExpression(value),
                 parseExpression(value))
-        List<DependableNode<Statement>> statements = builder.build()
+        List<DependableNode<Statement>> statements = builder.statements
 
         then:
         statements.size() == 1

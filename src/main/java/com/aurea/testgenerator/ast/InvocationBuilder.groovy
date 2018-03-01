@@ -2,7 +2,7 @@ package com.aurea.testgenerator.ast
 
 import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.generation.merge.TestNodeMerger
-import com.aurea.testgenerator.value.Types
+import com.aurea.testgenerator.value.Resolution
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.NodeList
@@ -116,7 +116,7 @@ class InvocationBuilder {
         }
 
         cd.parameters.collect { parameter ->
-            Optional<ResolvedType> resolvedType = Types.tryResolve(parameter.type)
+            Optional<ResolvedType> resolvedType = Resolution.tryResolve(parameter.type)
             resolvedType.flatMap { factory.getExpression(it)}.orElseThrow {
                 new IllegalArgumentException("Failed to create expression for ${parameter} of ${cd}")
             }

@@ -1,6 +1,6 @@
 package com.aurea.testgenerator.generation.patterns.pojos
 
-import com.aurea.testgenerator.value.Types
+import com.aurea.testgenerator.value.Resolution
 import com.github.javaparser.ast.AccessSpecifier
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
@@ -99,7 +99,7 @@ class Pojos {
 
     private static StreamEx<ResolvedFieldDeclaration> resolvedFields(ClassOrInterfaceDeclaration coid) {
         StreamEx.of(coid.fields)
-                .map { Types.tryResolve(it) }
+                .map { Resolution.tryResolve(it) }
                 .filter { it.present }
                 .map { it.get() }
     }
@@ -127,7 +127,7 @@ class Pojos {
     }
 
     static boolean isSetterCall(MethodCallExpr methodCall) {
-        Types.tryResolve(methodCall).map {
+        Resolution.tryResolve(methodCall).map {
             isSetterSignature(it)
         }.orElse(false)
     }

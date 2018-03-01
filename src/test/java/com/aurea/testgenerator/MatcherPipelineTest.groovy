@@ -6,6 +6,7 @@ import com.aurea.testgenerator.coverage.NoCoverageService
 import com.aurea.testgenerator.extensions.Extensions
 import com.aurea.testgenerator.generation.TestGenerator
 import com.aurea.testgenerator.generation.UnitTestGenerator
+import com.aurea.testgenerator.generation.assertions.SoftAssertions
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.StandardTestClassNomenclatureFactory
 import com.aurea.testgenerator.reporting.CoverageReporter
@@ -50,6 +51,7 @@ abstract class MatcherPipelineTest extends Specification {
     TestGeneratorResultReporter reporter = new TestGeneratorResultReporter(mock(ApplicationEventPublisher))
     CoverageReporter visitReporter = new CoverageReporter(mock(ApplicationEventPublisher))
     NomenclatureFactory nomenclatureFactory = new NomenclatureFactory(new StandardTestClassNomenclatureFactory())
+    SoftAssertions softAssertions = new SoftAssertions(nomenclatureFactory)
 
     void setupSpec() {
         Extensions.enable()

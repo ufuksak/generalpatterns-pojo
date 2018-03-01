@@ -1,72 +1,62 @@
 package com.aurea.testgenerator.generation.assertions
 
-import com.aurea.testgenerator.ast.FieldAssignments
-import com.aurea.testgenerator.generation.TestGeneratorErrorContainer
+import com.aurea.testgenerator.ast.FieldAccessBuilder
+import com.aurea.testgenerator.ast.FieldAccessResult
 import com.aurea.testgenerator.generation.ast.DependableNode
-import com.aurea.testgenerator.generation.patterns.pojos.Pojos
-import com.github.javaparser.ast.Node
-import com.github.javaparser.ast.expr.AssignExpr
+import com.aurea.testgenerator.generation.ast.MethodStateChangeVisitor
+import com.aurea.testgenerator.generation.ast.ArgumentStack
+import com.aurea.testgenerator.generation.ast.StateChangeVisitResult
+import com.aurea.testgenerator.generation.ast.StateChangeVisitResultType
+import com.aurea.testgenerator.generation.ast.StateChangeVisitor
+import com.aurea.testgenerator.value.Resolution
+import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.MethodCallExpr
-import com.github.javaparser.ast.expr.SimpleName
-import com.github.javaparser.ast.stmt.Statement
+import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
-import one.util.streamex.StreamEx
+import groovy.util.logging.Log4j2
 
-import java.util.function.BinaryOperator
+import static com.aurea.testgenerator.generation.ast.StateChangeFunctions.onlyLastChanges
 
-class StateChangeAssertionBuilder {
+@Log4j2
+class StateChangeAssertionBuilder extends SimpleAssertionBuilder {
 
-    Expression trackedExpression
-    Node context
+    Expression verifiedExpression
     JavaParserFacade solver
-    TestGeneratorErrorContainer errorContainer
+    StateChangeVisitor visitor
 
-    StateChangeAssertionBuilder(Expression trackedExpression, Node context,
-                                JavaParserFacade solver,
-                                TestGeneratorErrorContainer errorContainer) {
-        this.trackedExpression = trackedExpression
-        this.context = context
+    StateChangeAssertionBuilder(Expression trackedExpression,
+                                Expression verifiedExpression,
+                                MethodDeclaration context,
+                                JavaParserFacade solver) {
+        this.verifiedExpression = verifiedExpression
         this.solver = solver
-        this.errorContainer = errorContainer
-    }
-    
-    List<DependableNode<Statement>> buildAssertions() {
-        AssertionBuilder builder = new AssertionBuilder()
-        AssignAssertionBuilder assertionBuilder = new AssignAssertionBuilder(trackedExpression, solver, errorContainer, builder)
-        Collection<AssignExpr> assignExprs = findAssignments()
-        assertionBuilder.withAssertions(assignExprs)
-
-        SetterAssertionBuilder setterAssertionBuilder = new SetterAssertionBuilder(trackedExpression, solver, errorContainer, builder)
-        Collection<MethodCallExpr> setterCalls = findSetterCalls()
-        setterAssertionBuilder.withAssertions(setterCalls)
-        builder.softly((assignExprs.size() + setterCalls.size()) > 1).build()
+        this.visitor = new MethodStateChangeVisitor(solver, context, trackedExpression, new ArgumentStack())
     }
 
-    private Collection<AssignExpr> findAssignments() {
-        List<AssignExpr> assignExprs = context.findAll(AssignExpr)
-        Collection<AssignExpr> onlyLastAssignExprs = FieldAssignments.findLastAssignExpressionsByField(assignExprs)
-        Collection<AssignExpr> targetingExprAssignments = onlyLastAssignExprs.findAll {
-            it.target.fieldAccessExpr && it.target.asFieldAccessExpr().scope == trackedExpression
+    @Override
+    List<DependableNode<MethodCallExpr>> getAssertions() {
+        StateChangeVisitResult stateChangeVisitResult = visitor.visit()
+        StateChangeVisitResult lastStateChangeVisitResult = onlyLastChanges(stateChangeVisitResult)
+        if (lastStateChangeVisitResult.failed) {
+            throw lastStateChangeVisitResult.error
         }
-        targetingExprAssignments
+
+        FieldAccessBuilder fieldAccessBuilder = new FieldAccessBuilder(verifiedExpression)
+        lastStateChangeVisitResult.stateChanges
+                              .findAll { it.type != StateChangeVisitResultType.NONCOMPREHENSIVE }
+                              .each { stateChange ->
+            ResolvedFieldDeclaration resolvedField = stateChange.resolvedField
+            FieldAccessResult fieldAccessResult = fieldAccessBuilder.build(resolvedField)
+            if (fieldAccessResult.success) {
+                Resolution.tryGetType(resolvedField).ifPresent { fieldType ->
+                    with(fieldType, fieldAccessResult.expression, stateChange.assignment)
+                }
+            } else if (fieldAccessResult.failed) {
+                throw fieldAccessResult.error
+            }
+            log.debug "Field $resolvedField is not accessible from tests, skipping assertion"
+        }
+        return this.@assertions
     }
-
-    private Collection<MethodCallExpr> findSetterCalls() {
-        List<MethodCallExpr> setterCallsOnExpression = context
-                .findAll(MethodCallExpr)
-                .findAll { it.scope.present && it.scope.get() == trackedExpression && Pojos.isSetterCall(it) }
-
-        findLastSetterCalls(setterCallsOnExpression)
-    }
-
-    private static Collection<MethodCallExpr> findLastSetterCalls(Collection<MethodCallExpr> methodCalls) {
-        Map<SimpleName, MethodCallExpr> mapByName = StreamEx.of(methodCalls)
-                                                            .toMap(
-                { it.name },
-                { it },
-                { mce1, mce2 -> mce2 } as BinaryOperator<MethodCallExpr>)
-        mapByName.values()
-    }
-
 }

@@ -12,6 +12,7 @@ class NomenclatureFactory {
 
     Map<JavaClass, TestMethodNomenclature> testMethodNomenclatures = new ConcurrentHashMap<>()
     Map<JavaClass, TestClassNomenclature> testClassNomenclatures = new ConcurrentHashMap<>()
+    Map<JavaClass, Map<String, TestVariableNomenclature>> testVariablesNomenclatures = new ConcurrentHashMap<>()
 
     final TestClassNomenclatureFactory testClassNomenclatureFactory
 
@@ -22,6 +23,13 @@ class NomenclatureFactory {
 
     TestMethodNomenclature getTestMethodNomenclature(JavaClass javaClass) {
         testMethodNomenclatures.computeIfAbsent(javaClass, { new TestMethodNomenclature() })
+    }
+
+    TestVariableNomenclature getVariableNomenclature(JavaClass javaClass, String methodName) {
+        Map<String, TestVariableNomenclature> variablesPerMethod = testVariablesNomenclatures.computeIfAbsent(javaClass, {
+            new HashMap<>()
+        })
+        variablesPerMethod.computeIfAbsent(methodName, { new StandardVariableNomenclature() })
     }
 
     TestClassNomenclature getTestClassNomenclature(JavaClass javaClass) {

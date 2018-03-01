@@ -1,6 +1,6 @@
 package com.aurea.testgenerator.ast
 
-import com.aurea.testgenerator.value.Types
+import com.aurea.testgenerator.value.Resolution
 import com.github.javaparser.ast.body.CallableDeclaration
 import com.github.javaparser.ast.body.TypeDeclaration
 import com.github.javaparser.ast.expr.SimpleName
@@ -32,18 +32,18 @@ class FieldResolver {
                     TypeDeclaration typeDeclaration = maybeType.get()
                     Optional<? extends ResolvedTypeDeclaration> resolvedType = Optional.empty()
                     if (typeDeclaration.classOrInterfaceDeclaration) {
-                        resolvedType = Types.tryResolve(typeDeclaration.asClassOrInterfaceDeclaration())
+                        resolvedType = Resolution.tryResolve(typeDeclaration.asClassOrInterfaceDeclaration())
                     } else if (typeDeclaration.enumDeclaration) {
-                        resolvedType = Types.tryResolve(typeDeclaration.asEnumDeclaration())
+                        resolvedType = Resolution.tryResolve(typeDeclaration.asEnumDeclaration())
                     }
                     if (resolvedType.present) {
                         SymbolReference<? extends ResolvedValueDeclaration> resolvedValueDeclaration =
-                                Types.trySolveSymbolInType(solver.symbolSolver, resolvedType.get(), name.identifier)
+                                Resolution.trySolveSymbolInType(solver.symbolSolver, resolvedType.get(), name.identifier)
                         return asSolvedField(name, resolvedValueDeclaration)
                     }
                 }
             }
-            SymbolReference<? extends ResolvedValueDeclaration> reference = Types.trySolve(solver, name)
+            SymbolReference<? extends ResolvedValueDeclaration> reference = Resolution.trySolve(solver, name)
             return asSolvedField(name, reference)
         }
         return Optional.empty()

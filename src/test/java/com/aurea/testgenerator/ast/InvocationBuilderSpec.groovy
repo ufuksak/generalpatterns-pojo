@@ -22,10 +22,6 @@ class InvocationBuilderSpec extends TestUnitSpec {
 
     InvocationBuilder builder
 
-    def setupSpec() {
-        Extensions.enable()
-    }
-
     def setup() {
         ReferenceTypeFactory typesFactory = new ArbitraryReferenceTypeFactory()
         PrimitiveValueFactory primitiveValueFactory = new ArbitraryPrimitiveValuesFactory()
