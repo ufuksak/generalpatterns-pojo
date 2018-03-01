@@ -5,8 +5,8 @@ apply plugin: 'maven-publish'
 publishing {
     publications {
         maven(MavenPublication) {
-            groupId 'com.aurea.bigcode'
-            artifactId 'bigcode'
+            groupId 'com.aurea.aut'
+            artifactId 'general-patterns'
             version version
 
             from components.java

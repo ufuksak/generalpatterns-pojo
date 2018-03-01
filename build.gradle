@@ -1,4 +1,4 @@
-group 'com.aurea.bigcode'
+group 'com.aurea.aut'
 
 buildscript {
     ext { springBootVersion = '1.5.9.RELEASE' }
