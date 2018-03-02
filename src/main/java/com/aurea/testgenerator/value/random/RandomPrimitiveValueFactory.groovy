@@ -26,6 +26,9 @@ import static com.github.javaparser.ast.type.PrimitiveType.Primitive.SHORT
 
 @Component
 class RandomPrimitiveValueFactory implements PrimitiveValueFactory {
+
+    private static final int READABILITY_BOUND = 10_000
+
     @Override
     DependableNode<Expression> get(PrimitiveType type) {
         switch (type.getType()) {
@@ -34,13 +37,13 @@ class RandomPrimitiveValueFactory implements PrimitiveValueFactory {
             case CHAR:
                 return DependableNode.from(new CharLiteralExpr(RandomStringUtils.randomAlphabetic(1)))
             case BYTE:
-                CastExpr castExpr = new CastExpr(PrimitiveType.byteType(), new IntegerLiteralExpr(nextInt(Byte.MIN_VALUE, Byte.MAX_VALUE)))
+                CastExpr castExpr = new CastExpr(PrimitiveType.byteType(), new IntegerLiteralExpr(nextInt(Byte.MIN_VALUE, Byte.MAX_VALUE) % READABILITY_BOUND))
                 return DependableNode.from(castExpr)
             case SHORT:
-                CastExpr castExpr = new CastExpr(PrimitiveType.shortType(), new IntegerLiteralExpr(nextInt(Short.MIN_VALUE, Short.MAX_VALUE)))
+                CastExpr castExpr = new CastExpr(PrimitiveType.shortType(), new IntegerLiteralExpr(nextInt(Short.MIN_VALUE, Short.MAX_VALUE) % READABILITY_BOUND))
                 return DependableNode.from(castExpr)
             case INT:
-                return DependableNode.from(new IntegerLiteralExpr(RandomUtils.nextInt()))
+                return DependableNode.from(new IntegerLiteralExpr(RandomUtils.nextInt() % READABILITY_BOUND))
             case LONG:
                 return DependableNode.from(new LongLiteralExpr(RandomUtils.nextLong().toString() + "L"))
             case FLOAT:
@@ -58,13 +61,13 @@ class RandomPrimitiveValueFactory implements PrimitiveValueFactory {
         } else if (type == ResolvedPrimitiveType.CHAR) {
             return DependableNode.from(new CharLiteralExpr(RandomStringUtils.randomAlphabetic(1)))
         } else if (type == ResolvedPrimitiveType.BYTE) {
-            CastExpr castExpr = new CastExpr(PrimitiveType.byteType(), new IntegerLiteralExpr(nextInt(Byte.MIN_VALUE, Byte.MAX_VALUE)))
+            CastExpr castExpr = new CastExpr(PrimitiveType.byteType(), new IntegerLiteralExpr(nextInt(Byte.MIN_VALUE, Byte.MAX_VALUE) % READABILITY_BOUND))
             return DependableNode.from(castExpr)
         } else if (type == ResolvedPrimitiveType.SHORT) {
-            CastExpr castExpr = new CastExpr(PrimitiveType.shortType(), new IntegerLiteralExpr(nextInt(Short.MIN_VALUE, Short.MAX_VALUE)))
+            CastExpr castExpr = new CastExpr(PrimitiveType.shortType(), new IntegerLiteralExpr(nextInt(Short.MIN_VALUE, Short.MAX_VALUE) % READABILITY_BOUND))
             return DependableNode.from(castExpr)
         } else if (type == ResolvedPrimitiveType.INT) {
-            return DependableNode.from(new IntegerLiteralExpr(RandomUtils.nextInt()))
+            return DependableNode.from(new IntegerLiteralExpr(RandomUtils.nextInt() % READABILITY_BOUND))
         } else if (type == ResolvedPrimitiveType.LONG) {
             return DependableNode.from(new LongLiteralExpr(RandomUtils.nextLong().toString() + "L"))
         } else if (type == ResolvedPrimitiveType.FLOAT) {

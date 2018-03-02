@@ -81,7 +81,7 @@ class AssignmentCheckStaticFactoryMethodTestGenerator extends AbstractMethodTest
 
                 List<DependableNode<VariableDeclarationExpr>> variables = StreamEx.of(method.parameters).map { p ->
                     valueFactory.getVariable(p.nameAsString, p.type).orElseThrow {
-                        throw new TestGeneratorError("Failed to build variable for parameter $p of $method")
+                        new TestGeneratorError("Failed to build variable for parameter $p of $method")
                     }
                 }.toList()
                 List<Statement> variableStatements = variables.collect { new ExpressionStmt(it.node) }

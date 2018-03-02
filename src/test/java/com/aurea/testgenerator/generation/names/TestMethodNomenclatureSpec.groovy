@@ -13,7 +13,7 @@ class TestMethodNomenclatureSpec extends Specification {
         setup:
         List<ConstructorDeclaration> constructors = getConstructors """
         class Foo {
-            foo() {}
+            Foo() {}
         }
         """
 
@@ -22,15 +22,15 @@ class TestMethodNomenclatureSpec extends Specification {
                 constructors.first())
 
         then:
-        name == "test_foo_OnSecondCall_CreateDifferentInstance"
+        name == "test_Foo_OnSecondCall_CreateDifferentInstance"
     }
 
     def "two constructors"() {
         setup:
         List<ConstructorDeclaration> constructors = getConstructors """
         class Foo {
-            foo() {}
-            foo(int i) {}
+            Foo() {}
+            Foo(int i) {}
         }
         """
 
@@ -41,16 +41,16 @@ class TestMethodNomenclatureSpec extends Specification {
                 constructors[1])
 
         then:
-        noArg == 'test_foo_OnSecondCall_CreateDifferentInstance'
-        arg == 'test_fooWithOneArgument_OnSecondCall_CreateDifferentInstance'
+        noArg == 'test_Foo_OnSecondCall_CreateDifferentInstance'
+        arg == 'test_FooWithOneArgument_OnSecondCall_CreateDifferentInstance'
     }
 
     def "two constructors with same number of arguments"() {
         setup:
         List<ConstructorDeclaration> constructors = getConstructors """
         class Foo {
-            foo(boolean f) {}
-            foo(int i) {}
+            Foo(boolean f) {}
+            Foo(int i) {}
         }
         """
 
@@ -61,16 +61,16 @@ class TestMethodNomenclatureSpec extends Specification {
                 constructors[1])
 
         then:
-        boolArg == 'test_foo_OnSecondCall_CreateDifferentInstance'
-        intArg == 'test_fooWithOneArgument_OnSecondCall_CreateDifferentInstance'
+        boolArg == 'test_Foo_OnSecondCall_CreateDifferentInstance'
+        intArg == 'test_FooWithOneArgument_OnSecondCall_CreateDifferentInstance'
     }
 
     def "constructors with array argument"() {
         setup:
         List<ConstructorDeclaration> constructors = getConstructors """
         class Foo {
-            foo(int[] arr) {}
-            foo(double[] arr) {}
+            Foo(int[] arr) {}
+            Foo(double[] arr) {}
         }
         """
 
@@ -81,8 +81,8 @@ class TestMethodNomenclatureSpec extends Specification {
                 constructors[1])
 
         then:
-        intArrayArg == 'test_foo_OnSecondCall_CreateDifferentInstance'
-        doubleArrayArg == 'test_fooWithOneArgument_OnSecondCall_CreateDifferentInstance'
+        intArrayArg == 'test_Foo_OnSecondCall_CreateDifferentInstance'
+        doubleArrayArg == 'test_FooWithOneArgument_OnSecondCall_CreateDifferentInstance'
 
     }
 

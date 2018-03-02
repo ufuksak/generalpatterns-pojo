@@ -43,21 +43,33 @@ class RandomJavaLangTypesFactory implements ReferenceTypeFactory {
         }
         if (Types.isList(type) || Types.isCollection(type) || Types.isIterable(type)) {
             Optional<DependableNode<Expression>> componentValue = getCollectionComponentValue(type)
-            return componentValue.map {
+            DependableNode<Expression> expression = componentValue.map {
                 it.dependency.imports << Imports.COLLECTIONS
                 Expression component = it.node
                 it.node = JavaParser.parseExpression("Collections.singletonList($component)")
                 it
+            }.orElseGet {
+                DependableNode<Expression> listOfObject = new DependableNode<>()
+                listOfObject.dependency.imports << Imports.COLLECTIONS
+                listOfObject.node = JavaParser.parseExpression("Collections.singletonList(new Object())")
+                listOfObject
             }
+            return Optional.of(expression)
         }
         if (Types.isSet(type)) {
             Optional<DependableNode<Expression>> componentValue = getCollectionComponentValue(type)
-            return componentValue.map {
+            DependableNode<Expression> expression = componentValue.map {
                 it.dependency.imports << Imports.COLLECTIONS
                 Expression component = it.node
                 it.node = JavaParser.parseExpression("Collections.singleton($component)")
                 it
+            }.orElseGet {
+                DependableNode<Expression> setOfObject = new DependableNode<>()
+                setOfObject.dependency.imports << Imports.COLLECTIONS
+                setOfObject.node = JavaParser.parseExpression("Collections.singleton(new Object())")
+                setOfObject
             }
+            return Optional.of(expression)
         }
         if (Types.isMap(type)) {
             List<Pair<ResolvedTypeParameterDeclaration, ResolvedType>> typeParameters = type.getTypeParametersMap()
