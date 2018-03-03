@@ -2,7 +2,7 @@ group 'com.aurea.aut'
 
 buildscript {
     ext { springBootVersion = '1.5.9.RELEASE' }
-    
+
     repositories {
         maven { url 'https://repo.spring.io/plugins-snapshot' }
         mavenCentral()
@@ -29,9 +29,9 @@ apply from: "${rootDir}/dependencies.gradle"
 apply from: "${rootDir}/publishing.gradle"
 
 test {
-    ignoreFailures = true
+    ignoreFailures = !project.hasProperty('ci')
 }
-                          
+
 task createWrapper(type: Wrapper) {
     gradleVersion = "4.5.1"
 }

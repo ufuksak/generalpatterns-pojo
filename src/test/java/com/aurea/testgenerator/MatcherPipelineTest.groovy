@@ -50,7 +50,7 @@ abstract class MatcherPipelineTest extends Specification {
             new ArbitraryPrimitiveValuesFactory())
     TestGeneratorResultReporter reporter = new TestGeneratorResultReporter(mock(ApplicationEventPublisher))
     CoverageReporter visitReporter = new CoverageReporter(mock(ApplicationEventPublisher))
-    NomenclatureFactory nomenclatureFactory = new NomenclatureFactory(new StandardTestClassNomenclatureFactory())
+    NomenclatureFactory nomenclatureFactory = new NomenclatureFactory(new StandardTestClassNomenclatureFactory(), cfg)
     SoftAssertions softAssertions = new SoftAssertions(nomenclatureFactory)
 
     void setupSpec() {
@@ -61,6 +61,8 @@ abstract class MatcherPipelineTest extends Specification {
         cfg.out = folder.newFolder("test-out").absolutePath
         cfg.src = folder.newFolder("src").absolutePath
         cfg.testSrc = folder.newFolder("test").absolutePath
+        cfg.disableMethodPrefix = false
+        cfg.methodPrefix = "test"
 
         source = new PathUnitSource(new JavaSourceFinder(cfg), cfg, SourceFilters.empty(), getSymbolSolver())
         TestGenerator generator = generator()

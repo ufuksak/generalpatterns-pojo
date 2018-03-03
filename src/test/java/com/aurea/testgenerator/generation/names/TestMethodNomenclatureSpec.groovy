@@ -1,13 +1,20 @@
 package com.aurea.testgenerator.generation.names
 
+import com.aurea.testgenerator.config.ProjectConfiguration
 import com.aurea.testgenerator.generation.patterns.staticfactory.StaticFactoryMethodTypes
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.body.ConstructorDeclaration
 import spock.lang.Specification
 
 class TestMethodNomenclatureSpec extends Specification {
+    static ProjectConfiguration projectConfiguration = new ProjectConfiguration()
+    TestMethodNomenclature nameRepository
 
-    TestMethodNomenclature nameRepository = new TestMethodNomenclature()
+    def setup() {
+        projectConfiguration.disableMethodPrefix = false
+        projectConfiguration.methodPrefix = "test"
+        nameRepository = new TestMethodNomenclature(projectConfiguration)
+    }
 
     def "no arg constructor"() {
         setup:
@@ -85,6 +92,60 @@ class TestMethodNomenclatureSpec extends Specification {
         doubleArrayArg == 'test_FooWithOneArgument_OnSecondCall_CreateDifferentInstance'
 
     }
+
+    def "constructor with custom global prefix"() {
+        setup:
+        projectConfiguration.methodPrefix = "tryThat"
+        List<ConstructorDeclaration> constructors = getConstructors """
+        class Foo {
+            Foo() {}
+        }
+        """
+
+        when:
+        String name = nameRepository.requestTestMethodName(StaticFactoryMethodTypes.DIFFERENT_INSTANCES,
+                constructors.first())
+
+        then:
+        name == "tryThat_Foo_OnSecondCall_CreateDifferentInstance"
+    }
+
+    def "constructor with global prefix disabled"() {
+        setup:
+        projectConfiguration.disableMethodPrefix = true
+        List<ConstructorDeclaration> constructors = getConstructors """
+        class Foo {
+            Foo() {}
+        }
+        """
+
+        when:
+        String name = nameRepository.requestTestMethodName(StaticFactoryMethodTypes.DIFFERENT_INSTANCES,
+                constructors.first())
+
+        then:
+        name == "Foo_OnSecondCall_CreateDifferentInstance"
+    }
+
+
+    def "constructor with custom global prefix provided but disabled"() {
+        setup:
+        projectConfiguration.disableMethodPrefix = true
+        projectConfiguration.methodPrefix = "should"
+        List<ConstructorDeclaration> constructors = getConstructors """
+        class Foo {
+            Foo() {}
+        }
+        """
+
+        when:
+        String name = nameRepository.requestTestMethodName(StaticFactoryMethodTypes.DIFFERENT_INSTANCES,
+                constructors.first())
+
+        then:
+        name == "Foo_OnSecondCall_CreateDifferentInstance"
+    }
+
 
     List<ConstructorDeclaration> getConstructors(String code) {
         JavaParser.parse(code).findAll(ConstructorDeclaration)

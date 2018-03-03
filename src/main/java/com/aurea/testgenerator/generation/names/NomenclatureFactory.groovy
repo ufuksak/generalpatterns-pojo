@@ -1,6 +1,7 @@
 package com.aurea.testgenerator.generation.names
 
 import com.aurea.common.JavaClass
+import com.aurea.testgenerator.config.ProjectConfiguration
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
 
@@ -15,14 +16,16 @@ class NomenclatureFactory {
     Map<JavaClass, Map<String, TestVariableNomenclature>> testVariablesNomenclatures = new ConcurrentHashMap<>()
 
     final TestClassNomenclatureFactory testClassNomenclatureFactory
+    final ProjectConfiguration projectConfiguration
 
     @Autowired
-    NomenclatureFactory(TestClassNomenclatureFactory testClassNomenclatureFactory) {
+    NomenclatureFactory(TestClassNomenclatureFactory testClassNomenclatureFactory, ProjectConfiguration projectConfiguration) {
         this.testClassNomenclatureFactory = testClassNomenclatureFactory
+        this.projectConfiguration = projectConfiguration
     }
 
     TestMethodNomenclature getTestMethodNomenclature(JavaClass javaClass) {
-        testMethodNomenclatures.computeIfAbsent(javaClass, { new TestMethodNomenclature() })
+        testMethodNomenclatures.computeIfAbsent(javaClass, { new TestMethodNomenclature(projectConfiguration) })
     }
 
     TestVariableNomenclature getVariableNomenclature(JavaClass javaClass, String methodName) {

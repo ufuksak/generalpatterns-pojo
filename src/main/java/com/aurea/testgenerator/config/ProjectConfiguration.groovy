@@ -24,6 +24,8 @@ class ProjectConfiguration {
     String testSrc
     String out
     String jacoco
+    String methodPrefix
+    boolean disableMethodPrefix
 
     Path getSrcPath() {
         Paths.get(src)

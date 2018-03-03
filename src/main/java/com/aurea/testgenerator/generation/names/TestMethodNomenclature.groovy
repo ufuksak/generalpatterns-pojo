@@ -2,6 +2,7 @@ package com.aurea.testgenerator.generation.names
 
 import com.aurea.common.ParsingUtils
 import com.aurea.testgenerator.ast.ASTNodeUtils
+import com.aurea.testgenerator.config.ProjectConfiguration
 import com.aurea.testgenerator.generation.TestType
 import com.aurea.testgenerator.generation.patterns.pojos.PojoTestTypes
 import com.aurea.testgenerator.generation.patterns.staticfactory.StaticFactoryMethodTypes
@@ -13,8 +14,6 @@ import one.util.streamex.StreamEx
 import pl.allegro.finance.tradukisto.ValueConverters
 
 class TestMethodNomenclature {
-
-    static final String TEST_NAME_PREFIX = "test"
     static final String TEST_NAME_SPACE = "_"
 
     private static final Map<? extends TestType, String> TEST_METHOD_NAME_SUFFIXES = [
@@ -54,7 +53,12 @@ class TestMethodNomenclature {
             (PojoTestTypes.POJO_TESTER_CONSTRUCTORS): 'validate'
     ].asImmutable()
 
+    final ProjectConfiguration projectConfiguration
     Set<String> takenNames = []
+
+    TestMethodNomenclature(ProjectConfiguration projectConfiguration) {
+        this.projectConfiguration = projectConfiguration
+    }
 
     String createTestMethodName(TestType type, Node context) {
         try {
@@ -79,6 +83,14 @@ class TestMethodNomenclature {
         String testName = createTestMethodName(type, context)
         takenNames << testName
         testName
+    }
+
+    private String addGlobalPrefix(String methodName) {
+        if (!projectConfiguration.disableMethodPrefix) {
+            return [projectConfiguration.methodPrefix, methodName].join(TEST_NAME_SPACE)
+        }
+
+        methodName
     }
 
     class CallableNameRepository {
@@ -124,7 +136,7 @@ class TestMethodNomenclature {
         }
 
         String wrap(String main) {
-            [TEST_NAME_PREFIX, main, suffix].join(TEST_NAME_SPACE)
+            addGlobalPrefix([main, suffix].join(TEST_NAME_SPACE))
         }
     }
 
@@ -141,9 +153,10 @@ class TestMethodNomenclature {
 
         String get() {
             String fullTypeName = ASTNodeUtils.getFullTypeName(typeDeclaration).replace('.', '')
-            String name = [TEST_NAME_PREFIX, prefix, fullTypeName, suffix].join(TEST_NAME_SPACE)
+
+            String name = addGlobalPrefix([prefix, fullTypeName, suffix].join(TEST_NAME_SPACE))
             if (name in takenNames) {
-                name = [TEST_NAME_PREFIX, prefix, fullTypeName, suffix, 'Generated'].join(TEST_NAME_SPACE)
+                name = addGlobalPrefix([prefix, fullTypeName, suffix, 'Generated'].join(TEST_NAME_SPACE))
             }
             name
         }
