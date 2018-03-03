@@ -1,5 +1,6 @@
 package com.aurea.testgenerator.generation
 
+import com.aurea.testgenerator.ast.Callability
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.reporting.TestGeneratorResultReporter
 import com.aurea.testgenerator.reporting.CoverageReporter
@@ -55,7 +56,7 @@ abstract class MethodLevelTestGenerator<T extends CallableDeclaration> implement
     protected abstract VoidVisitorAdapter<JavaParserFacade> createVisitor(Unit unit, List<TestGeneratorResult> results)
 
     protected boolean shouldBeVisited(Unit unit, T callableDeclaration) {
-        true
+        Callability.isCallableFromTests(callableDeclaration)
     }
 
     protected abstract TestGeneratorResult generate(T callableDeclaration, Unit unitUnderTest)

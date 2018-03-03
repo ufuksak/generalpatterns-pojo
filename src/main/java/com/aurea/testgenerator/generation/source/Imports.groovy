@@ -36,6 +36,10 @@ class Imports {
     static final ImportDeclaration POJO_TESTER_ASSERTIONS_POJO_METHODS_FOR = new ImportDeclaration(new Name('pl.pojo.tester.api.assertion.Assertions.assertPojoMethodsFor'), true, false)
     static final ImportDeclaration POJO_TESTER_METHOD = parse('pl.pojo.tester.api.assertion.Method')
 
+    //Singletons
+    static final ImportDeclaration SINGLETON_TESTER = parse('com.aurea.unittest.commons.SingletonTester')
+    static final ImportDeclaration CALLABLE = parse('java.util.concurrent.Callable')
+
 
     static ImportDeclaration parse(String fullClassName) {
         JavaParser.parseImport("import $fullClassName;")
