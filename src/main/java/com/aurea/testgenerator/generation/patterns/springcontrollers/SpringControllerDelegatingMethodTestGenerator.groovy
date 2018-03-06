@@ -1,15 +1,18 @@
 package com.aurea.testgenerator.generation.patterns.springcontrollers
 
-import com.aurea.testgenerator.extensions.AssignExprExtension
 import com.aurea.testgenerator.generation.AbstractMethodTestGenerator
+import com.aurea.testgenerator.generation.TestGenerator
 import com.aurea.testgenerator.generation.TestGeneratorError
 import com.aurea.testgenerator.generation.TestGeneratorResult
 import com.aurea.testgenerator.generation.TestType
 import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
+import com.aurea.testgenerator.generation.names.TestMethodNomenclature
+import com.aurea.testgenerator.generation.source.Imports
 import com.aurea.testgenerator.reporting.CoverageReporter
 import com.aurea.testgenerator.reporting.TestGeneratorResultReporter
 import com.aurea.testgenerator.source.Unit
+import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.Modifier
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.BodyDeclaration
@@ -17,6 +20,7 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.VariableDeclarator
+import com.github.javaparser.ast.expr.AnnotationExpr
 import com.github.javaparser.ast.expr.AssignExpr
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.MethodCallExpr
@@ -25,7 +29,9 @@ import com.github.javaparser.ast.stmt.ExpressionStmt
 import com.github.javaparser.ast.stmt.ReturnStmt
 import com.github.javaparser.ast.stmt.Statement
 import com.github.javaparser.ast.type.ClassOrInterfaceType
+import com.github.javaparser.ast.type.Type
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
+import com.google.common.collect.Sets
 import groovy.util.logging.Log4j2
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
@@ -33,46 +39,210 @@ import org.springframework.stereotype.Component
 @Component
 @Profile("manual")
 @Log4j2
-class SpringControllerDelegatingMethodTestGenerator  extends AbstractMethodTestGenerator {
+class SpringControllerDelegatingMethodTestGenerator  implements TestGenerator {
+    private static final String DEFAULT_ANNOTATION_PROPERTY = "value"
+    static final String PATH_PROPERTY = "path"
+    private static final String REQUEST_MAPPING = "org.springframework.web.bind.annotation.RequestMapping"
+    private static final String GET_MAPPING = "org.springframework.web.bind.annotation.GetMapping"
+    private static final String POST_MAPPING = "org.springframework.web.bind.annotation.PostMapping"
+    private static final String PUT_MAPPING = "org.springframework.web.bind.annotation.PutMapping"
+    private static final String PATCH_MAPPING = "org.springframework.web.bind.annotation.PatchMapping"
+    private static final String DELETE_MAPPING =  "org.springframework.web.bind.annotation.DeleteMapping"
+    private static final Set<String> REQUEST_MAPPING_ANNOTATIONS = Sets.newHashSet(REQUEST_MAPPING,GET_MAPPING,
+            POST_MAPPING,PUT_MAPPING,PATCH_MAPPING,DELETE_MAPPING).asImmutable()
 
-    SpringControllerDelegatingMethodTestGenerator(JavaParserFacade solver, TestGeneratorResultReporter reporter, CoverageReporter visitReporter, NomenclatureFactory nomenclatures) {
-        super(solver, reporter, visitReporter, nomenclatures)
+    private static final String EXPECTED_RESULT = "expectedResult";
+    private static final String INSTANCE_NAME ="controllerInstance";
+    private static final int MAPPING_SUFFIX_LENGTH = 6;
+
+    JavaParserFacade solver
+    TestGeneratorResultReporter reporter
+    CoverageReporter coverageReporter
+    NomenclatureFactory nomenclatures
+
+
+    SpringControllerDelegatingMethodTestGenerator(JavaParserFacade solver, TestGeneratorResultReporter reporter, CoverageReporter coverageReporter, NomenclatureFactory nomenclatures) {
+        this.solver=solver
+        this.reporter=reporter
+        this.coverageReporter=coverageReporter
+        this.nomenclatures= nomenclatures
     }
 
+
     @Override
-    protected TestGeneratorResult generate(MethodDeclaration callableDeclaration, Unit unitUnderTest) {
-        TestGeneratorResult result = new TestGeneratorResult()
-        try{
-            List<FieldDeclaration> targetFields = callableDeclaration.parentNode.get().findAll(FieldDeclaration)
+    Collection<TestGeneratorResult> generate(Unit unit) {
+        List<ClassOrInterfaceDeclaration> classes = unit.cu.findAll(ClassOrInterfaceDeclaration).findAll {
+            !it.interface && isRestController(it)
+        }
+        TestMethodNomenclature testMethodNomenclature = nomenclatures.getTestMethodNomenclature(unit.javaClass)
+
+        List<TestGeneratorResult> tests = []
+        for (ClassOrInterfaceDeclaration classDeclaration : classes) {
+            List<FieldDeclaration> targetFields = classDeclaration.findAll(FieldDeclaration)
             if(targetFields.isEmpty()){
-                return result
+                continue
             }
-            List<FieldDeclaration> testFields = targetFields.collect {
+            Set<FieldDeclaration> testFields = targetFields.collect {
                 VariableDeclarator variable = it.variables.first()
                 new FieldDeclaration(EnumSet.of(Modifier.PRIVATE), new
                         VariableDeclarator(variable.type, variable.name)).addAnnotation("Mock") //TODO add support
                 // for primitive types
-            }
-            ClassOrInterfaceDeclaration classDeclaration = node.get() as ClassOrInterfaceDeclaration
-            FieldDeclaration instanceField = new FieldDeclaration(EnumSet.of(Modifier.PRIVATE), new
-                    VariableDeclarator(new ClassOrInterfaceType(classDeclaration.name), "controllerInstance"))
-                    .addAnnotation("@InjectMocks")
+            }.toSet()
 
+            FieldDeclaration instanceField = new FieldDeclaration(EnumSet.of(Modifier.PRIVATE), new
+                    VariableDeclarator(new ClassOrInterfaceType(classDeclaration.name), INSTANCE_NAME))
+                    .addAnnotation("InjectMocks")
+
+            String setupCode = """
+            @Before 
+            public void setup(){
+                mockMvc = MockMvcBuilders.standaloneSetup(coverageController).build();
+            }
+            """
+
+            MethodDeclaration setupMethod = JavaParser.parseBodyDeclaration(setupCode)
+                    .asMethodDeclaration()
+
+
+            for(MethodDeclaration methodDeclaration: classDeclaration.findAll(MethodDeclaration)){
+                TestGeneratorResult result = generate(methodDeclaration,classDeclaration)
+                //add dependencies to result
+                //add result to list
+                //check that everything is reported
+            }
+        }
+
+    }
+
+    //TODO add support for spring injected parameters like HttpSession or Pagination
+    @Override
+    protected TestGeneratorResult generate(MethodDeclaration method, ClassOrInterfaceDeclaration classDeclaration) {
+        TestGeneratorResult result = new TestGeneratorResult()
+        try{
             List<DependableNode<VariableDeclarationExpr>> variables = getVariableDeclarations(method)
             List<Statement> variableStatements = variables.collect { new ExpressionStmt(it.node) }
 
-            resolve the delegate method and create a Method call statement
+            MethodCallExpr delegate = method.findAll(MethodCallExpr).first()
+            Statement delegateCallStatment = new ExpressionStmt(delegate.clone())
+            Statement expectedResulstStatment
+            if(method.type){
+                expectedResulstStatment = valueFactory.getVariable(EXPECTED_RESULT, method.type).get().node
+            }
 
-            map the method under test parameters to query parameters
+            Map<String, String> pathVariableToName = getVariablesMap(method,"org.springframework.web.bind.annotation" +
+                    ".PathVariable",DEFAULT_ANNOTATION_PROPERTY)
+            Map<String, String> requestParamToname = getVariablesMap(method, "org.springframework.web.bind.annotation" +
+                    ".RequestParam",DEFAULT_ANNOTATION_PROPERTY)
+            String requestBody = method.parameters.find {hasAnnotation(it,"org.springframework.web.bind.annotation" +
+                    ".RequestBody")}?.nameAsString
 
-            resolve the request path and method and build the url
+            AnnotationExpr classRequestMappingAnnotation = getAnnotation(classDeclaration,REQUEST_MAPPING_ANNOTATIONS)
+            String classUrlTemplate = getUrlTemplate(classRequestMappingAnnotation)
+            AnnotationExpr methodRequestMappingAnnotation = getAnnotation(method, REQUEST_MAPPING_ANNOTATIONS)
+            String urlTemplate = classUrlTemplate +  getUrlTemplate(methodRequestMappingAnnotation)
+            String url = fillPathVariablesdUrl(urlTemplate, pathVariableToName)
 
-            build and return the test method
+            String testName = testMethodNomenclature.requestTestMethodName(getType(), method)
+            String objectMapperCode = requestBody?"ObjectMapper mapper = new ObjectMapper();":""
+
+            String expectedResulstStatmentCode=""
+            String verifyCode=""
+            if(expectedResulstStatment){
+                expectedResulstStatmentCode = """
+                    $expectedResulstStatment
+                    Mockito.when(${delegateCallStatment}).thenReturn(${EXPECTED_RESULT});
+                """
+            }else{
+                verifyCode="""
+                    Mockito.verify(${delegateCallStatment});
+                """
+            }
+
+            String contentCode = requestBody? "${System.lineSeparator()}.content(mapper.writeValueAsString" +
+                    "($requestBody))":""
+
+            String paramsCode = requestParamToname.isEmpty()?"":"${System.lineSeparator()}"+requestParamToname
+                    .collect {"${System.lineSeparator()}.param(${it.key},${it.value}.toString())"}
+
+            String httpMethod = getHttpMethod(methodRequestMappingAnnotation)
+            String testCode = """
+            @Test
+            public void ${testName}() throws Exception {
+                MockitoAnnotations.initMocks(this);
+                ${variableStatements.join(System.lineSeparator())}
+                $objectMapperCode
+                
+                $expectedResulstStatmentCode
+                
+                MockMvc mockMvc = MockMvcBuilders.standaloneSetup($INSTANCE_NAME).build();
+                mockMvc.perform($httpMethod("$url")$contentCode$paramsCode
+                .accept(MediaType.parseMediaType("application/json;charset=UTF-8")))
+                .andExpect(status().is2xxSuccessful())
+                .andExpect(jsonPath("\$.status").value("hello"));        
+                
+                $verifyCode
+             }
+            """
+
+            DependableNode<MethodDeclaration> testMethod = new DependableNode<>()
+            testMethod.node = JavaParser.parseBodyDeclaration(testCode)
+                    .asMethodDeclaration()
+            testMethod.dependency.imports << Imports.JUNIT_TEST
+            result.tests = [testMethod]
+
 
         }catch (TestGeneratorError tge) {
             result.errors << tge
         }
         return result
+    }
+
+    String getHttpMethod(AnnotationExpr annotationExpr) {
+        String annotationName = getQualifiedName(annotationExpr)
+        if(!REQUEST_MAPPING_ANNOTATIONS.contains(annotationName)){
+            throw new IllegalArgumentException("Unsuported annotation type: $annotationName")
+        }else if(annotationName == REQUEST_MAPPING){
+            return getStringValue(annotationName,"method").toLowerCase()
+        }else {
+            return annotationName.substring(annotationName.lastIndexOf("."),annotationName.length()
+                    -MAPPING_SUFFIX_LENGTH).toLowerCase()
+        }
+    }
+
+    private String fillPathVariablesdUrl(String urlTemplate, Map<String, String> pathVariableToName) {
+        String url = urlTemplate
+        for (String name : pathVariableToName.keySet()) {
+            url = url.replaceAll("{$name}", "\"+${pathVariableToName.get(name)}+\"")
+        }
+        if(url.endsWith("+\"")){
+            url = url.substring(0,url.length()-2)
+        }
+        url
+    }
+
+    private String getUrlTemplate(AnnotationExpr requestMappingAnnotation) {
+        classRequestMappingAnnotation ? getStringValue(classRequestMappingAnnotation,
+                PATH_PROPERTY) : ""
+    }
+
+    Map<String, String> getVariablesMap(MethodDeclaration methodDeclaration, String annotationName, String memberName) {
+        methodDeclaration.parameters.collect{
+            AnnotationExpr annotation = getAnnotation(it,annotationName)
+            if(annotation ){
+                Tuple2<String, String> pair = new Tuple2<>(getStringValue(annotation), it.nameAsString, memberName)
+                return Optional.of(pair)
+            }
+            return Optional.<Tuple2<String, String>>empty()
+        }.findAll {it.isPresent()}.collectEntries {[(it.get().first):it.get().second]}
+    }
+
+    String getStringValue(AnnotationExpr annotation, String memberName){
+        if(annotation.isSingleMemberAnnotationExpr()){
+            return annotation.asSingleMemberAnnotationExpr().memberValue.asStringLiteralExpr().asString()
+        }else if(annotation.isNormalAnnotationExpr()){
+            def pair = annotation.asNormalAnnotationExpr().pairs.find {it.nameAsString==memberName}
+            return pair? pair.value.asStringLiteralExpr().asString(): ""
+        }else return ""
     }
 
     @Override
@@ -117,7 +287,14 @@ class SpringControllerDelegatingMethodTestGenerator  extends AbstractMethodTestG
         }
         List<String> paramNames = getParamNames(methodDeclaration)
         List<String> usedParameters = methodCallExpr.arguments.findAll {it.nameExpr}.collect {it.asNameExpr().nameAsString}
-        return paramNames.containsAll(usedParameters)
+        if(!paramNames.containsAll(usedParameters)){
+            return false
+        }
+        Type returnType = method.type
+        if(!returnType){
+            return true
+        }
+        returnType.classOrInterfaceType && methodCallExpr.type == returnType
     }
 
     private List<String> getParamNames(MethodDeclaration methodDeclaration) {
@@ -127,20 +304,32 @@ class SpringControllerDelegatingMethodTestGenerator  extends AbstractMethodTestG
 
     private boolean isRestControllerMehod(MethodDeclaration methodDeclaration) {
         !methodDeclaration.static &&
-        hasAnnotation(methodDeclaration, "org.springframework.web.bind.annotation.RequestMapping") &&
-                isRestController(methodDeclaration.parentNode)
+        hasAnnotation(methodDeclaration, REQUEST_MAPPING_ANNOTATIONS)
 
     }
 
-    boolean isRestController(Optional<Node> node) {
-        if(node.isPresent()){
-            ClassOrInterfaceDeclaration classDeclaration = node.get() as ClassOrInterfaceDeclaration
-            return hasAnnotation(classDeclaration, "org.springframework.web.bind.annotation.RestController")
-        }
-        false
+    boolean isRestController(ClassOrInterfaceDeclaration classDeclaration) {
+        classDeclaration = node.get() as ClassOrInterfaceDeclaration
+        return hasAnnotation(classDeclaration, "org.springframework.web.bind.annotation.RestController")
+    }
+
+    boolean hasAnnotation(BodyDeclaration bodyDeclaration, Set<String> annotatioNames){
+        bodyDeclaration.annotations.any{annotatioNames.contains(getQualifiedName(it))}
     }
 
     boolean hasAnnotation(BodyDeclaration bodyDeclaration, String annotatioName){
-        bodyDeclaration.annotations.any{solver.getType(it).asReferenceType().qualifiedName.equals(annotatioName)}
+        hasAnnotation(bodyDeclaration, Collections.singleton(annotatioName))
+    }
+
+    String getQualifiedName (AnnotationExpr annotationExpr) {
+        solver.getType(annotationExpr).asReferenceType().qualifiedName
+    }
+
+    String getAnnotation(BodyDeclaration bodyDeclaration, Set<String> annotatioNames){
+        return bodyDeclaration.annotations.find {annotatioNames.contains(getQualifiedName(it))}
+    }
+
+    String getAnnotation(BodyDeclaration bodyDeclaration, String annotatioName){
+        return getAnnotation(bodyDeclaration, Collections.singleton(annotatioName))
     }
 }
