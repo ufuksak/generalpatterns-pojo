@@ -43,7 +43,6 @@ import org.springframework.stereotype.Component
 @Log4j2
 class AssignmentCheckStaticFactoryMethodTestGenerator extends AbstractMethodTestGenerator {
 
-    ValueFactory valueFactory
     SoftAssertions softAssertions
 
     @Autowired
@@ -79,11 +78,7 @@ class AssignmentCheckStaticFactoryMethodTestGenerator extends AbstractMethodTest
                 DependableNode<MethodDeclaration> testMethod = new DependableNode<>()
                 TestNodeMerger.appendDependencies(testMethod, assertionStatements)
 
-                List<DependableNode<VariableDeclarationExpr>> variables = StreamEx.of(method.parameters).map { p ->
-                    valueFactory.getVariable(p.nameAsString, p.type).orElseThrow {
-                        new TestGeneratorError("Failed to build variable for parameter $p of $method")
-                    }
-                }.toList()
+                List<DependableNode<VariableDeclarationExpr>> variables = getVariableDeclarations(method)
                 List<Statement> variableStatements = variables.collect { new ExpressionStmt(it.node) }
                 TestNodeMerger.appendDependencies(testMethod, variables)
 
