@@ -2,14 +2,12 @@ package com.aurea.testgenerator.generation.patterns.springcontrollers
 
 import com.aurea.testgenerator.generation.TestGeneratorError
 import com.aurea.testgenerator.generation.ast.DependableNode
-import com.aurea.testgenerator.generation.names.NomenclatureFactory
-import com.aurea.testgenerator.reporting.CoverageReporter
-import com.aurea.testgenerator.reporting.TestGeneratorResultReporter
 import com.aurea.testgenerator.value.ValueFactory
+import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.Node
-import com.github.javaparser.ast.body.BodyDeclaration
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.body.VariableDeclarator
 import com.github.javaparser.ast.expr.AnnotationExpr
 import com.github.javaparser.ast.expr.AssignExpr
 import com.github.javaparser.ast.expr.Expression
@@ -18,7 +16,6 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import com.github.javaparser.ast.stmt.ReturnStmt
 import com.github.javaparser.ast.type.Type
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
-import com.google.common.collect.Sets
 import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
 import org.springframework.context.annotation.Profile
@@ -75,8 +72,18 @@ class SpringControllerHelper {
             return annotation.asSingleMemberAnnotationExpr().memberValue.asStringLiteralExpr().asString()
         } else if (annotation.isNormalAnnotationExpr()) {
             def pair = annotation.asNormalAnnotationExpr().pairs.find { it.nameAsString == memberName }
-            return pair ? pair.value.asStringLiteralExpr().asString() : ""
+            return pair ? getAnnotationMemberValueAsString(pair.value) : ""
         } else return ""
+    }
+
+    String getAnnotationMemberValueAsString(Expression memberExpression){
+        if(memberExpression.isStringLiteralExpr()){
+            memberExpression.asStringLiteralExpr().asString()
+        }else if(memberExpression.isFieldAccessExpr()){
+            memberExpression.asFieldAccessExpr().nameAsString
+        }else {
+            throw new IllegalArgumentException("Unknown annotation member expression type: $memberExpression")
+        }
     }
 
     String getStringValue(AnnotationExpr annotation, Set<String> memberNames){
@@ -148,11 +155,7 @@ class SpringControllerHelper {
         if (!paramNames.containsAll(usedParameters)) {
             return false
         }
-        Type returnType = methodDeclaration.type
-        if (!returnType || returnType.isVoidType()) {
-            return true
-        }
-        returnType.classOrInterfaceType && methodCallExpr.type == returnType
+        return true
     }
 
     List<String> getParamNames(MethodDeclaration methodDeclaration) {
@@ -188,11 +191,21 @@ class SpringControllerHelper {
 
     List<DependableNode<VariableDeclarationExpr>> getVariableDeclarations(MethodDeclaration method) {
         List<DependableNode<VariableDeclarationExpr>> variables = StreamEx.of(method.parameters).map { p ->
-            valueFactory.getVariable(p.nameAsString, p.type).orElseThrow {
-                new TestGeneratorError("Failed to build variable for parameter $p of $method")
-            }
+            getVariable(p.nameAsString,p.type)
         }.toList()
         variables
+    }
+
+    DependableNode<VariableDeclarationExpr> getVariable(String name, Type type) {
+        valueFactory.getVariable(name, type).orElseGet {
+            getMockedVariable(name, type)
+        }
+    }
+
+    DependableNode<VariableDeclarationExpr> getMockedVariable(String name, Type type) {
+        Expression newExpression = JavaParser.parseExpression("new ${type}()")
+        VariableDeclarator variableDeclarator = new VariableDeclarator(type.clone(), name, newExpression)
+        DependableNode.from(new VariableDeclarationExpr(variableDeclarator))
     }
 
     Map<String, String> getVariablesMap(MethodDeclaration methodDeclaration, String annotationName) {

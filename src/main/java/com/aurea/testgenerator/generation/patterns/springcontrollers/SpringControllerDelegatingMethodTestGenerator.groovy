@@ -10,6 +10,8 @@ import com.aurea.testgenerator.generation.names.TestMethodNomenclature
 import com.aurea.testgenerator.reporting.CoverageReporter
 import com.aurea.testgenerator.reporting.TestGeneratorResultReporter
 import com.aurea.testgenerator.source.Unit
+import com.aurea.testgenerator.value.Resolution
+import com.aurea.testgenerator.value.Types
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.ImportDeclaration
@@ -19,6 +21,8 @@ import com.github.javaparser.ast.expr.*
 import com.github.javaparser.ast.stmt.ExpressionStmt
 import com.github.javaparser.ast.stmt.Statement
 import com.github.javaparser.ast.type.ClassOrInterfaceType
+import com.github.javaparser.ast.type.Type
+import com.github.javaparser.resolution.types.ResolvedType
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import groovy.util.logging.Log4j2
 import org.springframework.context.annotation.Profile
@@ -44,7 +48,8 @@ class SpringControllerDelegatingMethodTestGenerator implements TestGenerator {
             "import org.springframework.test.web.servlet.MockMvc;",
             "import org.springframework.test.web.servlet.setup.MockMvcBuilders;",
             "import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;",
-            "import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;"].collect {
+            "import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;",
+            "import static org.mockito.Mockito.*;"].collect {
         JavaParser.parseImport(it)
     }.toSet()
 
@@ -133,23 +138,17 @@ class SpringControllerDelegatingMethodTestGenerator implements TestGenerator {
         classTest
     }
 
-    //TODO add support for spring injected parameters like HttpSession or Pagination
     protected TestGeneratorResult generateMethodTest(MethodDeclaration method, ClassOrInterfaceDeclaration classDeclaration, TestMethodNomenclature testMethodNomenclature) {
         TestGeneratorResult result = new TestGeneratorResult()
         try {
             List<DependableNode<VariableDeclarationExpr>> variables = controllerHelper.getVariableDeclarations(method)
             List<Statement> variableStatements = variables.collect { new ExpressionStmt(it.node) }
 
-            Statement expectedResulstStatment
-            if (method.type && method.type.isClassOrInterfaceType()) {
-                expectedResulstStatment = valueFactory.getVariable(EXPECTED_RESULT, method.type).get().node
-            }
-
             Map<String, String> pathVariableToName = controllerHelper.getVariablesMap(method, SpringControllerHelper
                     .PATH_VARIABLE)
             Map<String, String> requestParamToname = controllerHelper.getVariablesMap(method, SpringControllerHelper
                     .REQUEST_PARAM)
-            String requestBody = method.parameters.find {
+            String requestBodyName = method.parameters.find {
                 controllerHelper.hasAnnotation(it, SpringControllerHelper.REQUEST_BODY)
             }?.nameAsString
 
@@ -165,26 +164,33 @@ class SpringControllerDelegatingMethodTestGenerator implements TestGenerator {
             urlTemplate = urlTemplate.isEmpty() ? "/" : urlTemplate
             String url = controllerHelper.fillPathVariablesdUrl(urlTemplate, pathVariableToName)
 
-            String objectMapperCode = requestBody ? "ObjectMapper mapper = new ObjectMapper();" : ""
+            String objectMapperCode = requestBodyName ? "ObjectMapper mapper = new ObjectMapper();" : ""
 
+            Map<String, Type> methodParmaTotype = method.parameters.collectEntries {[(it.nameAsString),it.type]}
             MethodCallExpr delegate = method.findAll(MethodCallExpr).last()
+            String args = delegate.arguments.collect {
+                Type argType = methodParmaTotype.get(it.toString())
+                if (argType && argType.isClassOrInterfaceType() && !Types.isString(argType)) {
+                    "any(${argType}.class)"
+                } else {
+                    "eq(${it})"
+                }
+            }.join(",")
+
+            String scope = delegate.scope.get().asNameExpr().nameAsString
             String expectedResulstStatmentCode = ""
-            String verifyCode = ""
-            if (expectedResulstStatment) {
+            if (method.type && method.type.isClassOrInterfaceType()) {
                 expectedResulstStatmentCode = """
-                    $expectedResulstStatment
-                    Mockito.when(${delegate}).thenReturn(${EXPECTED_RESULT});
-                """
-            } else {
-                String scope = delegate.scope.get().asNameExpr().nameAsString
-                String args = delegate.arguments.join(",")
-                verifyCode = """
-                    Mockito.verify(${scope}).${delegate.nameAsString}($args);
+                    $method.type ${EXPECTED_RESULT} = new $method.type();
+                    Mockito.when(${scope}.${delegate.nameAsString}($args)).thenReturn(${EXPECTED_RESULT});
                 """
             }
+            String verifyCode = """
+                    Mockito.verify(${scope}).${delegate.nameAsString}($args);
+                """
             String sep = System.lineSeparator()
-            String contentCode = requestBody ? "${sep}.content(mapper.writeValueAsString" +
-                    "($requestBody))" : ""
+            String contentCode = requestBodyName ? "${sep}.content(mapper.writeValueAsString" +
+                    "($requestBodyName)).contentType(mimeType)" : ""
 
             String paramsCode = requestParamToname.isEmpty() ? "" : requestParamToname.entrySet().collect {
                 "${sep}.param(\"${it.key}\",${it.value}.toString())"
@@ -203,9 +209,10 @@ class SpringControllerDelegatingMethodTestGenerator implements TestGenerator {
                 $objectMapperCode
                 
                 $expectedResulstStatmentCode
-
+                
+                String mimeType="application/json;charset=UTF-8";
                 mockMvc.perform($httpMethod("$url")$contentCode$paramsCode
-                .accept(MediaType.parseMediaType("application/json;charset=UTF-8")))
+                .accept(MediaType.parseMediaType(mimeType)))
                 .andExpect(status().is2xxSuccessful())$expectedJsonCode;                       
                 
                 $verifyCode
