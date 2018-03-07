@@ -145,8 +145,10 @@ class SpringControllerDelegatingMethodTestGenerator implements TestGenerator {
                 expectedResulstStatment = valueFactory.getVariable(EXPECTED_RESULT, method.type).get().node
             }
 
-            Map<String, String> pathVariableToName = getVariablesMap(method, SpringControllerHelper.PATH_VARIABLE, SpringControllerHelper.DEFAULT_ANNOTATION_PROPERTY)
-            Map<String, String> requestParamToname = getVariablesMap(method, SpringControllerHelper.REQUEST_PARAM, SpringControllerHelper.DEFAULT_ANNOTATION_PROPERTY)
+            Map<String, String> pathVariableToName = controllerHelper.getVariablesMap(method, SpringControllerHelper
+                    .PATH_VARIABLE)
+            Map<String, String> requestParamToname = controllerHelper.getVariablesMap(method, SpringControllerHelper
+                    .REQUEST_PARAM)
             String requestBody = method.parameters.find {
                 controllerHelper.hasAnnotation(it, SpringControllerHelper.REQUEST_BODY)
             }?.nameAsString
@@ -184,8 +186,10 @@ class SpringControllerDelegatingMethodTestGenerator implements TestGenerator {
             String contentCode = requestBody ? "${sep}.content(mapper.writeValueAsString" +
                     "($requestBody))" : ""
 
-            String paramsCode = requestParamToname.isEmpty() ? "" : "${sep}" + requestParamToname
-                    .collect { "${sep}.param(${it.key},${it.value}.toString())" }
+            String paramsCode = requestParamToname.isEmpty() ? "" : requestParamToname.entrySet().collect {
+                "${sep}.param(\"${it.key}\",${it.value}.toString())"
+            }
+                    .join("")
 
             String httpMethod = controllerHelper.getHttpMethod(methodRequestMappingAnnotation)
 
@@ -229,19 +233,6 @@ class SpringControllerDelegatingMethodTestGenerator implements TestGenerator {
             """${sep}.andExpect(jsonPath("\$.$fieldName").value($EXPECTED_RESULT.${getMethodName}))"""
         }.join("")
         expectedJsonCode
-    }
-
-
-    Map<String, String> getVariablesMap(MethodDeclaration methodDeclaration, String annotationName, String memberName) {
-        methodDeclaration.parameters.collect {
-            AnnotationExpr annotation = controllerHelper.getAnnotation(it, annotationName)
-            if (annotation) {
-                Tuple2<String, String> pair = new Tuple2<>(controllerHelper.getStringValue(annotation), it
-                        .nameAsString, memberName)
-                return Optional.of(pair)
-            }
-            return Optional.<Tuple2<String, String>> empty()
-        }.findAll { it.isPresent() }.collectEntries { [(it.get().first): it.get().second] }
     }
 
     TestType getType() {

@@ -45,7 +45,9 @@ class UnitTestGenerator {
 
         testUnit.addDependencies(StreamEx.of(testGeneratorResults).flatMap { it.tests.stream() }.toList())
 
-        StreamEx.of(testGeneratorResults).flatMap{it.tests.stream()}.flatMap{it.dependency.fields.stream()}.toSet().each {
+        StreamEx.of(testGeneratorResults).flatMap { it.tests.stream() }.flatMap {
+            it.dependency.fields.stream()
+        }.toSet().sort { it.getVariable(0).nameAsString }.each {
             testUnit.addField(it)
         }
 

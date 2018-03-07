@@ -6,6 +6,7 @@ import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.reporting.CoverageReporter
 import com.aurea.testgenerator.reporting.TestGeneratorResultReporter
 import com.aurea.testgenerator.value.ValueFactory
+import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.BodyDeclaration
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
@@ -28,6 +29,9 @@ import org.springframework.stereotype.Component
 @Log4j2
 class SpringControllerHelper {
     protected static final String DEFAULT_ANNOTATION_PROPERTY = "value"
+    protected static final String NAME_ANNOTATION_PROPERTY = "name"
+    protected static final Set<String> PARAMETER_ANNOTATION_PROPERTIES = [DEFAULT_ANNOTATION_PROPERTY,
+                                                                          NAME_ANNOTATION_PROPERTY].toSet()
     static final String PATH_PROPERTY = "path"
     private static final String REQUEST_MAPPING = "RequestMapping"
     private static final String GET_MAPPING = "GetMapping"
@@ -35,12 +39,12 @@ class SpringControllerHelper {
     private static final String PUT_MAPPING = "PutMapping"
     private static final String PATCH_MAPPING = "PatchMapping"
     private static final String DELETE_MAPPING = "DeleteMapping"
-    protected static final Set<String> REQUEST_MAPPING_ANNOTATIONS = Sets.newHashSet(REQUEST_MAPPING, GET_MAPPING,
-            POST_MAPPING, PUT_MAPPING, PATCH_MAPPING, DELETE_MAPPING).asImmutable()
+    protected static final Set<String> REQUEST_MAPPING_ANNOTATIONS = [REQUEST_MAPPING, GET_MAPPING,
+            POST_MAPPING, PUT_MAPPING, PATCH_MAPPING, DELETE_MAPPING].toSet()
     private static final String REST_CONTROLLER = "RestController"
     protected static final String PATH_VARIABLE = "PathVariable"
     protected static final String REQUEST_PARAM = "RequestParam"
-    private static final int MAPPING_SUFFIX_LENGTH = 6
+    private static final int MAPPING_SUFFIX_LENGTH = 7
     protected static final String REQUEST_BODY = "RequestBody"
     protected static final String DEFAULT_HTTP_METHOD = "get"
 
@@ -75,13 +79,24 @@ class SpringControllerHelper {
         } else return ""
     }
 
+    String getStringValue(AnnotationExpr annotation, Set<String> memberNames){
+        for(String memberName: memberNames){
+            String value = getStringValue(annotation, memberName)
+            if(!value.isEmpty()){
+                return value
+            }
+        }
+        return ""
+    }
+
+    String getStringValue(AnnotationExpr annotation) {
+        return getStringValue(annotation, DEFAULT_ANNOTATION_PROPERTY)
+    }
+
     String fillPathVariablesdUrl(String urlTemplate, Map<String, String> pathVariableToName) {
         String url = urlTemplate
         for (String name : pathVariableToName.keySet()) {
-            url = url.replaceAll("{$name}", "\"+${pathVariableToName.get(name)}+\"")
-        }
-        if (url.endsWith("+\"")) {
-            url = url.substring(0, url.length() - 2)
+            url = url.replaceAll("\\{$name\\}", "\"+${pathVariableToName.get(name)}+\"")
         }
         url
     }
@@ -123,7 +138,7 @@ class SpringControllerHelper {
         if (!methodCallExpr.scope.isPresent() || !methodCallExpr.scope.get().asNameExpr().resolve().isField()) {
             return false
         }
-        if (methodCallExpr.arguments.any { !it.nameExpr || !it.literalExpr }) {
+        if (methodCallExpr.arguments.any { !(it.nameExpr || it.literalExpr) }) {
             return false
         }
         List<String> paramNames = getParamNames(methodDeclaration)
@@ -155,20 +170,20 @@ class SpringControllerHelper {
         return hasAnnotation(classDeclaration, REST_CONTROLLER)
     }
 
-    boolean hasAnnotation(BodyDeclaration bodyDeclaration, Set<String> annotatioNames) {
-        bodyDeclaration.annotations.any { annotatioNames.contains(it.nameAsString) }
+    boolean hasAnnotation(Node node, Set<String> annotatioNames) {
+        node.annotations.any { annotatioNames.contains(it.nameAsString) }
     }
 
-    boolean hasAnnotation(BodyDeclaration bodyDeclaration, String annotatioName) {
-        hasAnnotation(bodyDeclaration, Collections.singleton(annotatioName))
+    boolean hasAnnotation(Node node, String annotatioName) {
+        hasAnnotation(node, Collections.singleton(annotatioName))
     }
 
-    AnnotationExpr getAnnotation(BodyDeclaration bodyDeclaration, Set<String> annotatioNames) {
-        return bodyDeclaration.annotations.find { annotatioNames.contains(it.nameAsString) }
+    AnnotationExpr getAnnotation(Node node, Set<String> annotatioNames) {
+        return node.annotations.find { annotatioNames.contains(it.nameAsString) }
     }
 
-    AnnotationExpr getAnnotation(BodyDeclaration bodyDeclaration, String annotatioName) {
-        return getAnnotation(bodyDeclaration, Collections.singleton(annotatioName))
+    AnnotationExpr getAnnotation(Node node, String annotatioName) {
+        return getAnnotation(node, Collections.singleton(annotatioName))
     }
 
     List<DependableNode<VariableDeclarationExpr>> getVariableDeclarations(MethodDeclaration method) {
@@ -178,5 +193,17 @@ class SpringControllerHelper {
             }
         }.toList()
         variables
+    }
+
+    Map<String, String> getVariablesMap(MethodDeclaration methodDeclaration, String annotationName) {
+        methodDeclaration.parameters.collect {
+            AnnotationExpr annotation = getAnnotation(it, annotationName)
+            if (annotation) {
+                Tuple2<String, String> pair = new Tuple2<>(getStringValue(annotation,PARAMETER_ANNOTATION_PROPERTIES)
+                        ,  it.nameAsString)
+                return Optional.of(pair)
+            }
+            return Optional.<Tuple2<String, String>> empty()
+        }.findAll { it.isPresent() }.collectEntries { [(it.get().first): it.get().second] }
     }
 }
