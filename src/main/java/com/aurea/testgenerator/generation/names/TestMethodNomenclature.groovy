@@ -4,6 +4,7 @@ import com.aurea.common.ParsingUtils
 import com.aurea.testgenerator.ast.ASTNodeUtils
 import com.aurea.testgenerator.generation.TestType
 import com.aurea.testgenerator.generation.patterns.pojos.PojoTestTypes
+import com.aurea.testgenerator.generation.patterns.springcontrollers.SpringControllersTestTypes
 import com.aurea.testgenerator.generation.patterns.staticfactory.StaticFactoryMethodTypes
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.CallableDeclaration
@@ -21,6 +22,7 @@ class TestMethodNomenclature {
             (StaticFactoryMethodTypes.IS_CALLABLE)        : 'IsCallable',
             (StaticFactoryMethodTypes.ASSIGNMENT_CHECK)   : 'AssignsValues',
             (StaticFactoryMethodTypes.DIFFERENT_INSTANCES): 'OnSecondCall_CreateDifferentInstance',
+            (SpringControllersTestTypes.DELEGATING) : 'DelegatesToService',
 
             (PojoTestTypes.OPEN_POJO_GETTER)              : 'Getters',
             (PojoTestTypes.OPEN_POJO_SETTER)              : 'Setters',
@@ -59,8 +61,8 @@ class TestMethodNomenclature {
     String createTestMethodName(TestType type, Node context) {
         try {
             String suffix = TEST_METHOD_NAME_SUFFIXES[type]
-
-            if (type instanceof StaticFactoryMethodTypes) {
+            //TODO refactor this so that we don't have to change here for each new type
+            if (type instanceof StaticFactoryMethodTypes || type instanceof SpringControllersTestTypes) {
                 return new CallableNameRepository(suffix, context as CallableDeclaration).get()
             }
 

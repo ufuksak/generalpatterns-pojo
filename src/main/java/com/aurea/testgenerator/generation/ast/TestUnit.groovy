@@ -4,6 +4,7 @@ import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
+import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import groovy.transform.Canonical
 import groovy.transform.Memoized
@@ -42,6 +43,11 @@ class TestUnit {
 
     TestUnit addTest(MethodDeclaration test) {
         getTestClass().addMember(test)
+        this
+    }
+
+    TestUnit addField(FieldDeclaration field){
+        getTestClass().addMember(field)
         this
     }
 
