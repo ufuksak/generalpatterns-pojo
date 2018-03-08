@@ -64,7 +64,11 @@ class SpringControllerHelper {
             method = annotationName.substring(0, annotationName.length()
                     - MAPPING_SUFFIX_LENGTH).toLowerCase()
         }
-        method.isEmpty() ? DEFAULT_HTTP_METHOD : method
+        method = method.isEmpty() ? DEFAULT_HTTP_METHOD : method
+        if (method.contains(".")) {
+            method = method.substring(method.lastIndexOf('.') + 1)
+        }
+        method
     }
 
     String getStringValue(AnnotationExpr annotation, String memberName) {
@@ -80,7 +84,7 @@ class SpringControllerHelper {
         if(memberExpression.isStringLiteralExpr()){
             memberExpression.asStringLiteralExpr().asString()
         }else if(memberExpression.isFieldAccessExpr()){
-            memberExpression.asFieldAccessExpr().nameAsString
+            memberExpression.asFieldAccessExpr().toString()
         }else if(memberExpression.isArrayInitializerExpr()){
             List<Node> childNodes = memberExpression.childNodes
             if (childNodes.isEmpty()){

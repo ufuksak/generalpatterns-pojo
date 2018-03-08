@@ -196,9 +196,19 @@ class SpringControllerDelegatingMethodTestGenerator implements TestGenerator {
                     Mockito.verify(${scope}).${delegateExpression.nameAsString}($args);
                 """
             String sep = System.lineSeparator()
-            String contentCode = requestBodyName ? "${sep}.content(mapper.writeValueAsString" +
-                    "($requestBodyName)).contentType(mimeType)" : ""
 
+            String contentCode = requestBodyName ? "${sep}.content(mapper.writeValueAsString" +
+                    "($requestBodyName))" : ""
+
+            String consumeType = controllerHelper.getStringValue(methodRequestMappingAnnotation, "consumes")
+            String contentTypeCode =""
+            if(requestBodyName || !consumeType.isEmpty()){
+                if(consumeType.isEmpty()){
+                    contentTypeCode = ".contentType(mimeType)"
+                }else {
+                    contentTypeCode = ".contentType($consumeType)"
+                }
+            }
             String paramsCode = requestParamToname.isEmpty() ? "" : requestParamToname.entrySet().collect {
                 "${sep}.param(\"${it.key}\", String.valueOf(${it.value}))"
             }
@@ -218,7 +228,10 @@ class SpringControllerDelegatingMethodTestGenerator implements TestGenerator {
                 $expectedResulstStatmentCode
                 
                 String mimeType="application/json;charset=UTF-8";
-                mockMvc.perform($httpMethod("$url")$contentCode$paramsCode
+                mockMvc.perform($httpMethod("$url")
+                $contentCode
+                $contentTypeCode
+                $paramsCode
                 .accept(MediaType.parseMediaType(mimeType)))
                 .andExpect(status().is2xxSuccessful())$expectedJsonCode;                       
                 
