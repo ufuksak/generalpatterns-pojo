@@ -25,21 +25,9 @@ class ReportingSymbolResolver implements SymbolResolver {
     private final JavaSymbolSolver solver
     private final ApplicationEventPublisher publisher
 
-    ReportingSymbolResolver(ProjectConfiguration cfg, ApplicationEventPublisher publisher) {
-        solver = new JavaSymbolSolver(new CombinedTypeSolver(getTypeSolvers(cfg)))
+    ReportingSymbolResolver(TypeSolver typeSolver, ApplicationEventPublisher publisher) {
+        solver = new JavaSymbolSolver(typeSolver)
         this.publisher = publisher
-    }
-
-    private TypeSolver[] getTypeSolvers(ProjectConfiguration cfg){
-        return ([new ReflectionTypeSolver()] + getJavaParserTypeSolvers(cfg)) as TypeSolver[]
-    }
-
-    private List<JavaParserTypeSolver> getJavaParserTypeSolvers(ProjectConfiguration cfg){
-        if(!cfg.paths.isEmpty()){
-            cfg.paths.toSet().collect{new JavaParserTypeSolver(cfg.srcPath.resolve(it).toFile())}
-        }else {
-            Collections.singletonList(new JavaParserTypeSolver(cfg.srcPath.toFile()))
-        }
     }
 
     @Override

@@ -8,9 +8,12 @@ import com.aurea.testgenerator.source.SourceFilter
 import com.aurea.testgenerator.source.SourceFilters
 import com.github.javaparser.JavaParser
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
+import com.github.javaparser.symbolsolver.model.resolution.TypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.EnableAspectJAutoProxy
@@ -38,11 +41,28 @@ class BaseConfig {
     }
 
     @Bean
-    JavaParserFacade javaParserFacade(ProjectConfiguration projectConfiguration) {
-        JavaParserFacade.get(new CombinedTypeSolver(
-                new ReflectionTypeSolver(),
-                new JavaParserTypeSolver(projectConfiguration.srcPath.toFile())
-        ))
+    TypeSolver combinedTypeSolver(ProjectConfiguration projectConfiguration) {
+        CombinedTypeSolver solver = new CombinedTypeSolver(
+                new ReflectionTypeSolver())
+
+        if (projectConfiguration.resolveJars) {
+            projectConfiguration.resolveJars.split(",").each { solver.add(new JarTypeSolver(it)) }
+        }
+        getJavaParserTypeSolvers(projectConfiguration).each { solver.add(it) }
+        solver
+    }
+
+    private List<JavaParserTypeSolver> getJavaParserTypeSolvers(ProjectConfiguration cfg) {
+        if (!cfg.paths.isEmpty()) {
+            cfg.paths.toSet().collect { new JavaParserTypeSolver(cfg.srcPath.resolve(it).toFile()) }
+        } else {
+            Collections.singletonList(new JavaParserTypeSolver(cfg.srcPath.toFile()))
+        }
+    }
+
+    @Bean
+    JavaParserFacade javaParserFacade(TypeSolver solver) {
+        JavaParserFacade.get(solver)
     }
 
     @Bean

@@ -1,2 +1,4 @@
 spring.output.ansi.enabled: ALWAYS
 logging.level.root: WARN
+project.methodPrefix: test
+project.disableMethodPrefix: false

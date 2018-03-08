@@ -10,6 +10,7 @@ import com.github.javaparser.resolution.Resolvable
 import com.github.javaparser.resolution.declarations.ResolvedConstructorDeclaration
 import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration
+import com.github.javaparser.resolution.declarations.ResolvedReferenceTypeDeclaration
 import com.github.javaparser.resolution.declarations.ResolvedTypeDeclaration
 import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration
 import com.github.javaparser.resolution.types.ResolvedType
@@ -38,6 +39,11 @@ class Resolution {
 
     static Optional<ResolvedMethodDeclaration> tryResolve(MethodCallExpr methodCall) {
         Try.ofFailable { methodCall.resolveInvokedMethod() }.toOptional()
+    }
+
+    static SymbolReference<ResolvedReferenceTypeDeclaration> trySolveType(JavaParserFacade solver, String name) {
+        Try.ofFailable { solver.typeSolver.tryToSolveType(name) }
+           .orElse(SymbolReference.unsolved(ResolvedReferenceTypeDeclaration))
     }
 
     static SymbolReference<? extends ResolvedValueDeclaration> trySolveSymbolInType(SymbolSolver symbolSolver, ResolvedTypeDeclaration typeDeclaration, String name) {

@@ -26,6 +26,9 @@ class ProjectConfiguration {
     String testSrc
     String out
     String jacoco
+    String methodPrefix
+    boolean disableMethodPrefix
+    String resolveJars
 
     Path getSrcPath() {
         Paths.get(src)
@@ -45,5 +48,9 @@ class ProjectConfiguration {
 
     boolean isBlank() {
         return blank
+    }
+
+    boolean isDisableMethodPrefix(){
+        disableMethodPrefix
     }
 }
