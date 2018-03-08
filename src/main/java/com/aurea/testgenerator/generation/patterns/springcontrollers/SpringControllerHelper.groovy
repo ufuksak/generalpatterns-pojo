@@ -231,4 +231,17 @@ class SpringControllerHelper {
             return Optional.<Tuple2<String, String>> empty()
         }.findAll { it.isPresent() }.collectEntries { [(it.get().first): it.get().second] }
     }
+
+    String buildUrl(MethodDeclaration method, AnnotationExpr methodRequestMappingAnnotation) {
+        ClassOrInterfaceDeclaration classDeclaration = method.parentNode.get() as ClassOrInterfaceDeclaration
+        AnnotationExpr classRequestMappingAnnotation = getAnnotation(classDeclaration,REQUEST_MAPPING_ANNOTATIONS)
+        String classUrlTemplate = classRequestMappingAnnotation ? getUrlTemplate(classRequestMappingAnnotation) : ""
+
+        String methodUrlTemplate = methodRequestMappingAnnotation ? getUrlTemplate(methodRequestMappingAnnotation) : ""
+        String urlTemplate = classUrlTemplate + methodUrlTemplate
+        urlTemplate = urlTemplate.isEmpty() ? "/" : urlTemplate
+        Map<String, String> pathVariableToName = getVariablesMap(method, PATH_VARIABLE)
+        String url = fillPathVariablesdUrl(urlTemplate, pathVariableToName)
+        url
+    }
 }

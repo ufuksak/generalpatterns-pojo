@@ -40,6 +40,33 @@ class Imports {
     static final ImportDeclaration SINGLETON_TESTER = parse('com.aurea.unittest.commons.SingletonTester')
     static final ImportDeclaration CALLABLE = parse('java.util.concurrent.Callable')
 
+    //spring controllers
+    static final ImportDeclaration OBJECT_MAPPER = parse('com.fasterxml.jackson.databind.ObjectMapper')
+    static final ImportDeclaration JUNIT_BEFORE = parse('org.junit.Before')
+    static final ImportDeclaration INJECT_MOCKS = parse('org.mockito.InjectMocks')
+    static final ImportDeclaration MOCK = parse('org.mockito.Mock')
+    static final ImportDeclaration MOCKITO = parse('org.mockito.Mockito')
+    static final ImportDeclaration MOCK_ANNOTATIONS = parse('org.mockito.MockitoAnnotations')
+    static final ImportDeclaration MEDIA_TYPE = parse('org.springframework.http.MediaType')
+    static final ImportDeclaration MOCK_MVC = parse('org.springframework.test.web.servlet.MockMvc')
+    static final ImportDeclaration MOCK_MVC_BUILDERS = parse('org.springframework.test.web.servlet.setup.MockMvcBuilders')
+    static final ImportDeclaration STATIC_MOCK_MVC_BUILDERS = new ImportDeclaration(new Name('org.springframework.test.web.servlet.request.MockMvcRequestBuilders'), true, true)
+    static final ImportDeclaration STATIC_MOCK_MVC_MATCHERS = new ImportDeclaration(new Name('org.springframework.test.web.servlet.result.MockMvcResultMatchers'), true, true)
+    static final ImportDeclaration STATIC_MOCKITO = new ImportDeclaration(new Name('org.mockito.Mockito'), true, true)
+    static final List<ImportDeclaration> SPRING_CONTROLLER_IMPORTS = [
+            OBJECT_MAPPER,
+            JUNIT_BEFORE,
+            JUNIT_TEST,
+            INJECT_MOCKS,
+            MOCK,
+            MOCKITO,
+            MOCK_ANNOTATIONS,
+            MEDIA_TYPE,
+            MOCK_MVC,
+            MOCK_MVC_BUILDERS,
+            STATIC_MOCK_MVC_BUILDERS,
+            STATIC_MOCK_MVC_MATCHERS,
+            STATIC_MOCKITO]
 
     static ImportDeclaration parse(String fullClassName) {
         JavaParser.parseImport("import $fullClassName;")
