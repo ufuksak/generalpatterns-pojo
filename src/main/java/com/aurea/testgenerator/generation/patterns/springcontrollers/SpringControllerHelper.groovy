@@ -1,6 +1,7 @@
 package com.aurea.testgenerator.generation.patterns.springcontrollers
 
 import com.aurea.testgenerator.generation.ast.DependableNode
+import com.aurea.testgenerator.value.NewExpressionBuilder
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.Node
@@ -210,7 +211,7 @@ class SpringControllerHelper {
     }
 
     DependableNode<VariableDeclarationExpr> getNewVariable(String name, Type type) {
-        Expression newExpression = JavaParser.parseExpression("new ${type}()")
+        Expression newExpression = NewExpressionBuilder.builExpression(type.toString())
         VariableDeclarator variableDeclarator = new VariableDeclarator(type.clone(), name, newExpression)
         DependableNode.from(new VariableDeclarationExpr(variableDeclarator))
     }

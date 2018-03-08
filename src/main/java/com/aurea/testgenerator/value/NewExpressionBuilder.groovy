@@ -7,7 +7,11 @@ import com.github.javaparser.ast.expr.Expression
 
 class NewExpressionBuilder {
 
-    static DependableNode<Expression> build(String type) {
-        DependableNode<Expression> expression = DependableNode.from(JavaParser.parseExpression("new ${type}()"))
+    static DependableNode<Expression> buildDependableNode(String type) {
+        DependableNode.from(builExpression(type))
+    }
+
+    static Expression builExpression(String type){
+        JavaParser.parseExpression("new ${type}()")
     }
 }

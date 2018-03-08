@@ -146,7 +146,7 @@ class RandomJavaLangTypesFactory implements ReferenceTypeFactory {
         if(mockByDefault){
             MockExpressionBuilder.build(name)
         }else{
-            NewExpressionBuilder.build(name)
+            NewExpressionBuilder.buildDependableNode(name)
         }
 
     }
