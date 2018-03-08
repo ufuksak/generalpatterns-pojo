@@ -8,6 +8,7 @@ import com.github.javaparser.resolution.SymbolResolver
 import com.github.javaparser.resolution.types.ResolvedType
 import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.javaparsermodel.UnsolvedSymbolException
+import com.github.javaparser.symbolsolver.model.resolution.TypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
@@ -24,11 +25,8 @@ class ReportingSymbolResolver implements SymbolResolver {
     private final JavaSymbolSolver solver
     private final ApplicationEventPublisher publisher
 
-    ReportingSymbolResolver(ProjectConfiguration cfg, ApplicationEventPublisher publisher) {
-        solver = new JavaSymbolSolver(new CombinedTypeSolver(
-                new ReflectionTypeSolver(),
-                new JavaParserTypeSolver(cfg.srcPath.toFile())
-        ))
+    ReportingSymbolResolver(TypeSolver typeSolver, ApplicationEventPublisher publisher) {
+        solver = new JavaSymbolSolver(typeSolver)
         this.publisher = publisher
     }
 
