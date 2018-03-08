@@ -29,7 +29,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Component
-@Profile("manual")
+@Profile("spring-controller")
 @Log4j2
 //TODO add dependency mergers
 class SpringControllerDelegatingMethodTestGenerator implements TestGenerator {
@@ -132,6 +132,7 @@ class SpringControllerDelegatingMethodTestGenerator implements TestGenerator {
                 it.dependency.imports.addAll(IMPORT_DECLARATIONS)
                 classTest.tests << it
             }
+            methodResult.type = getType()
             reporter.publish(methodResult, unit, methodDeclaration)
             coverageReporter.report(unit, methodResult, methodDeclaration)
         }
@@ -167,8 +168,8 @@ class SpringControllerDelegatingMethodTestGenerator implements TestGenerator {
             String objectMapperCode = requestBodyName ? "ObjectMapper mapper = new ObjectMapper();" : ""
 
             Map<String, Type> methodParmaTotype = method.parameters.collectEntries {[(it.nameAsString),it.type]}
-            MethodCallExpr delegate = method.findAll(MethodCallExpr).last()
-            String args = delegate.arguments.collect {
+            MethodCallExpr delegateExpression = method.findAll(MethodCallExpr).last()
+            String args = delegateExpression.arguments.collect {
                 Type argType = methodParmaTotype.get(it.toString())
                 if (argType && argType.isClassOrInterfaceType() && !Types.isString(argType)) {
                     "any(${argType}.class)"
@@ -177,23 +178,25 @@ class SpringControllerDelegatingMethodTestGenerator implements TestGenerator {
                 }
             }.join(",")
 
-            String scope = delegate.scope.get().asNameExpr().nameAsString
+            String scope = delegateExpression.scope.get().asNameExpr().nameAsString
             String expectedResulstStatmentCode = ""
+            VariableDeclarationExpr expectedResultDeclaration = controllerHelper.getVariable(EXPECTED_RESULT,method
+                    .type).node
             if (method.type && method.type.isClassOrInterfaceType()) {
                 expectedResulstStatmentCode = """
-                    $method.type ${EXPECTED_RESULT} = new $method.type();
-                    Mockito.when(${scope}.${delegate.nameAsString}($args)).thenReturn(${EXPECTED_RESULT});
+                    $expectedResultDeclaration;
+                    Mockito.when(${scope}.${delegateExpression.nameAsString}($args)).thenReturn(${EXPECTED_RESULT});
                 """
             }
             String verifyCode = """
-                    Mockito.verify(${scope}).${delegate.nameAsString}($args);
+                    Mockito.verify(${scope}).${delegateExpression.nameAsString}($args);
                 """
             String sep = System.lineSeparator()
             String contentCode = requestBodyName ? "${sep}.content(mapper.writeValueAsString" +
                     "($requestBodyName)).contentType(mimeType)" : ""
 
             String paramsCode = requestParamToname.isEmpty() ? "" : requestParamToname.entrySet().collect {
-                "${sep}.param(\"${it.key}\",${it.value}.toString())"
+                "${sep}.param(\"${it.key}\", String.valueOf(${it.value}))"
             }
                     .join("")
 

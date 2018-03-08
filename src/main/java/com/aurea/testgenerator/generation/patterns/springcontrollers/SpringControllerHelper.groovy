@@ -1,6 +1,5 @@
 package com.aurea.testgenerator.generation.patterns.springcontrollers
 
-import com.aurea.testgenerator.generation.TestGeneratorError
 import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
@@ -22,7 +21,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Component
-@Profile("manual")
+@Profile("spring-controller")
 @Log4j2
 class SpringControllerHelper {
     protected static final String DEFAULT_ANNOTATION_PROPERTY = "value"
@@ -81,7 +80,15 @@ class SpringControllerHelper {
             memberExpression.asStringLiteralExpr().asString()
         }else if(memberExpression.isFieldAccessExpr()){
             memberExpression.asFieldAccessExpr().nameAsString
-        }else {
+        }else if(memberExpression.isArrayInitializerExpr()){
+            List<Node> childNodes = memberExpression.childNodes
+            if (childNodes.isEmpty()){
+                ""
+            }else {
+                getAnnotationMemberValueAsString(childNodes.first())
+            }
+        }
+        else {
             throw new IllegalArgumentException("Unknown annotation member expression type: $memberExpression")
         }
     }
@@ -198,11 +205,11 @@ class SpringControllerHelper {
 
     DependableNode<VariableDeclarationExpr> getVariable(String name, Type type) {
         valueFactory.getVariable(name, type).orElseGet {
-            getMockedVariable(name, type)
+            getNewVariable(name, type)
         }
     }
 
-    DependableNode<VariableDeclarationExpr> getMockedVariable(String name, Type type) {
+    DependableNode<VariableDeclarationExpr> getNewVariable(String name, Type type) {
         Expression newExpression = JavaParser.parseExpression("new ${type}()")
         VariableDeclarator variableDeclarator = new VariableDeclarator(type.clone(), name, newExpression)
         DependableNode.from(new VariableDeclarationExpr(variableDeclarator))
