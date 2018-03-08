@@ -5,6 +5,7 @@ import com.aurea.testgenerator.generation.TestGeneratorError
 import com.aurea.testgenerator.generation.TestGeneratorResult
 import com.aurea.testgenerator.generation.TestType
 import com.aurea.testgenerator.generation.ast.DependableNode
+import com.aurea.testgenerator.generation.merge.TestNodeMerger
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.TestMethodNomenclature
 import com.aurea.testgenerator.reporting.CoverageReporter
@@ -180,9 +181,12 @@ class SpringControllerDelegatingMethodTestGenerator implements TestGenerator {
 
             String scope = delegateExpression.scope.get().asNameExpr().nameAsString
             String expectedResulstStatmentCode = ""
-            VariableDeclarationExpr expectedResultDeclaration = controllerHelper.getVariable(EXPECTED_RESULT,method
-                    .type).node
+            DependableNode<VariableDeclarationExpr> variableDeclarationDepNode
             if (method.type && method.type.isClassOrInterfaceType()) {
+                variableDeclarationDepNode = controllerHelper.getVariable(EXPECTED_RESULT, method
+                        .type)
+                VariableDeclarationExpr expectedResultDeclaration = variableDeclarationDepNode.node
+
                 expectedResulstStatmentCode = """
                     $expectedResultDeclaration;
                     Mockito.when(${scope}.${delegateExpression.nameAsString}($args)).thenReturn(${EXPECTED_RESULT});
@@ -223,6 +227,9 @@ class SpringControllerDelegatingMethodTestGenerator implements TestGenerator {
             """
 
             DependableNode<MethodDeclaration> testMethod = new DependableNode<>()
+            if(variableDeclarationDepNode){
+                TestNodeMerger.appendDependencies(testMethod, variableDeclarationDepNode)
+            }
             testMethod.node = JavaParser.parseBodyDeclaration(testCode)
                     .asMethodDeclaration()
             result.tests = [testMethod]

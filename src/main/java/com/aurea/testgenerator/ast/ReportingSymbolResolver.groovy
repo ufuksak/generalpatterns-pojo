@@ -8,6 +8,7 @@ import com.github.javaparser.resolution.SymbolResolver
 import com.github.javaparser.resolution.types.ResolvedType
 import com.github.javaparser.symbolsolver.JavaSymbolSolver
 import com.github.javaparser.symbolsolver.javaparsermodel.UnsolvedSymbolException
+import com.github.javaparser.symbolsolver.model.resolution.TypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
@@ -25,11 +26,20 @@ class ReportingSymbolResolver implements SymbolResolver {
     private final ApplicationEventPublisher publisher
 
     ReportingSymbolResolver(ProjectConfiguration cfg, ApplicationEventPublisher publisher) {
-        solver = new JavaSymbolSolver(new CombinedTypeSolver(
-                new ReflectionTypeSolver(),
-                new JavaParserTypeSolver(cfg.srcPath.toFile())
-        ))
+        solver = new JavaSymbolSolver(new CombinedTypeSolver(getTypeSolvers(cfg)))
         this.publisher = publisher
+    }
+
+    private TypeSolver[] getTypeSolvers(ProjectConfiguration cfg){
+        return ([new ReflectionTypeSolver()] + getJavaParserTypeSolvers(cfg)) as TypeSolver[]
+    }
+
+    private List<JavaParserTypeSolver> getJavaParserTypeSolvers(ProjectConfiguration cfg){
+        if(!cfg.paths.isEmpty()){
+            cfg.paths.toSet().collect{new JavaParserTypeSolver(cfg.srcPath.resolve(it).toFile())}
+        }else {
+            Collections.singletonList(new JavaParserTypeSolver(cfg.srcPath.toFile()))
+        }
     }
 
     @Override

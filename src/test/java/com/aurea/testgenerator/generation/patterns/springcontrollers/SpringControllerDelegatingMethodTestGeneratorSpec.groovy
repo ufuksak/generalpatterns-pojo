@@ -104,7 +104,7 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
 
         """, """ 
         package sample;
-        
+         
         import com.aurea.auth.generalpatternsspringtest.service.DelegateService;
         import org.springframework.web.bind.annotation.PathVariable;
         import org.springframework.web.bind.annotation.PostMapping;
@@ -124,29 +124,29 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         import org.mockito.Mockito;
         import static org.mockito.Mockito.*;
         import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-        
+         
         public class FooTest {
-        
+         
             @InjectMocks()
             private DelegatingWithParametersController controllerInstance;
-        
+         
             @Mock()
             private DelegateService delegateService;
-        
+         
             private MockMvc mockMvc;
-        
+         
             @Before
             public void setup() {
                 MockitoAnnotations.initMocks(this);
                 mockMvc = MockMvcBuilders.standaloneSetup(controllerInstance).build();
             }
-        
+         
             @Test
             public void test_delegate_DelegatesToService() throws Exception {
                 int intParam = 42;
                 String stringParm = "ABC";
                 String mimeType = "application/json;charset=UTF-8";
-                mockMvc.perform(post("/params/delegate/" + intParam + "").param("string_param", stringParm.toString()).accept(MediaType.parseMediaType(mimeType))).andExpect(status().is2xxSuccessful());
+                mockMvc.perform(post("/params/delegate/" + intParam + "").param("string_param", String.valueOf(stringParm)).accept(MediaType.parseMediaType(mimeType))).andExpect(status().is2xxSuccessful());
                 Mockito.verify(delegateService).delegateWithParameters(eq(intParam), eq(stringParm));
             }
         }
@@ -188,7 +188,7 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
 
         """, """ 
         package sample;
-        
+         
         import com.aurea.auth.generalpatternsspringtest.data.Body;
         import com.aurea.auth.generalpatternsspringtest.data.Value;
         import com.aurea.auth.generalpatternsspringtest.service.DelegateService;
@@ -213,23 +213,23 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         import org.mockito.Mockito;
         import static org.mockito.Mockito.*;
         import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-        
+         
         public class FooTest {
-        
+         
             @InjectMocks()
             private DelegatingWithReturnValueController controllerInstance;
-        
+         
             @Mock()
             private DelegateService delegateService;
-        
+         
             private MockMvc mockMvc;
-        
+         
             @Before
             public void setup() {
                 MockitoAnnotations.initMocks(this);
                 mockMvc = MockMvcBuilders.standaloneSetup(controllerInstance).build();
             }
-        
+         
             @Test
             public void test_delegateWithValue_DelegatesToService() throws Exception {
                 int intParam = 42;
@@ -239,7 +239,7 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
                 Value expectedResult = new Value();
                 Mockito.when(delegateService.delegateWithValue(eq(intParam), eq(stringParm), any(Body.class))).thenReturn(expectedResult);
                 String mimeType = "application/json;charset=UTF-8";
-                mockMvc.perform(post("/return/delegate/" + intParam + "").content(mapper.writeValueAsString(body)).contentType(mimeType).param("string_param", stringParm.toString()).accept(MediaType.parseMediaType(mimeType))).andExpect(status().is2xxSuccessful());
+                mockMvc.perform(post("/return/delegate/" + intParam + "").content(mapper.writeValueAsString(body)).contentType(mimeType).param("string_param", String.valueOf(stringParm)).accept(MediaType.parseMediaType(mimeType))).andExpect(status().is2xxSuccessful());
                 Mockito.verify(delegateService).delegateWithValue(eq(intParam), eq(stringParm), any(Body.class));
             }
         }

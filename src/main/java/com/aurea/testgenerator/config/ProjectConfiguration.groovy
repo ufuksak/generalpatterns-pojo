@@ -21,6 +21,8 @@ class ProjectConfiguration {
     @NotNull
     String src
 
+    List<String> paths = []
+
     String testSrc
     String out
     String jacoco
