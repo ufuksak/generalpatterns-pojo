@@ -2,6 +2,7 @@ package com.aurea.testgenerator.generation.ast
 
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.ImportDeclaration
+import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.FieldDeclaration
@@ -23,22 +24,27 @@ class TestUnit {
         this
     }
 
-    TestUnit addDependency(TestDependency dependency) {
-        dependency.imports.each {
-            addImport it
+    TestUnit addDependenciesAndTests(List<DependableNode<MethodDeclaration>> testNodes) {
+        addImports(testNodes)
+
+        StreamEx.of(testNodes).flatMap{it.dependency.fields.stream()}.toSet().sort { it.getVariable(0).nameAsString }.each {
+            addField(it)
         }
-        //TODO: impl
+
+        StreamEx.of(testNodes).flatMap{it.dependency.methodSetups.stream()}.toSet().sort{it.nameAsString}.each {
+            addTest(it)
+        }
+
+        testNodes.each {addTest(it.node)}
+
         this
     }
 
-    TestUnit addDependency(Dependable dependable) {
-        addDependency(dependable.dependency)
-        this
-    }
-
-    TestUnit addDependencies(List<? extends Dependable> testNodes) {
-        StreamEx.of(testNodes).map { it.dependency }.each { addDependency(it) }
-        this
+    private List<ImportDeclaration> addImports(List<DependableNode<MethodDeclaration>> testNodes) {
+        StreamEx.of(testNodes).flatMap { it.dependency.imports.stream() }.each {
+            addImport(it)
+        }
+        test.cu.imports = test.cu.imports.toSet().sort{it.toString()}
     }
 
     TestUnit addTest(MethodDeclaration test) {

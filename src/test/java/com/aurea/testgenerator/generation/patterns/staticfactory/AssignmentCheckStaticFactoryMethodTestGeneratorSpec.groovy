@@ -28,11 +28,11 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             }
         """, """     
             package sample;
-             
+ 
             import org.assertj.core.api.SoftAssertions;
-            import static org.assertj.core.api.Assertions.assertThat;
             import org.assertj.core.data.Offset;
-            import org.junit.Test;              
+            import org.junit.Test;
+            import static org.assertj.core.api.Assertions.assertThat;
              
             public class FooTest {
              
@@ -40,7 +40,6 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
                 public void test_emptyProfile_AssignsValues() throws Exception {
                     String username = "ABC";
                     UserProfile resultingInstance = UserProfile.emptyProfile(username);
-                    
                     SoftAssertions sa = new SoftAssertions();
                     sa.assertThat(resultingInstance.female).isFalse();
                     sa.assertThat(resultingInstance.degrees).isCloseTo(42.2F, Offset.offset(0.001F));
@@ -116,11 +115,11 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             }
         """, """     
             package sample;
-             
+ 
             import org.assertj.core.api.SoftAssertions;
-            import static org.assertj.core.api.Assertions.assertThat;
             import org.assertj.core.data.Offset;
             import org.junit.Test;
+            import static org.assertj.core.api.Assertions.assertThat;
              
             public class FooTest {
              
@@ -128,7 +127,6 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
                 public void test_emptyProfile_AssignsValues() throws Exception {
                     String username = "ABC";
                     UserProfile resultingInstance = UserProfile.emptyProfile(username);
-                    
                     SoftAssertions sa = new SoftAssertions();
                     sa.assertThat(resultingInstance.isFemale()).isFalse();
                     sa.assertThat(resultingInstance.getDegrees()).isCloseTo(42.2F, Offset.offset(0.001F));
@@ -166,10 +164,10 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             }
         """, """     
             package sample;
-             
+ 
             import org.assertj.core.api.SoftAssertions;
-            import static org.assertj.core.api.Assertions.assertThat;
             import org.junit.Test;
+            import static org.assertj.core.api.Assertions.assertThat;
              
             public class FooTest {
              
@@ -177,7 +175,6 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
                 public void test_emptyProfile_AssignsValues() throws Exception {
                     String username = "ABC";
                     UserProfile resultingInstance = UserProfile.emptyProfile(username);
-                    
                     SoftAssertions sa = new SoftAssertions();
                     sa.assertThat(resultingInstance.getAge()).isEqualTo(42);
                     sa.assertThat(resultingInstance.username).isEqualTo(username);
@@ -215,17 +212,16 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             }
         """, """     
             package sample;
-             
+ 
             import org.assertj.core.api.SoftAssertions;
-            import static org.assertj.core.api.Assertions.assertThat;
             import org.junit.Test;
+            import static org.assertj.core.api.Assertions.assertThat;
              
             public class FooTest {
              
                 @Test
                 public void test_emptyProfile_AssignsValues() throws Exception {
                     Foo resultingInstance = Foo.emptyProfile();
-                    
                     SoftAssertions sa = new SoftAssertions();
                     sa.assertThat(resultingInstance.getAge()).isEqualTo(58);
                     sa.assertThat(resultingInstance.username).isEqualTo("Galatae, quadra!");
@@ -262,17 +258,16 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             }
         """, """     
             package sample;
-             
+ 
             import org.assertj.core.api.SoftAssertions;
-            import static org.assertj.core.api.Assertions.assertThat;
             import org.junit.Test;
+            import static org.assertj.core.api.Assertions.assertThat;
              
             public class FooTest {
              
                 @Test
                 public void test_emptyProfile_AssignsValues() throws Exception {
                     Foo resultingInstance = Foo.emptyProfile();
-                    
                     SoftAssertions sa = new SoftAssertions();
                     sa.assertThat(resultingInstance.getAge()).isEqualTo(58);
                     sa.assertThat(resultingInstance.username).isEqualTo("Galatae, quadra!");
@@ -309,10 +304,10 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             }
         """, """     
             package sample;
-             
+ 
             import org.assertj.core.api.SoftAssertions;
-            import static org.assertj.core.api.Assertions.assertThat;
             import org.junit.Test;
+            import static org.assertj.core.api.Assertions.assertThat;
              
             public class FooTest {
              
@@ -320,7 +315,6 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
                 public void test_emptyProfile_AssignsValues() throws Exception {
                     String username = "ABC";
                     Foo resultingInstance = Foo.emptyProfile(username);
-                    
                     SoftAssertions sa = new SoftAssertions();
                     sa.assertThat(resultingInstance.getAge()).isEqualTo(58);
                     sa.assertThat(resultingInstance.username).isEqualTo(username);

@@ -4,7 +4,6 @@ import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.generation.merge.TestNodeMerger
 import com.aurea.testgenerator.generation.source.Imports
 import com.aurea.testgenerator.value.MockExpressionBuilder
-import com.aurea.testgenerator.value.NewExpressionBuilder
 import com.aurea.testgenerator.value.PrimitiveValueFactory
 import com.aurea.testgenerator.value.ReferenceTypeFactory
 import com.aurea.testgenerator.value.Resolution
@@ -21,7 +20,6 @@ import com.github.javaparser.resolution.types.ResolvedType
 import com.github.javaparser.utils.Pair
 import org.apache.commons.lang.math.RandomUtils
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
@@ -29,13 +27,10 @@ class RandomJavaLangTypesFactory implements ReferenceTypeFactory {
 
     ValueFactory valueFactory
     PrimitiveValueFactory primitiveValueFactory
-    boolean mockByDefault = true
 
     @Autowired
-    RandomJavaLangTypesFactory(PrimitiveValueFactory primitiveValueFactory,
-                               @Value("\${type.factory.mockByDefault:true}") boolean mockByDefault) {
+    RandomJavaLangTypesFactory(PrimitiveValueFactory primitiveValueFactory) {
         this.primitiveValueFactory = primitiveValueFactory
-        this.mockByDefault = mockByDefault
     }
 
     @Override
@@ -139,16 +134,7 @@ class RandomJavaLangTypesFactory implements ReferenceTypeFactory {
             DependableNode<Expression> expression = DependableNode.from(JavaParser.parseExpression('new Object()'))
             return Optional.of(expression)
         }
-        return Optional.of(mockOrNew(type.qualifiedName))
-    }
-
-    private DependableNode<Expression> mockOrNew(String name) {
-        if(mockByDefault){
-            MockExpressionBuilder.build(name)
-        }else{
-            NewExpressionBuilder.buildDependableNode(name)
-        }
-
+        return Optional.of(MockExpressionBuilder.build(type.qualifiedName))
     }
 
     private Optional<DependableNode<Expression>> getCollectionComponentValue(ResolvedReferenceType type) {

@@ -43,21 +43,7 @@ class UnitTestGenerator {
             it.generate(unitUnderTest).stream()
         }.toList()
 
-        testUnit.addDependencies(StreamEx.of(testGeneratorResults).flatMap { it.tests.stream() }.toList())
-
-        StreamEx.of(testGeneratorResults).flatMap { it.tests.stream() }.flatMap {
-            it.dependency.fields.stream()
-        }.toSet().sort { it.getVariable(0).nameAsString }.each {
-            testUnit.addField(it)
-        }
-
-        StreamEx.of(testGeneratorResults).flatMap{it.tests.stream()}.flatMap{it.dependency.methodSetups.stream()}.toSet().each {
-            testUnit.addTest(it)
-        }
-
-        StreamEx.of(testGeneratorResults).flatMap { it.tests.stream() }.each { testNodeMethod ->
-            testUnit.addTest(testNodeMethod.node)
-        }
+        testUnit.addDependenciesAndTests(StreamEx.of(testGeneratorResults).flatMap { it.tests.stream() }.toList())
 
         boolean hasTests = testGeneratorResults.any { it.tests }
         return hasTests ? Optional.of(testUnit) : Optional.empty()

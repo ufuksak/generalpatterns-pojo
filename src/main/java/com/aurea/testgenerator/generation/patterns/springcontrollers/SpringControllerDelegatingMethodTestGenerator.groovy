@@ -1,11 +1,13 @@
 package com.aurea.testgenerator.generation.patterns.springcontrollers
 
-import com.aurea.testgenerator.generation.MethodLevelTestGenerator
+import com.aurea.testgenerator.generation.MethodLevelTestGeneratorWithClassContext
 import com.aurea.testgenerator.generation.TestGeneratorError
 import com.aurea.testgenerator.generation.TestGeneratorResult
 import com.aurea.testgenerator.generation.TestType
+import com.aurea.testgenerator.generation.annotations.AnnotationsProcessor
 import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.generation.merge.TestNodeMerger
+import com.aurea.testgenerator.generation.methods.MethodsUtils
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.TestMethodNomenclature
 import com.aurea.testgenerator.generation.source.Imports
@@ -14,6 +16,7 @@ import com.aurea.testgenerator.reporting.TestGeneratorResultReporter
 import com.aurea.testgenerator.source.Unit
 import com.aurea.testgenerator.value.Types
 import com.aurea.testgenerator.value.ValueFactory
+import com.aurea.testgenerator.value.VariableFactoryReplacingMocksByNewInstances
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.Modifier
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
@@ -26,7 +29,6 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import com.github.javaparser.ast.stmt.ExpressionStmt
 import com.github.javaparser.ast.type.ClassOrInterfaceType
 import com.github.javaparser.ast.type.Type
-import com.github.javaparser.ast.visitor.VoidVisitorAdapter
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import groovy.util.logging.Log4j2
 import org.springframework.context.annotation.Profile
@@ -36,7 +38,7 @@ import org.springframework.stereotype.Component
 @Profile("spring-controller")
 @Log4j2
 //TODO add dependency mergers
-class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGenerator<MethodDeclaration> {
+class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGeneratorWithClassContext<MethodDeclaration> {
 
     private static final String EXPECTED_RESULT = "expectedResult"
     private static final String INSTANCE_NAME = "controllerInstance"
@@ -51,16 +53,14 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
             .asMethodDeclaration()
     private static final FieldDeclaration MOCKMVC_FIELD = JavaParser.parseBodyDeclaration("private MockMvc mockMvc;")
 
-    ValueFactory valueFactory
-    SpringControllerHelper controllerHelper
+    VariableFactoryReplacingMocksByNewInstances variableFactory
 
 
     SpringControllerDelegatingMethodTestGenerator(JavaParserFacade solver, TestGeneratorResultReporter reporter,
                                                   CoverageReporter coverageReporter, NomenclatureFactory
-                                                          nomenclatures, ValueFactory valueFactory, SpringControllerHelper controllerHelper) {
+                                                          nomenclatures, ValueFactory valueFactory) {
         super(solver, reporter, coverageReporter, nomenclatures)
-        this.valueFactory = valueFactory
-        this.controllerHelper = controllerHelper
+        this.variableFactory = new VariableFactoryReplacingMocksByNewInstances(valueFactory)
     }
 
     private List<FieldDeclaration> getTargetFields(ClassOrInterfaceDeclaration classDeclaration) {
@@ -70,25 +70,7 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
     }
 
     @Override
-    protected VoidVisitorAdapter<JavaParserFacade> createVisitor(Unit unit, List<TestGeneratorResult> results) {
-        new VoidVisitorAdapter<JavaParserFacade>() {
-            @Override
-            void visit(MethodDeclaration methodDeclaration, JavaParserFacade javaParserFacade) {
-                visit(methodDeclaration, unit, results)
-            }
-
-            @Override
-            void visit(ClassOrInterfaceDeclaration classOrInterfaceDeclaration, JavaParserFacade javaParserFacade) {
-                if (!shouldBeVisited(classOrInterfaceDeclaration)) {
-                    return
-                }
-                super.visit(classOrInterfaceDeclaration, javaParserFacade)
-                visitClass(classOrInterfaceDeclaration, results)
-            }
-        }
-    }
-
-    void visitClass(ClassOrInterfaceDeclaration classDeclaration, List<TestGeneratorResult> results) {
+    protected void visitClass(ClassOrInterfaceDeclaration classDeclaration, List<TestGeneratorResult> results) {
         List<FieldDeclaration> targetFields = getTargetFields(classDeclaration)
         Set<FieldDeclaration> testFields = targetFields.collect {
             VariableDeclarator variable = it.variables.first()
@@ -119,17 +101,15 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
             MethodCallExpr delegateExpression = method.findAll(MethodCallExpr).last()
             DependableNode<VariableDeclarationExpr> variableDeclarationDepNode
             if (returnsClassOrInterface(method)) {
-                variableDeclarationDepNode = controllerHelper.getVariable(EXPECTED_RESULT, method
-                        .type)
+                variableDeclarationDepNode = variableFactory.getVariable(EXPECTED_RESULT, method.type)
             }
 
             String requestBodyName = method.parameters.find {
-                controllerHelper.hasAnnotation(it, SpringControllerHelper.REQUEST_BODY)
+                AnnotationsProcessor.hasAnnotation(it, SpringControllerUtils.REQUEST_BODY)
             }?.nameAsString
 
-            AnnotationExpr methodRequestMappingAnnotation = controllerHelper.getAnnotation(method,
-                    SpringControllerHelper
-                            .REQUEST_MAPPING_ANNOTATIONS)
+            AnnotationExpr methodRequestMappingAnnotation = AnnotationsProcessor.getAnnotation(method,
+                    SpringControllerUtils.REQUEST_MAPPING_ANNOTATIONS)
 
             DependableNode<MethodDeclaration> testMethod = buildTestMethod(unit, method, delegateExpression,
                     requestBodyName, variableDeclarationDepNode, methodRequestMappingAnnotation)
@@ -156,7 +136,7 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
                 ${getExpectedResultStatementCode(method, variableDeclarationDepNode, delegateExpression, args)}
                 
                 String mimeType="application/json;charset=UTF-8";
-                mockMvc.perform(${controllerHelper.getHttpMethod(methodRequestMappingAnnotation)}("${buildUrl(method, methodRequestMappingAnnotation)}")
+                mockMvc.perform(${SpringControllerUtils.getHttpMethod(methodRequestMappingAnnotation)}("${buildUrl(method, methodRequestMappingAnnotation)}")
                 ${getContentCode(requestBodyName)}
                 ${getContenTypeCode(requestBodyName, methodRequestMappingAnnotation)}
                 ${getParamsCode(method)}
@@ -202,7 +182,7 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
     }
 
     private String getParamsCode(MethodDeclaration method) {
-        Map<String, String> requestParamToname = controllerHelper.getVariablesMap(method, SpringControllerHelper
+        Map<String, String> requestParamToname = SpringControllerUtils.getVariablesMap(method, SpringControllerUtils
                 .REQUEST_PARAM)
         String paramsCode = requestParamToname.isEmpty() ? "" : requestParamToname.entrySet().collect {
             "${System.lineSeparator()}.param(\"${it.key}\", String.valueOf(${it.value}))"
@@ -211,11 +191,11 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
     }
 
     private String buildUrl(MethodDeclaration method, AnnotationExpr methodRequestMappingAnnotation) {
-        controllerHelper.buildUrl(method,methodRequestMappingAnnotation)
+        SpringControllerUtils.buildUrl(method,methodRequestMappingAnnotation)
     }
 
     private String getVariableStatements(MethodDeclaration method) {
-        List<DependableNode<VariableDeclarationExpr>> variables = controllerHelper.getVariableDeclarations(method)
+        List<DependableNode<VariableDeclarationExpr>> variables = variableFactory.getVariableDeclarations(method)
         variables.collect { new ExpressionStmt(it.node) }.join(System.lineSeparator())
     }
 
@@ -242,7 +222,7 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
     }
 
     private String getContenTypeCode(String requestBodyName, AnnotationExpr methodRequestMappingAnnotation) {
-        String consumeType = controllerHelper.getStringValue(methodRequestMappingAnnotation, "consumes")
+        String consumeType = AnnotationsProcessor.getStringValue(methodRequestMappingAnnotation, "consumes")
         if (requestBodyName || !consumeType.isEmpty()) {
             if (consumeType.isEmpty()) {
                 return ".contentType(mimeType)"
@@ -269,17 +249,18 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
         return SpringControllersTestTypes.DELEGATING
     }
 
-    boolean shouldBeVisited(ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
+    @Override
+    boolean shouldBeVisited(Unit unit, ClassOrInterfaceDeclaration classOrInterfaceDeclaration) {
         !classOrInterfaceDeclaration.interface &&
-                controllerHelper.isRestController(classOrInterfaceDeclaration) &&
+                SpringControllerUtils.isRestController(classOrInterfaceDeclaration) &&
                 !getTargetFields(classOrInterfaceDeclaration).isEmpty()
     }
 
     @Override
     boolean shouldBeVisited(Unit unit, MethodDeclaration callableDeclaration) {
-        return controllerHelper.isRestControllerMethod(callableDeclaration) &&
-                controllerHelper.callDelegateWithParamValuesAndReturnResults(callableDeclaration) &&
-                controllerHelper.doNotReassignParameters(callableDeclaration)
+        return SpringControllerUtils.isRestControllerMethod(callableDeclaration) &&
+                SpringControllerUtils.callDelegateWithParamValuesAndReturnResults(callableDeclaration) &&
+                MethodsUtils.doNotReassignParameters(callableDeclaration)
 
     }
 }
