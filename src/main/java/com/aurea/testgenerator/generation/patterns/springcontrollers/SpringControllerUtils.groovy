@@ -7,9 +7,12 @@ import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.AnnotationExpr
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.stmt.ReturnStmt
+import com.github.javaparser.resolution.UnsolvedSymbolException
+import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration
+import groovy.util.logging.Log4j2
 import org.apache.commons.lang3.StringUtils
 
-
+@Log4j2
 class SpringControllerUtils {
     static final String NAME_ANNOTATION_PROPERTY = "name"
     protected
@@ -73,8 +76,16 @@ class SpringControllerUtils {
             return false
         }
         MethodCallExpr methodCallExpr = optionalExpression.get()
-        if (!methodCallExpr.scope.isPresent() || !methodCallExpr.scope.get().asNameExpr().resolve().isField()) {
+        if (!methodCallExpr.scope.isPresent()) {
             return false
+        }
+        try{
+            ResolvedValueDeclaration scope = methodCallExpr.scope.get().asNameExpr().resolve();
+            if(!scope.isField()){
+                return false
+            }
+        }catch (UnsolvedSymbolException ex){
+            log.error("Unresoolvable return type for method $methodDeclaration", ex)
         }
         if (methodCallExpr.arguments.any { !(it.nameExpr || it.literalExpr) }) {
             return false
