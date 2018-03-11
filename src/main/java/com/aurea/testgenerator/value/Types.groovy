@@ -21,6 +21,7 @@ import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import com.github.javaparser.symbolsolver.model.resolution.SymbolReference
 import com.github.javaparser.symbolsolver.resolution.SymbolSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
+import org.apache.commons.lang3.StringUtils
 
 class Types {
 
@@ -230,6 +231,16 @@ class Types {
     static boolean isBoxedPrimitive(ResolvedReferenceType type) {
         for (ResolvedPrimitiveType primitive : ResolvedPrimitiveType.ALL) {
             if (primitive.boxTypeQName == type.qualifiedName) {
+                return true
+            }
+        }
+        return false
+    }
+
+    static boolean isBoxedPrimitive(Type type) {
+        for (ResolvedPrimitiveType primitive : ResolvedPrimitiveType.ALL) {
+            if (primitive.boxTypeQName == type.asString()
+                    || StringUtils.substringAfterLast(primitive.boxTypeQName, ".") == type.asString()) {
                 return true
             }
         }

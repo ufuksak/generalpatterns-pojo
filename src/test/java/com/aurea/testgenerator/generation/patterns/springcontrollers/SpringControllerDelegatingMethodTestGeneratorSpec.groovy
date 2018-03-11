@@ -67,8 +67,7 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
          
             @Test
             public void test_delegate_DelegatesToService() throws Exception {
-                String mimeType = "application/json;charset=UTF-8";
-                mockMvc.perform(get("/delegate").accept(MediaType.parseMediaType(mimeType))).andExpect(status().is2xxSuccessful());
+                mockMvc.perform(get("/delegate")).andExpect(status().is2xxSuccessful());
                 Mockito.verify(delegateService).delegate();
             }
         }
@@ -146,8 +145,7 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
             public void test_delegate_DelegatesToService() throws Exception {
                 int intParam = 42;
                 String stringParm = "ABC";
-                String mimeType = "application/json;charset=UTF-8";
-                mockMvc.perform(post("/params/delegate/" + intParam + "").param("string_param", String.valueOf(stringParm)).accept(MediaType.parseMediaType(mimeType))).andExpect(status().is2xxSuccessful());
+                mockMvc.perform(post("/params/delegate/" + intParam + "").param("string_param", String.valueOf(stringParm))).andExpect(status().is2xxSuccessful());
                 Mockito.verify(delegateService).delegateWithParameters(eq(intParam), eq(stringParm));
             }
         }
@@ -157,8 +155,6 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
     def "service call returning values should be mocked"() {
         expect:
         onClassCodeExpect """
-        import com.aurea.auth.generalpatternsspringtest.data.Body;
-        import com.aurea.auth.generalpatternsspringtest.data.Value;
         import com.aurea.auth.generalpatternsspringtest.service.DelegateService;
         import org.springframework.web.bind.annotation.GetMapping;
         import org.springframework.web.bind.annotation.PathVariable;
@@ -186,12 +182,63 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
             }
         
         }
+        
+         class Value {
+            private int inntValue;
+            private String stringValue;
+        
+            public Value(int inntValue, String stringValue) {
+                this.inntValue = inntValue;
+                this.stringValue = stringValue;
+            }
+        
+            public Value(){}
+        
+            public int getInntValue() {
+                return inntValue;
+            }
+        
+            public void setInntValue(int inntValue) {
+                this.inntValue = inntValue;
+            }
+        
+            public String getStringValue() {
+                return stringValue;
+            }
+        
+            public void setStringValue(String stringValue) {
+                this.stringValue = stringValue;
+            }
+        }
+        
+        class Body {
+            int id;
+        
+            public Body(int id) {
+                this.id = id;
+            }
+        
+            public Body() {
+            }
+        
+            public int getId() {
+                return id;
+            }
+        
+            public void setId(int id) {
+                this.id = id;
+            }
+        }
+        
+        class DelegateService {
+            public Value delegateWithValue(int intParam, String stringParm, Body body) {
+                return new Value(intParam,stringParm);
+            }
+        }
 
         """, """ 
         package sample;
  
-        import com.aurea.auth.generalpatternsspringtest.data.Body;
-        import com.aurea.auth.generalpatternsspringtest.data.Value;
         import com.aurea.auth.generalpatternsspringtest.service.DelegateService;
         import com.fasterxml.jackson.databind.ObjectMapper;
         import org.junit.Before;
@@ -212,6 +259,8 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         import org.springframework.web.bind.annotation.RequestParam;
         import org.springframework.web.bind.annotation.RestController;
         import static org.mockito.Mockito.*;
+        import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
+        import static org.mockito.Mockito.mock;
         import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
         import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
          
@@ -239,8 +288,7 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
                 ObjectMapper mapper = new ObjectMapper();
                 Value expectedResult = new Value();
                 Mockito.when(delegateService.delegateWithValue(eq(intParam), eq(stringParm), any(Body.class))).thenReturn(expectedResult);
-                String mimeType = "application/json;charset=UTF-8";
-                mockMvc.perform(post("/return/delegate/" + intParam + "").content(mapper.writeValueAsString(body)).contentType(mimeType).param("string_param", String.valueOf(stringParm)).accept(MediaType.parseMediaType(mimeType))).andExpect(status().is2xxSuccessful());
+                mockMvc.perform(post("/return/delegate/" + intParam + "").content(mapper.writeValueAsString(body)).contentType("application/json;charset=UTF-8").param("string_param", String.valueOf(stringParm))).andExpect(status().is2xxSuccessful());
                 Mockito.verify(delegateService).delegateWithValue(eq(intParam), eq(stringParm), any(Body.class));
             }
         }

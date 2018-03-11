@@ -9,12 +9,33 @@ class AnnotationsProcessor {
     public static final String DEFAULT_ANNOTATION_PROPERTY = "value"
 
     static String getStringValue(AnnotationExpr annotation, String memberName) {
+        Expression memberExpression = getAnnotationMemberExpressionValue(annotation, memberName)
+        if (memberExpression) {
+            return getAnnotationMemberValueAsString(memberExpression)
+        }
+        return ""
+    }
+
+    static Expression getAnnotationMemberExpressionValue(AnnotationExpr annotation, List<String> memberNames) {
+        memberNames.forEach {
+            Expression expression = getAnnotationMemberExpressionValue(annotation, it)
+            if (expression) {
+                return expression
+            }
+        }
+    }
+
+    static Expression getAnnotationMemberExpressionValue(AnnotationExpr annotation, String memberName) {
+        Expression memberExpression
         if (annotation.isSingleMemberAnnotationExpr() && memberName == AnnotationsProcessor.DEFAULT_ANNOTATION_PROPERTY) {
-            return annotation.asSingleMemberAnnotationExpr().memberValue.asStringLiteralExpr().asString()
+            memberExpression = annotation.asSingleMemberAnnotationExpr().memberValue
         } else if (annotation.isNormalAnnotationExpr()) {
             def pair = annotation.asNormalAnnotationExpr().pairs.find { it.nameAsString == memberName }
-            return pair ? getAnnotationMemberValueAsString(pair.value) : ""
-        } else return ""
+            if (pair) {
+                memberExpression = pair.value
+            }
+        }
+        memberExpression
     }
 
     static getAnnotationMemberValueAsString(Expression memberExpression){
@@ -29,6 +50,8 @@ class AnnotationsProcessor {
             }else {
                 getAnnotationMemberValueAsString(childNodes.first())
             }
+        }else  if(memberExpression.isNameExpr()){
+            memberExpression.asNameExpr().nameAsString
         }
         else {
             throw new IllegalArgumentException("Unknown annotation member expression type: $memberExpression")

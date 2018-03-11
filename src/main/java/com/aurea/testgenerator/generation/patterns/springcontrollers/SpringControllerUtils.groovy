@@ -2,9 +2,11 @@ package com.aurea.testgenerator.generation.patterns.springcontrollers
 
 import com.aurea.testgenerator.generation.annotations.AnnotationsProcessor
 import com.aurea.testgenerator.generation.methods.MethodsUtils
+import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.expr.AnnotationExpr
+import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.stmt.ReturnStmt
 import com.github.javaparser.resolution.UnsolvedSymbolException
@@ -15,24 +17,24 @@ import org.apache.commons.lang3.StringUtils
 @Log4j2
 class SpringControllerUtils {
     static final String NAME_ANNOTATION_PROPERTY = "name"
-    protected
     static final Set<String> PARAMETER_ANNOTATION_PROPERTIES = [AnnotationsProcessor.DEFAULT_ANNOTATION_PROPERTY,
                                                                 NAME_ANNOTATION_PROPERTY]
-    protected static final String PATH_PROPERTY = "path"
-    protected static final String REQUEST_MAPPING = "RequestMapping"
+    static final String PATH_PROPERTY = "path"
+    static final String REQUEST_MAPPING = "RequestMapping"
     static final String GET_MAPPING = "GetMapping"
     static final String POST_MAPPING = "PostMapping"
     static final String PUT_MAPPING = "PutMapping"
     static final String PATCH_MAPPING = "PatchMapping"
     static final String DELETE_MAPPING = "DeleteMapping"
-    protected static final Set<String> REQUEST_MAPPING_ANNOTATIONS = [REQUEST_MAPPING, GET_MAPPING,
+    static final Set<String> REQUEST_MAPPING_ANNOTATIONS = [REQUEST_MAPPING, GET_MAPPING,
                                                                       POST_MAPPING, PUT_MAPPING, PATCH_MAPPING, DELETE_MAPPING]
-    protected static final String REST_CONTROLLER = "RestController"
-    protected static final String PATH_VARIABLE = "PathVariable"
-    protected static final String REQUEST_PARAM = "RequestParam"
-    protected static final int MAPPING_SUFFIX_LENGTH = 7
-    protected static final String REQUEST_BODY = "RequestBody"
-    protected static final String DEFAULT_HTTP_METHOD = "get"
+    static final String REST_CONTROLLER = "RestController"
+    static final String PATH_VARIABLE = "PathVariable"
+    static final String REQUEST_PARAM = "RequestParam"
+    static final String REQUEST_HEADER = "RequestHeader"
+    static final int MAPPING_SUFFIX_LENGTH = 7
+    static final String REQUEST_BODY = "RequestBody"
+    static final String DEFAULT_HTTP_METHOD = "get"
 
     static String getHttpMethod(AnnotationExpr annotationExpr) {
         String annotationName = annotationExpr.nameAsString
@@ -76,16 +78,11 @@ class SpringControllerUtils {
             return false
         }
         MethodCallExpr methodCallExpr = optionalExpression.get()
-        if (!methodCallExpr.scope.isPresent()) {
+        if(!callsDelegate(methodCallExpr)){
             return false
         }
-        try{
-            ResolvedValueDeclaration scope = methodCallExpr.scope.get().asNameExpr().resolve();
-            if(!scope.isField()){
-                return false
-            }
-        }catch (UnsolvedSymbolException ex){
-            log.error("Unresoolvable return type for method $methodDeclaration", ex)
+        if(!returnSameType(methodDeclaration,methodCallExpr)){
+            return false
         }
         if (methodCallExpr.arguments.any { !(it.nameExpr || it.literalExpr) }) {
             return false
@@ -95,6 +92,39 @@ class SpringControllerUtils {
             it.asNameExpr().nameAsString
         }
         if (!paramNames.containsAll(usedParameters)) {
+            return false
+        }
+        return true
+    }
+
+    static boolean returnSameType(MethodDeclaration methodDeclaration, MethodCallExpr methodCallExpr) {
+        try {
+            if (methodDeclaration.type.isVoidType()){
+                return true
+            }
+            return methodDeclaration.type.resolve() == methodCallExpr.calculateResolvedType()
+        } catch (Exception ex) { // catching Exception here because com.github.javaparser.symbolsolver
+            // .javaparsermodel.JavaParserFacade.solveMethodAsUsage thros RuntimeExdeption
+            log.error("Unable to resolve types for $methodDeclaration and $methodCallExpr", ex)
+            return false
+        }
+    }
+
+    static boolean callsDelegate(MethodCallExpr methodCallExpr) {
+        if (!methodCallExpr.scope.isPresent()) {
+            return false
+        }
+        try{
+            Expression scope = methodCallExpr.scope.get()
+            if(!scope.isNameExpr()){
+                return false
+            }
+            ResolvedValueDeclaration resolvedScope = scope.asNameExpr().resolve();
+            if(!resolvedScope.isField()){
+                return false
+            }
+        }catch (UnsolvedSymbolException ex){
+            log.error("Unresoolvable return type for method $methodCallExpr", ex)
             return false
         }
         return true
@@ -113,7 +143,8 @@ class SpringControllerUtils {
         methodDeclaration.parameters.collect {
             AnnotationExpr annotation = AnnotationsProcessor.getAnnotation(it, annotationName)
             if (annotation) {
-                Tuple2<String, String> pair = new Tuple2<>(AnnotationsProcessor.getStringValue(annotation, SpringControllerUtils.PARAMETER_ANNOTATION_PROPERTIES)
+                String key = AnnotationsProcessor.getStringValue(annotation, SpringControllerUtils.PARAMETER_ANNOTATION_PROPERTIES)
+                Tuple2<String, String> pair = new Tuple2<>(key.isEmpty()?it.nameAsString:key
                         ,  it.nameAsString)
                 return Optional.of(pair)
             }
@@ -121,16 +152,33 @@ class SpringControllerUtils {
         }.findAll { it.isPresent() }.collectEntries { [(it.get().first): it.get().second] }
     }
 
-    static String buildUrl(MethodDeclaration method, AnnotationExpr methodRequestMappingAnnotation) {
+    static String buildUrl(MethodDeclaration method) {
         ClassOrInterfaceDeclaration classDeclaration = method.parentNode.get() as ClassOrInterfaceDeclaration
-        AnnotationExpr classRequestMappingAnnotation = AnnotationsProcessor.getAnnotation(classDeclaration, SpringControllerUtils.REQUEST_MAPPING_ANNOTATIONS)
-        String classUrlTemplate = classRequestMappingAnnotation ? getUrlTemplate(classRequestMappingAnnotation) : ""
+        String classUrlTemplate = getNodeUrlTemplate(classDeclaration)
 
-        String methodUrlTemplate = methodRequestMappingAnnotation ? getUrlTemplate(methodRequestMappingAnnotation) : ""
+        String methodUrlTemplate = getNodeUrlTemplate(method)
         String urlTemplate = classUrlTemplate + methodUrlTemplate
-        urlTemplate = urlTemplate.isEmpty() ? "/" : urlTemplate
+        String urlSep = "/"
+        urlTemplate = urlTemplate.isEmpty() ? urlSep : urlTemplate
+        urlTemplate = urlTemplate.startsWith(urlSep) ? urlTemplate : (urlSep +  urlTemplate)
         Map<String, String> pathVariableToName = getVariablesMap(method, SpringControllerUtils.PATH_VARIABLE)
         String url = fillPathVariablesUrl(urlTemplate, pathVariableToName)
         url
+    }
+
+    private static String getNodeUrlTemplate(Node node) {
+        AnnotationExpr mappingAnnotation = AnnotationsProcessor.getAnnotation(node, SpringControllerUtils.REQUEST_MAPPING_ANNOTATIONS)
+        String urlTemplate = mappingAnnotation ? getUrlTemplate(mappingAnnotation) : ""
+        urlTemplate
+    }
+
+    static boolean hasSimpleUrlTemplate(Node node) {
+        AnnotationExpr mappingAnnotation = AnnotationsProcessor.getAnnotation(node, SpringControllerUtils.REQUEST_MAPPING_ANNOTATIONS)
+        if(!mappingAnnotation){
+            return true
+        }
+        Expression mappingExpression = AnnotationsProcessor.getAnnotationMemberExpressionValue(mappingAnnotation,
+                [AnnotationsProcessor.DEFAULT_ANNOTATION_PROPERTY, SpringControllerUtils.PATH_PROPERTY])
+        return (!mappingExpression || mappingExpression.isStringLiteralExpr())
     }
 }

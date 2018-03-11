@@ -16,7 +16,9 @@ class MethodsUtils {
     }
 
     static Optional<MethodCallExpr> findLastMethodCallExpression (MethodDeclaration methodDeclaration){
-        List<MethodCallExpr> expressions = methodDeclaration.findAll(MethodCallExpr)
+        List<MethodCallExpr> expressions = methodDeclaration.findAll(MethodCallExpr).findAll {
+            !(it.parentNode.isPresent() && it.parentNode.get() instanceof MethodCallExpr)
+        }
         if(!expressions.isEmpty()){
             return Optional.of(expressions.last())
         }
@@ -26,5 +28,9 @@ class MethodsUtils {
     static List<String> getParamNames(MethodDeclaration methodDeclaration) {
         List<String> paramNames = methodDeclaration.parameters.collect { it.nameAsString }
         paramNames
+    }
+
+    static boolean returnsClassOrInterface(MethodDeclaration method) {
+        method.type && method.type.isClassOrInterfaceType()
     }
 }
