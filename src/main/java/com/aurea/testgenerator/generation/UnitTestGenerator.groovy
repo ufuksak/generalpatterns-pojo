@@ -27,7 +27,7 @@ class UnitTestGenerator {
     UnitTestGenerator(List<TestGenerator> generators, NomenclatureFactory nomenclatureFactory) {
         this.generators = generators
         this.nomenclatureFactory = nomenclatureFactory
-        log.info "Registered generators: ${this.generators}"
+        log.info "Registered generators: ${this.generators.collect {it.class.simpleName}}"
     }
 
     Optional<TestUnit> tryGenerateTest(Unit unitUnderTest) {
@@ -57,7 +57,7 @@ class UnitTestGenerator {
 
     @Override
     String toString() {
-        generators
+        generators.collect {it.class.simpleName }.join('||')
     }
 
     private static ClassOrInterfaceDeclaration newTestClass(String testName) {
