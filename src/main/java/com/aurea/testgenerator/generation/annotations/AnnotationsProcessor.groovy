@@ -9,33 +9,33 @@ class AnnotationsProcessor {
     public static final String DEFAULT_ANNOTATION_PROPERTY = "value"
 
     static String getStringValue(AnnotationExpr annotation, String memberName) {
-        Expression memberExpression = getAnnotationMemberExpressionValue(annotation, memberName)
-        if (memberExpression) {
-            return getAnnotationMemberValueAsString(memberExpression)
+        Optional<Expression> memberExpression = getAnnotationMemberExpressionValue(annotation, memberName)
+        if (memberExpression.isPresent()) {
+            return getAnnotationMemberValueAsString(memberExpression.get())
         }
         return ""
     }
 
-    static Expression getAnnotationMemberExpressionValue(AnnotationExpr annotation, List<String> memberNames) {
+    static Optional<Expression> getAnnotationMemberExpressionValue(AnnotationExpr annotation, List<String> memberNames) {
         memberNames.forEach {
-            Expression expression = getAnnotationMemberExpressionValue(annotation, it)
-            if (expression) {
+            Optional<Expression> expression = getAnnotationMemberExpressionValue(annotation, it)
+            if (expression.isPresent()) {
                 return expression
             }
         }
+        return Optional.empty()
     }
 
-    static Expression getAnnotationMemberExpressionValue(AnnotationExpr annotation, String memberName) {
-        Expression memberExpression
-        if (annotation.isSingleMemberAnnotationExpr() && memberName == AnnotationsProcessor.DEFAULT_ANNOTATION_PROPERTY) {
-            memberExpression = annotation.asSingleMemberAnnotationExpr().memberValue
+    static Optional<Expression> getAnnotationMemberExpressionValue(AnnotationExpr annotation, String memberName) {
+        if (annotation.isSingleMemberAnnotationExpr() && memberName == DEFAULT_ANNOTATION_PROPERTY) {
+            return Optional.of(annotation.asSingleMemberAnnotationExpr().memberValue)
         } else if (annotation.isNormalAnnotationExpr()) {
             def pair = annotation.asNormalAnnotationExpr().pairs.find { it.nameAsString == memberName }
             if (pair) {
-                memberExpression = pair.value
+                return Optional.of(pair.value)
             }
         }
-        memberExpression
+        return Optional.empty()
     }
 
     static getAnnotationMemberValueAsString(Expression memberExpression){
@@ -48,7 +48,7 @@ class AnnotationsProcessor {
             if (childNodes.isEmpty()){
                 ""
             }else {
-                getAnnotationMemberValueAsString(childNodes.first())
+                getAnnotationMemberValueAsString(childNodes.first() as Expression)
             }
         }else  if(memberExpression.isNameExpr()){
             memberExpression.asNameExpr().nameAsString
@@ -68,10 +68,6 @@ class AnnotationsProcessor {
         return ""
     }
 
-    static String getStringValue(AnnotationExpr annotation) {
-        return getStringValue(annotation, DEFAULT_ANNOTATION_PROPERTY)
-    }
-
     static boolean hasAnnotation(Node node, Set<String> annotatioNames) {
         node.annotations.any { annotatioNames.contains(it.nameAsString) }
     }
@@ -81,7 +77,8 @@ class AnnotationsProcessor {
     }
 
     static AnnotationExpr getAnnotation(Node node, Set<String> annotatioNames) {
-        return node.annotations.find { annotatioNames.contains(it.nameAsString) }
+        List<AnnotationExpr> annotations = node.annotations
+        return annotations.find { annotatioNames.contains(it.nameAsString) }
     }
 
     static AnnotationExpr getAnnotation(Node node, String annotatioName) {

@@ -27,7 +27,8 @@ class SpringControllerUtils {
     static final String PATCH_MAPPING = "PatchMapping"
     static final String DELETE_MAPPING = "DeleteMapping"
     static final Set<String> REQUEST_MAPPING_ANNOTATIONS = [REQUEST_MAPPING, GET_MAPPING,
-                                                                      POST_MAPPING, PUT_MAPPING, PATCH_MAPPING, DELETE_MAPPING]
+                                                                      POST_MAPPING, PUT_MAPPING, PATCH_MAPPING,
+                                                            DELETE_MAPPING].toSet()
     static final String REST_CONTROLLER = "RestController"
     static final String PATH_VARIABLE = "PathVariable"
     static final String REQUEST_PARAM = "RequestParam"
@@ -39,15 +40,15 @@ class SpringControllerUtils {
     static String getHttpMethod(AnnotationExpr annotationExpr) {
         String annotationName = annotationExpr.nameAsString
         String method
-        if (!SpringControllerUtils.REQUEST_MAPPING_ANNOTATIONS.contains(annotationName)) {
+        if (!REQUEST_MAPPING_ANNOTATIONS.contains(annotationName)) {
             throw new IllegalArgumentException("Unsuported annotation type: $annotationName")
-        } else if (annotationName == SpringControllerUtils.REQUEST_MAPPING) {
+        } else if (annotationName == REQUEST_MAPPING) {
             method = AnnotationsProcessor.getStringValue(annotationExpr, "method").toLowerCase()
         } else {
             method = annotationName.substring(0, annotationName.length()
-                    - SpringControllerUtils.MAPPING_SUFFIX_LENGTH).toLowerCase()
+                    - MAPPING_SUFFIX_LENGTH).toLowerCase()
         }
-        method = method.isEmpty() ? SpringControllerUtils.DEFAULT_HTTP_METHOD : method
+        method = method.isEmpty() ? DEFAULT_HTTP_METHOD : method
         if (method.contains(".")) {
             method = StringUtils.substringAfterLast(method, ".")
         }
@@ -64,7 +65,7 @@ class SpringControllerUtils {
 
     static String getUrlTemplate(AnnotationExpr requestMappingAnnotation) {
         String template = AnnotationsProcessor.getStringValue(requestMappingAnnotation,
-                SpringControllerUtils.PATH_PROPERTY)
+                PATH_PROPERTY)
         template.isEmpty() ? AnnotationsProcessor.getStringValue(requestMappingAnnotation, AnnotationsProcessor.DEFAULT_ANNOTATION_PROPERTY) : template
     }
 
@@ -119,7 +120,7 @@ class SpringControllerUtils {
             if(!scope.isNameExpr()){
                 return false
             }
-            ResolvedValueDeclaration resolvedScope = scope.asNameExpr().resolve();
+            ResolvedValueDeclaration resolvedScope = scope.asNameExpr().resolve()
             if(!resolvedScope.isField()){
                 return false
             }
@@ -132,18 +133,18 @@ class SpringControllerUtils {
 
     static boolean isRestControllerMethod(MethodDeclaration methodDeclaration) {
         !methodDeclaration.static &&
-                AnnotationsProcessor.hasAnnotation(methodDeclaration, SpringControllerUtils.REQUEST_MAPPING_ANNOTATIONS)
+                AnnotationsProcessor.hasAnnotation(methodDeclaration, REQUEST_MAPPING_ANNOTATIONS)
     }
 
     static boolean isRestController(ClassOrInterfaceDeclaration classDeclaration) {
-        return AnnotationsProcessor.hasAnnotation(classDeclaration, SpringControllerUtils.REST_CONTROLLER)
+        return AnnotationsProcessor.hasAnnotation(classDeclaration, REST_CONTROLLER)
     }
 
     static Map<String, String> getVariablesMap(MethodDeclaration methodDeclaration, String annotationName) {
         methodDeclaration.parameters.collect {
             AnnotationExpr annotation = AnnotationsProcessor.getAnnotation(it, annotationName)
             if (annotation) {
-                String key = AnnotationsProcessor.getStringValue(annotation, SpringControllerUtils.PARAMETER_ANNOTATION_PROPERTIES)
+                String key = AnnotationsProcessor.getStringValue(annotation, PARAMETER_ANNOTATION_PROPERTIES)
                 Tuple2<String, String> pair = new Tuple2<>(key.isEmpty()?it.nameAsString:key
                         ,  it.nameAsString)
                 return Optional.of(pair)
@@ -161,24 +162,24 @@ class SpringControllerUtils {
         String urlSep = "/"
         urlTemplate = urlTemplate.isEmpty() ? urlSep : urlTemplate
         urlTemplate = urlTemplate.startsWith(urlSep) ? urlTemplate : (urlSep +  urlTemplate)
-        Map<String, String> pathVariableToName = getVariablesMap(method, SpringControllerUtils.PATH_VARIABLE)
+        Map<String, String> pathVariableToName = getVariablesMap(method, PATH_VARIABLE)
         String url = fillPathVariablesUrl(urlTemplate, pathVariableToName)
         url
     }
 
     private static String getNodeUrlTemplate(Node node) {
-        AnnotationExpr mappingAnnotation = AnnotationsProcessor.getAnnotation(node, SpringControllerUtils.REQUEST_MAPPING_ANNOTATIONS)
+        AnnotationExpr mappingAnnotation = AnnotationsProcessor.getAnnotation(node, REQUEST_MAPPING_ANNOTATIONS)
         String urlTemplate = mappingAnnotation ? getUrlTemplate(mappingAnnotation) : ""
         urlTemplate
     }
 
     static boolean hasSimpleUrlTemplate(Node node) {
-        AnnotationExpr mappingAnnotation = AnnotationsProcessor.getAnnotation(node, SpringControllerUtils.REQUEST_MAPPING_ANNOTATIONS)
+        AnnotationExpr mappingAnnotation = AnnotationsProcessor.getAnnotation(node, REQUEST_MAPPING_ANNOTATIONS)
         if(!mappingAnnotation){
             return true
         }
-        Expression mappingExpression = AnnotationsProcessor.getAnnotationMemberExpressionValue(mappingAnnotation,
-                [AnnotationsProcessor.DEFAULT_ANNOTATION_PROPERTY, SpringControllerUtils.PATH_PROPERTY])
-        return (!mappingExpression || mappingExpression.isStringLiteralExpr())
+        Optional<Expression> mappingExpression = AnnotationsProcessor.getAnnotationMemberExpressionValue(mappingAnnotation,
+                [AnnotationsProcessor.DEFAULT_ANNOTATION_PROPERTY, PATH_PROPERTY])
+        return (!mappingExpression.isPresent() || mappingExpression.get().isStringLiteralExpr())
     }
 }
