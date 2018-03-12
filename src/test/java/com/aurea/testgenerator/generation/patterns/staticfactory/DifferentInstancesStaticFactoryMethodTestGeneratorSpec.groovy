@@ -16,10 +16,12 @@ class DifferentInstancesStaticFactoryMethodTestGeneratorSpec extends MatcherPipe
         """, """     
             package sample;
              
+            import javax.annotation.Generated;
             import org.junit.Test;
             import static org.assertj.core.api.Assertions.assertThat;
-             
-            public class FooTest {
+            
+            @Generated("GeneralPatterns")
+            public class FooPatternTest {
              
                 @Test
                 public void test_newFoo_OnSecondCall_CreateDifferentInstance() throws Exception {
@@ -49,10 +51,12 @@ class DifferentInstancesStaticFactoryMethodTestGeneratorSpec extends MatcherPipe
         """, """     
             package sample;
              
+            import javax.annotation.Generated;
             import org.junit.Test;
             import static org.assertj.core.api.Assertions.assertThat;
              
-            public class FooTest {
+            @Generated("GeneralPatterns")
+            public class FooPatternTest {
              
                 @Test
                 public void test_newFoo_OnSecondCall_CreateDifferentInstance() throws Exception {

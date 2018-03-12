@@ -12,7 +12,10 @@ import com.aurea.testgenerator.generation.names.StandardTestClassNomenclatureFac
 import com.aurea.testgenerator.reporting.CoverageReporter
 import com.aurea.testgenerator.reporting.TestGeneratorResultReporter
 import com.aurea.testgenerator.source.JavaSourceFinder
+import com.aurea.testgenerator.source.OverrideClassWriteStrategy
 import com.aurea.testgenerator.source.PathUnitSource
+import com.aurea.testgenerator.source.RenameClassWriteStrategy
+import com.aurea.testgenerator.source.SkipClassWriteStrategy
 import com.aurea.testgenerator.source.SourceFilters
 import com.aurea.testgenerator.source.UnitSource
 import com.aurea.testgenerator.source.UnitTestWriter
@@ -67,7 +70,10 @@ abstract class MatcherPipelineTest extends Specification {
         source = new PathUnitSource(new JavaSourceFinder(cfg), cfg, SourceFilters.empty(), getSymbolSolver())
         TestGenerator generator = generator()
         unitTestGenerator = new UnitTestGenerator([generator], nomenclatureFactory)
-        unitTestWriter = new UnitTestWriter(cfg)
+        unitTestWriter = new UnitTestWriter(cfg,
+                [new OverrideClassWriteStrategy(), 
+                 new RenameClassWriteStrategy(),
+                 new SkipClassWriteStrategy()])
         coverageService = new NoCoverageService()
 
         pipeline = new Pipeline(
@@ -82,9 +88,9 @@ abstract class MatcherPipelineTest extends Specification {
 
         pipeline.start()
 
-        File testFile = cfg.outPath.resolve('sample').resolve('FooTest.java').toFile()
+        File testFile = cfg.outPath.resolve('sample').resolve('FooPatternTest.java').toFile()
         assertThat(testFile).describedAs("Expected test to be generated but it wasn't").exists()
-        String resultingTest = cfg.outPath.resolve('sample').resolve('FooTest.java').toFile().text
+        String resultingTest = testFile.text
 
         assertThat(resultingTest).isEqualToNormalizingWhitespace(expectedTest)
     }

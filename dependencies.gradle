@@ -8,8 +8,10 @@ dependencyManagement {
     // Consistent Dependency Management configuration across all subprojects
     dependencies {
         dependency 'org.codehaus.groovy:groovy-all:2.4.12'
-        dependency 'com.github.javaparser:aurea-javaparser-core:3.5.12'
-        dependency 'com.github.javaparser:aurea-java-symbol-solver-core:0.6.15'
+        dependencySet(group: 'com.github.javaparser', version: '3.5.18-aurea') {
+            entry 'javaparser-core'
+            entry 'javaparser-symbol-solver-core'
+        }
         dependency 'com.jason-goodwin:better-monads:0.4.1'
         dependencySet(group: 'org.apache.logging.log4j', version: '2.10.0') {
             entry 'log4j-api'
@@ -46,8 +48,8 @@ dependencies {
     compile 'org.codehaus.groovy:groovy-all'
     compile 'org.springframework.boot:spring-boot-starter'
     compile 'org.aspectj:aspectjweaver'
-    compile 'com.github.javaparser:aurea-javaparser-core'
-    compile 'com.github.javaparser:aurea-java-symbol-solver-core'
+    compile 'com.github.javaparser:javaparser-core'
+    compile 'com.github.javaparser:javaparser-symbol-solver-core'
     compile 'com.jason-goodwin:better-monads'
     compile 'org.apache.logging.log4j:log4j-api'
     compile 'org.apache.logging.log4j:log4j-core'

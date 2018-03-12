@@ -4,8 +4,10 @@ import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.expr.Name
 
+
 class Imports {
     static final ImportDeclaration JUNIT_TEST = parse('org.junit.Test')
+    static final ImportDeclaration GENERATED = parse('javax.annotation.Generated')
     static final ImportDeclaration EXCEPTION = parse('java.lang.Exception')
     static final ImportDeclaration JUNIT_RUNWITH = parse('org.junit.runner.RunWith')
     static final ImportDeclaration JUNITPARAMS_JUNITPARAMSRUNNER = parse('junitparams.JUnitParamsRunner')
