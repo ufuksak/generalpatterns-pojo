@@ -229,7 +229,7 @@ class Types {
     }
 
     static boolean isBoxedPrimitive(ResolvedReferenceType type) {
-        for (ResolvedPrimitiveType primitive : ResolvedPrimitiveType.ALL) {
+        for (ResolvedPrimitiveType primitive : ResolvedPrimitiveType.values()) {
             if (primitive.boxTypeQName == type.qualifiedName) {
                 return true
             }
@@ -248,7 +248,7 @@ class Types {
     }
 
     static ResolvedPrimitiveType unbox(ResolvedReferenceType type) {
-        for (ResolvedPrimitiveType primitive : ResolvedPrimitiveType.ALL) {
+        for (ResolvedPrimitiveType primitive : ResolvedPrimitiveType.values()) {
             if (primitive.boxTypeQName == type.qualifiedName) {
                 return primitive
             }

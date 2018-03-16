@@ -1,5 +1,6 @@
 package com.aurea.testgenerator.config
 
+import com.aurea.testgenerator.source.FileNameConflictResolutionStrategyType
 import groovy.transform.Canonical
 import org.springframework.boot.context.properties.ConfigurationProperties
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -29,6 +30,7 @@ class ProjectConfiguration {
     String methodPrefix
     boolean disableMethodPrefix
     String resolveJars
+    FileNameConflictResolutionStrategyType fileNameResolution = FileNameConflictResolutionStrategyType.OVERRIDE
 
     Path getSrcPath() {
         Paths.get(src)

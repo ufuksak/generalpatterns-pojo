@@ -28,13 +28,16 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             }
         """, """     
             package sample;
- 
+
+             
+            import javax.annotation.Generated;
             import org.assertj.core.api.SoftAssertions;
             import org.assertj.core.data.Offset;
             import org.junit.Test;
             import static org.assertj.core.api.Assertions.assertThat;
              
-            public class FooTest {
+            @Generated("GeneralPatterns")
+            public class FooPatternTest {
              
                 @Test
                 public void test_emptyProfile_AssignsValues() throws Exception {
@@ -115,13 +118,16 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             }
         """, """     
             package sample;
- 
+             
+            import javax.annotation.Generated;
             import org.assertj.core.api.SoftAssertions;
             import org.assertj.core.data.Offset;
             import org.junit.Test;
             import static org.assertj.core.api.Assertions.assertThat;
-             
-            public class FooTest {
+            
+            @Generated("GeneralPatterns")
+            public class FooPatternTest {
+
              
                 @Test
                 public void test_emptyProfile_AssignsValues() throws Exception {
@@ -164,12 +170,14 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             }
         """, """     
             package sample;
- 
+             
+            import javax.annotation.Generated;
             import org.assertj.core.api.SoftAssertions;
             import org.junit.Test;
             import static org.assertj.core.api.Assertions.assertThat;
              
-            public class FooTest {
+            @Generated("GeneralPatterns")
+            public class FooPatternTest {
              
                 @Test
                 public void test_emptyProfile_AssignsValues() throws Exception {
@@ -212,12 +220,14 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             }
         """, """     
             package sample;
- 
+             
+            import javax.annotation.Generated;
             import org.assertj.core.api.SoftAssertions;
             import org.junit.Test;
             import static org.assertj.core.api.Assertions.assertThat;
              
-            public class FooTest {
+            @Generated("GeneralPatterns")
+            public class FooPatternTest {
              
                 @Test
                 public void test_emptyProfile_AssignsValues() throws Exception {
@@ -258,12 +268,13 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             }
         """, """     
             package sample;
- 
+            import javax.annotation.Generated;
             import org.assertj.core.api.SoftAssertions;
             import org.junit.Test;
             import static org.assertj.core.api.Assertions.assertThat;
              
-            public class FooTest {
+            @Generated("GeneralPatterns")
+            public class FooPatternTest {
              
                 @Test
                 public void test_emptyProfile_AssignsValues() throws Exception {
@@ -277,7 +288,7 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
         """
     }
 
-    def "assignments in constructor should be tested when static factory method delegates some arguments to constructor"() {
+    def "assignments in constructor should be tested when static factory method delegates arguments to constructor"() {
         expect:
         onClassCodeExpect """
             class Foo {
@@ -304,12 +315,14 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             }
         """, """     
             package sample;
- 
+             
+            import javax.annotation.Generated;
             import org.assertj.core.api.SoftAssertions;
             import org.junit.Test;
             import static org.assertj.core.api.Assertions.assertThat;
              
-            public class FooTest {
+            @Generated("GeneralPatterns")
+            public class FooPatternTest {
              
                 @Test
                 public void test_emptyProfile_AssignsValues() throws Exception {
@@ -326,6 +339,11 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
 
     @Override
     MethodLevelTestGenerator generator() {
-        new AssignmentCheckStaticFactoryMethodTestGenerator(solver, reporter, visitReporter, nomenclatureFactory, valueFactory, softAssertions)
+        new AssignmentCheckStaticFactoryMethodTestGenerator(solver,
+                reporter,
+                visitReporter,
+                nomenclatureFactory,
+                valueFactory,
+                softAssertions)
     }
 }

@@ -21,10 +21,12 @@ class EagerSingletonTestGeneratorSpec extends MatcherPipelineTest {
         """, """     
             package sample;
              
+            import javax.annotation.Generated;
             import org.junit.Test;
             import static org.assertj.core.api.Assertions.assertThat;
              
-            public class FooTest {
+            @Generated("GeneralPatterns")
+            public class FooPatternTest {
              
                 @Test
                 public void test_getInstance_OnSecondCall_ReturnsSameInstance() throws Exception {
@@ -53,10 +55,12 @@ class EagerSingletonTestGeneratorSpec extends MatcherPipelineTest {
         """, """     
             package sample;
              
+            import javax.annotation.Generated;
             import org.junit.Test;
             import static org.assertj.core.api.Assertions.assertThat;
              
-            public class FooTest {
+            @Generated("GeneralPatterns")
+            public class FooPatternTest {
              
                 @Test
                 public void test_getInstance_OnSecondCall_ReturnsSameInstance() throws Exception {
@@ -87,10 +91,12 @@ class EagerSingletonTestGeneratorSpec extends MatcherPipelineTest {
         """, """     
             package sample;
              
+            import javax.annotation.Generated;
             import org.junit.Test;
             import static org.assertj.core.api.Assertions.assertThat;
              
-            public class FooTest {
+            @Generated("GeneralPatterns")
+            public class FooPatternTest {
              
                 @Test
                 public void test_getInstance_OnSecondCall_ReturnsSameInstance() throws Exception {

@@ -4,6 +4,7 @@ import com.aurea.common.JavaClass
 import com.aurea.testgenerator.generation.ast.TestUnit
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.TestClassNomenclature
+import com.aurea.testgenerator.generation.source.Imports
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.Modifier
@@ -26,7 +27,7 @@ class UnitTestGenerator {
     UnitTestGenerator(List<TestGenerator> generators, NomenclatureFactory nomenclatureFactory) {
         this.generators = generators
         this.nomenclatureFactory = nomenclatureFactory
-        log.info "Registered generators: ${this.generators}"
+        log.info "Registered generators: ${this.generators.collect {it.class.simpleName}}"
     }
 
     Optional<TestUnit> tryGenerateTest(Unit unitUnderTest) {
@@ -37,6 +38,7 @@ class UnitTestGenerator {
         CompilationUnit testCu = new CompilationUnit(pd,
                 unitUnderTest.cu.getImports(),
                 NodeList.nodeList(testClass), null)
+        markAsGenerated(testClass, testCu)
         Unit test = new Unit(testCu, new JavaClass(pd.nameAsString, testName), null)
         TestUnit testUnit = new TestUnit(test)
         List<TestGeneratorResult> testGeneratorResults = StreamEx.of(generators).flatMap {
@@ -51,10 +53,17 @@ class UnitTestGenerator {
 
     @Override
     String toString() {
-        generators
+        generators.collect {it.class.simpleName }.join('||')
     }
 
     private static ClassOrInterfaceDeclaration newTestClass(String testName) {
         new ClassOrInterfaceDeclaration(EnumSet.of(Modifier.PUBLIC), false, testName)
+    }
+
+    private static void markAsGenerated(
+            ClassOrInterfaceDeclaration testClass,
+            CompilationUnit testCu) {
+        testClass.addSingleMemberAnnotation("Generated", '"GeneralPatterns"')
+        testCu.addImport(Imports.GENERATED)
     }
 }
