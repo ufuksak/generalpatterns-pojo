@@ -87,9 +87,9 @@ class AssignmentCheckStaticFactoryMethodTestGenerator extends AbstractMethodTest
                 List<Statement> variableStatements = variables.collect { new ExpressionStmt(it.node) }
                 TestNodeMerger.appendDependencies(testMethod, variables)
 
-                Map<SimpleName, DependableNode<Expression>> variableExpressionsByNames = StreamEx.of(variables)
+                Map<String, DependableNode<Expression>> variableExpressionsByNames = StreamEx.of(variables)
                                                                                                  .toMap(
-                        { it.node.getVariable(0).name },
+                        { it.node.getVariable(0).nameAsString },
                         { DependableNode.from(new NameExpr(it.node.getVariable(0).name)) })
 
                 Optional<DependableNode<MethodCallExpr>> methodCall = new InvocationBuilder(valueFactory)

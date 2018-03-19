@@ -15,7 +15,6 @@ import com.github.javaparser.ast.expr.FieldAccessExpr
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.expr.NameExpr
 import com.github.javaparser.ast.expr.ObjectCreationExpr
-import com.github.javaparser.ast.expr.SimpleName
 import com.github.javaparser.ast.nodeTypes.NodeWithConstructors
 import com.github.javaparser.ast.nodeTypes.NodeWithOptionalScope
 import com.github.javaparser.ast.type.ClassOrInterfaceType
@@ -27,13 +26,13 @@ import one.util.streamex.StreamEx
 class InvocationBuilder {
 
     ValueFactory factory
-    Map<SimpleName, DependableNode<Expression>> expressionsForParameters
+    Map<String, DependableNode<Expression>> expressionsForParameters
 
     InvocationBuilder(ValueFactory factory) {
         this.factory = factory
     }
 
-    InvocationBuilder usingForParameters(Map<SimpleName, DependableNode<Expression>> expressionsForParameters) {
+    InvocationBuilder usingForParameters(Map<String, DependableNode<Expression>> expressionsForParameters) {
         this.expressionsForParameters = expressionsForParameters
         this
     }
@@ -136,7 +135,7 @@ class InvocationBuilder {
 
     private List<DependableNode<Expression>> getFromGivenParameters(CallableDeclaration cd) {
         StreamEx.of(cd.parameters).map { parameter ->
-            Optional.ofNullable(expressionsForParameters.get(parameter.name)).orElseThrow {
+            Optional.ofNullable(expressionsForParameters.get(parameter.nameAsString)).orElseThrow {
                 new IllegalArgumentException("Failed to find a parameter value for $parameter in $cd. " +
                         "Only $expressionsForParameters were provided!")
             }
