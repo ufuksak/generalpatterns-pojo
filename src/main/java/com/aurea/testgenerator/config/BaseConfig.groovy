@@ -19,6 +19,9 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.EnableAspectJAutoProxy
 
 import javax.annotation.PostConstruct
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.util.function.Predicate
 
 @Configuration
 @EnableAspectJAutoProxy
@@ -42,23 +45,20 @@ class BaseConfig {
 
     @Bean
     TypeSolver combinedTypeSolver(ProjectConfiguration projectConfiguration) {
-        CombinedTypeSolver solver = new CombinedTypeSolver(
-                new ReflectionTypeSolver())
+        CombinedTypeSolver solver = new CombinedTypeSolver(new ReflectionTypeSolver())
 
-        if (projectConfiguration.resolveJars) {
-            projectConfiguration.resolveJars.split(",").each { solver.add(new JarTypeSolver(it)) }
-        }
-        getJavaParserTypeSolvers(projectConfiguration).each { solver.add(it) }
+        projectConfiguration.resolvePaths.stream()
+                .map{new File(it)}
+                .filter{it.exists()}
+                .filter{(it.isFile() && it.name.endsWith(".jar")) || it.isDirectory()}
+                .forEach {
+                    solver.add( it.isDirectory() ? new JavaParserTypeSolver(it) : new JarTypeSolver(it.absolutePath) )
+                }
+
         solver
     }
 
-    private List<JavaParserTypeSolver> getJavaParserTypeSolvers(ProjectConfiguration cfg) {
-        if (!cfg.paths.isEmpty()) {
-            cfg.paths.toSet().collect { new JavaParserTypeSolver(cfg.srcPath.resolve(it).toFile()) }
-        } else {
-            Collections.singletonList(new JavaParserTypeSolver(cfg.srcPath.toFile()))
-        }
-    }
+
 
     @Bean
     JavaParserFacade javaParserFacade(TypeSolver solver) {

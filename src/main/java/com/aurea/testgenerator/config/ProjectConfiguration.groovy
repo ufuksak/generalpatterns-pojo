@@ -22,14 +22,14 @@ class ProjectConfiguration {
     @NotNull
     String src
 
-    List<String> paths = []
+    List<String> resolvePaths = []
 
     String testSrc
     String out
     String jacoco
     String methodPrefix
     boolean disableMethodPrefix
-    String resolveJars
+
     FileNameConflictResolutionStrategyType fileNameResolution = FileNameConflictResolutionStrategyType.OVERRIDE
 
     Path getSrcPath() {
