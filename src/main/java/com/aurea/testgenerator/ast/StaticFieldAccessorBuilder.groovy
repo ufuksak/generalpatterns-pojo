@@ -21,11 +21,11 @@ class StaticFieldAccessorBuilder {
     }
 
     FieldAccessResult build() {
-        if (fieldDeclaration.accessSpecifier() != AccessSpecifier.PRIVATE && fieldDeclaration.static) {
+        if (fieldDeclaration.accessSpecifier() != AccessSpecifier.PRIVATE) {
             return FieldAccessResult.success(buildStaticAccess(fieldDeclaration))
         }
 
-        PojoMethodsFinder.findGetterMethod(fieldDeclaration, true)
+        PojoMethodsFinder.findGetterMethod(fieldDeclaration)
                 .map { FieldAccessResult.success(buildStaticAccess(it)) }
                 .orElse(FieldAccessResult.NO_ACCESS)
     }

@@ -16,7 +16,7 @@ import static com.aurea.testgenerator.value.Types.areSameOrBoxedSame
 @Log4j2
 class PojoMethodsFinder {
 
-    static Optional<ResolvedMethodDeclaration> findGetterMethod(ResolvedFieldDeclaration fieldDeclaration, boolean isStatic = false) {
+    static Optional<ResolvedMethodDeclaration> findGetterMethod(ResolvedFieldDeclaration fieldDeclaration) {
         Try.ofFailable {
             if (Types.isBooleanType(fieldDeclaration.getType())) {
                 def expectedGetterName = fieldDeclaration.name
@@ -24,40 +24,40 @@ class PojoMethodsFinder {
                     expectedGetterName = 'is' + expectedGetterName.capitalize()
                 }
 
-                Optional<ResolvedMethodDeclaration> withIsName = findGetterWithName(fieldDeclaration, isStatic, expectedGetterName)
+                Optional<ResolvedMethodDeclaration> withIsName = findGetterWithName(fieldDeclaration, expectedGetterName)
                 if (withIsName.present) {
                     return withIsName
                 }
             }
 
-            findGetterWithName(fieldDeclaration, isStatic, 'get' + fieldDeclaration.name.capitalize())
+            findGetterWithName(fieldDeclaration, 'get' + fieldDeclaration.name.capitalize())
         }.orElse(Optional.empty())
     }
 
-    static Optional<ResolvedMethodDeclaration> findSetterMethod(ResolvedFieldDeclaration fieldDeclaration, boolean isStatic = false) {
+    static Optional<ResolvedMethodDeclaration> findSetterMethod(ResolvedFieldDeclaration fieldDeclaration) {
         Try.ofFailable {
             String fieldName = fieldDeclaration.name
             if (Types.isBooleanType(fieldDeclaration.type) && validPrefix(fieldName, 'is')) {
 
                 String expectedName = fieldName.replaceFirst('is', 'set')
-                Optional<ResolvedMethodDeclaration> withIsName = findSetterWithName(fieldDeclaration, isStatic, expectedName)
+                Optional<ResolvedMethodDeclaration> withIsName = findSetterWithName(fieldDeclaration, expectedName)
                 if (withIsName.present) {
                     return withIsName
                 }
             }
 
-            findSetterWithName(fieldDeclaration, isStatic, 'set' + fieldName.capitalize())
+            findSetterWithName(fieldDeclaration, 'set' + fieldName.capitalize())
         }.onFailure {
             log.warn('error', it.toString())
         }.orElse(Optional.empty())
     }
 
     private static Optional<ResolvedMethodDeclaration> findGetterWithName(ResolvedFieldDeclaration fieldDeclaration,
-                                                                          boolean isStatic, String expectedName) {
+                                                                          String expectedName) {
         ResolvedTypeDeclaration rtd = fieldDeclaration.declaringType()
         if (rtd.class || rtd.anonymousClass) {
             return StreamEx.of(rtd.asClass().declaredMethods).findFirst {
-                it.name == expectedName && isGetter(fieldDeclaration, isStatic, it)
+                it.name == expectedName && isGetter(fieldDeclaration, it)
             }
         }
 
@@ -69,12 +69,12 @@ class PojoMethodsFinder {
     }
 
     private static Optional<ResolvedMethodDeclaration> findSetterWithName(ResolvedFieldDeclaration fieldDeclaration,
-                                                                          boolean isStatic, String name) {
+                                                                          String name) {
         ResolvedTypeDeclaration rtd = fieldDeclaration.declaringType()
 
         if (rtd.class || rtd.anonymousClass) {
             return StreamEx.of(rtd.asClass().declaredMethods).findFirst {
-                it.name == name && isSetter(fieldDeclaration, isStatic, it)
+                it.name == name && isSetter(fieldDeclaration, it)
             }
         }
 
@@ -85,16 +85,14 @@ class PojoMethodsFinder {
         return Optional.empty()
     }
 
-    private static boolean isGetter(ResolvedFieldDeclaration fieldDeclaration, boolean isStatic,
-                                    ResolvedMethodDeclaration methodDeclaration) {
-        methodDeclaration.static == isStatic &&
+    private static boolean isGetter(ResolvedFieldDeclaration fieldDeclaration, ResolvedMethodDeclaration methodDeclaration) {
+        methodDeclaration.static == fieldDeclaration.static &&
                 isGetterSignature(methodDeclaration) &&
                 areSameOrBoxedSame(methodDeclaration.returnType, fieldDeclaration.type)
     }
 
-    private static boolean isSetter(ResolvedFieldDeclaration fieldDeclaration, boolean isStatic,
-                                    ResolvedMethodDeclaration methodDeclaration) {
-        methodDeclaration.static == isStatic &&
+    private static boolean isSetter(ResolvedFieldDeclaration fieldDeclaration, ResolvedMethodDeclaration methodDeclaration) {
+        methodDeclaration.static == fieldDeclaration.static &&
                 isSetterSignature(methodDeclaration) &&
                 areSameOrBoxedSame(methodDeclaration.getParam(0).type, fieldDeclaration.type)
     }
