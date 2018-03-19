@@ -38,6 +38,12 @@ import static com.aurea.testgenerator.generation.patterns.pojos.PojoTestTypes.OP
 @Log4j2
 class OpenPojoTestGenerator implements TestGenerator {
 
+    private static final String POJO_GETTER_TESTER_NAME = 'getterTester'
+    private static final String POJO_SETTER_TESTER_NAME = 'setterTester'
+    private static final String POJO_TO_STRING_TESTER_NAME = 'toStringTester'
+    private static final String POJO_CONSTRUCTOR_TESTER_NAME = 'constructorTester'
+    private static final String POJO_EQUALS_HASH_CODE_TESTER_NAME = 'equalsHashCodeTester'
+
     @Autowired
     TestGeneratorResultReporter reporter
 
@@ -60,17 +66,17 @@ class OpenPojoTestGenerator implements TestGenerator {
             result.type = OPEN_POJO
             if (Callability.isInstantiable(classDeclaration) && Pojos.isPojo(classDeclaration)) {
                 if (Pojos.hasAtleastOneGetter(classDeclaration)) {
-                    def test = buildTest(classDeclaration, testMethodNomenclature, 'getterTester', OPEN_POJO_GETTER)
+                    def test = buildTest(classDeclaration, testMethodNomenclature, POJO_GETTER_TESTER_NAME, OPEN_POJO_GETTER)
                     publishAndAddResolved(test, tests, unit, Pojos.getGetters(classDeclaration))
                 }
 
                 if (Pojos.hasAtLeastOneSetter(classDeclaration)) {
-                    def test = buildTest(classDeclaration, testMethodNomenclature, 'setterTester', OPEN_POJO_SETTER)
+                    def test = buildTest(classDeclaration, testMethodNomenclature, POJO_SETTER_TESTER_NAME, OPEN_POJO_SETTER)
                     publishAndAddResolved(test, tests, unit, Pojos.getSetters(classDeclaration))
                 }
 
                 Pojos.tryGetToStringMethod(classDeclaration).ifPresent { toStringMethod ->
-                    def test = buildTest(classDeclaration, testMethodNomenclature, 'toStringTester', OPEN_POJO_TO_STRING)
+                    def test = buildTest(classDeclaration, testMethodNomenclature, POJO_TO_STRING_TESTER_NAME, OPEN_POJO_TO_STRING)
                     publishAndAdd(test, tests, unit, toStringMethod)
                 }
 
@@ -81,13 +87,13 @@ class OpenPojoTestGenerator implements TestGenerator {
                     maybeEqualsMethod.ifPresent { methods << it }
                     maybeHashCodeMethod.ifPresent { methods << it }
 
-                    def test = buildTest(classDeclaration, testMethodNomenclature, 'equalsHashCodeTester', OPEN_POJO_EQUALS)
+                    def test = buildTest(classDeclaration, testMethodNomenclature, POJO_EQUALS_HASH_CODE_TESTER_NAME, OPEN_POJO_EQUALS)
                     publishAndAdd(test, tests, unit, methods)
                 }
 
                 List<ConstructorDeclaration> constructors = classDeclaration.constructors
                 if (constructors) {
-                    def test = buildTest(classDeclaration, testMethodNomenclature, 'constructorTester', OPEN_POJO_CONSTRUCTORS)
+                    def test = buildTest(classDeclaration, testMethodNomenclature, POJO_CONSTRUCTOR_TESTER_NAME, OPEN_POJO_CONSTRUCTORS)
                     publishAndAdd(test, tests, unit, constructors)
                 }
             } else {
