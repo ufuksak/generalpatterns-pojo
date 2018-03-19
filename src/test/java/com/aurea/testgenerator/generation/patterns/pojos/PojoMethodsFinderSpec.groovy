@@ -72,7 +72,7 @@ class PojoMethodsFinderSpec extends TestUnitSpec {
         injectSolver(cu)
 
         ResolvedFieldDeclaration fieldDeclaration = cu.findAll(FieldDeclaration)
-                .find { it.variables.first().nameAsString == field }
+                .find { field in it.variables.nameAsString }
                 .resolve()
 
         def getterMethod = PojoMethodsFinder.findGetterMethod(fieldDeclaration)
@@ -100,7 +100,7 @@ class PojoMethodsFinderSpec extends TestUnitSpec {
         injectSolver(cu)
 
         ResolvedFieldDeclaration fieldDeclaration = cu.findAll(FieldDeclaration)
-                .find { it.variables.first().nameAsString == field }
+                .find { field in it.variables.nameAsString }
                 .resolve()
 
         def setterMethod = PojoMethodsFinder.findSetterMethod(fieldDeclaration)
