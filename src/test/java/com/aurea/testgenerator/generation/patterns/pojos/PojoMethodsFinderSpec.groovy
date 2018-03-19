@@ -65,7 +65,35 @@ class PojoMethodsFinderSpec extends TestUnitSpec {
         """
 
     @Unroll
-    def "test pojo finder"() {
+    def "test pojo getter finder"() {
+        setup:
+
+        CompilationUnit cu = JavaParser.parse(code)
+        injectSolver(cu)
+
+        ResolvedFieldDeclaration fieldDeclaration = cu.findAll(FieldDeclaration)
+                .find { it.variables.first().nameAsString == field }
+                .resolve()
+
+        def getterMethod = PojoMethodsFinder.findGetterMethod(fieldDeclaration)
+
+        expect:
+
+        getterMethod.present
+        getterMethod.get().qualifiedName == getterName
+
+        PojoFieldFinder.findGetterField(getterMethod.get()).orElse(null)?.name == field
+
+        where:
+        code                           | field     | getterName
+        CLASS_WITH_INT_FIELD           | 'field'   | 'Foo.getField'
+        CLASS_WITH_BOOLEAN_FIELD       | 'field'   | 'Foo.getField'
+        CLASS_WITH_BOOLEAN_FIELD_IS    | 'isField' | 'Foo.isField'
+        CLASS_WITH_BOOLEAN_FIELD_IS_IS | 'isField' | 'Foo.isField'
+    }
+
+    @Unroll
+    def "test pojo setters finder"() {
         setup:
 
         CompilationUnit cu = JavaParser.parse(code)
@@ -76,7 +104,6 @@ class PojoMethodsFinderSpec extends TestUnitSpec {
                 .resolve()
 
         def setterMethod = PojoMethodsFinder.findSetterMethod(fieldDeclaration)
-        def getterMethod = PojoMethodsFinder.findGetterMethod(fieldDeclaration)
 
         expect:
 
@@ -85,16 +112,11 @@ class PojoMethodsFinderSpec extends TestUnitSpec {
 
         PojoFieldFinder.findSetterField(setterMethod.get()).orElse(null)?.name == field
 
-        getterMethod.present
-        getterMethod.get().qualifiedName == getterName
-
-        PojoFieldFinder.findGetterField(getterMethod.get()).orElse(null)?.name == field
-
         where:
-        code                           | field     | setterName     | getterName
-        CLASS_WITH_INT_FIELD           | 'field'   | 'Foo.setField' | 'Foo.getField'
-        CLASS_WITH_BOOLEAN_FIELD       | 'field'   | 'Foo.setField' | 'Foo.getField'
-        CLASS_WITH_BOOLEAN_FIELD_IS    | 'isField' | 'Foo.setField' | 'Foo.isField'
-        CLASS_WITH_BOOLEAN_FIELD_IS_IS | 'isField' | 'Foo.setField' | 'Foo.isField'
+        code                           | field     | setterName
+        CLASS_WITH_INT_FIELD           | 'field'   | 'Foo.setField'
+        CLASS_WITH_BOOLEAN_FIELD       | 'field'   | 'Foo.setField'
+        CLASS_WITH_BOOLEAN_FIELD_IS    | 'isField' | 'Foo.setField'
+        CLASS_WITH_BOOLEAN_FIELD_IS_IS | 'isField' | 'Foo.setField'
     }
 }
