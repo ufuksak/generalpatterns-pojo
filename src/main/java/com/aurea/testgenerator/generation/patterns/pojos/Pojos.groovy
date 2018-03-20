@@ -71,35 +71,33 @@ class Pojos {
     }
 
     static boolean hasAtleastOneGetter(ClassOrInterfaceDeclaration classDeclaration) {
-        resolvedFields(classDeclaration).anyMatch { PojoMethodsFinder.findGetterMethod(it).present }
+        resolvedFields(classDeclaration).any { PojoMethodsFinder.findGetterMethod(it).present }
     }
 
     static List<ResolvedMethodDeclaration> getGetters(ClassOrInterfaceDeclaration classDeclaration) {
         resolvedFields(classDeclaration)
-                .map { PojoMethodsFinder.findGetterMethod(it) }
-                .filter { it.present }
-                .map { it.get() }
-                .toList()
+                .collect { PojoMethodsFinder.findGetterMethod(it) }
+                .findAll { it.present }
+                *.get()
     }
 
     static boolean hasAtLeastOneSetter(ClassOrInterfaceDeclaration classDeclaration) {
-        resolvedFields(classDeclaration).anyMatch { PojoMethodsFinder.findSetterMethod(it).present }
+        resolvedFields(classDeclaration).any { PojoMethodsFinder.findSetterMethod(it).present }
     }
 
     static List<ResolvedMethodDeclaration> getSetters(ClassOrInterfaceDeclaration classDeclaration) {
         resolvedFields(classDeclaration)
-                .map { PojoMethodsFinder.findSetterMethod(it) }
-                .filter { it.present }
-                .map { it.get() }
-                .toList()
+                .collect() { PojoMethodsFinder.findSetterMethod(it) }
+                .findAll { it.present }
+                *.get()
     }
 
     @Memoized
-    private static StreamEx<ResolvedFieldDeclaration> resolvedFields(ClassOrInterfaceDeclaration classDeclaration) {
-        StreamEx.of(classDeclaration.fields)
-                .map { Resolution.tryResolve(it) }
-                .filter { it.present }
-                .map { it.get() }
+    private static List<ResolvedFieldDeclaration> resolvedFields(ClassOrInterfaceDeclaration classDeclaration) {
+        classDeclaration.fields
+                .collect { Resolution.tryResolve(it) }
+                .findAll { it.present }
+                *.get()
     }
 
     static boolean isSetterSignature(ResolvedMethodDeclaration resolvedMethod) {
