@@ -4,7 +4,6 @@ import com.aurea.testgenerator.ast.FieldResolver
 import com.aurea.testgenerator.generation.patterns.pojos.PojoFieldFinder
 import com.aurea.testgenerator.value.Resolution
 import com.github.javaparser.ast.Node
-import com.github.javaparser.ast.body.ConstructorDeclaration
 import com.github.javaparser.ast.expr.AssignExpr
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.FieldAccessExpr
@@ -58,8 +57,7 @@ class StateChangeDetector {
 
     private static Optional<StateChange> setterCallToStateChange(MethodCallExpr setterCall) {
         Resolution.tryResolve(setterCall).flatMap { resolvedSetter ->
-            PojoFieldFinder fieldFinder = PojoFieldFinder.fromSetter(resolvedSetter)
-            fieldFinder.tryToFindField().map { resolvedField ->
+            PojoFieldFinder.findSetterField(resolvedSetter).map { resolvedField ->
                 new StateChange(
                         resolvedField,
                         setterCall.arguments.first(),
