@@ -24,7 +24,7 @@ class TestUnit {
         this
     }
 
-    TestUnit addDependenciesAndTests(List<DependableNode<MethodDeclaration>> testNodes) {
+    TestUnit addTestsAndDependencies(List<DependableNode<MethodDeclaration>> testNodes) {
         addImports(testNodes)
 
         StreamEx.of(testNodes).flatMap{it.dependency.fields.stream()}.toSet().sort { it.getVariable(0).nameAsString }.each {

@@ -238,7 +238,7 @@ class Types {
     }
 
     static boolean isBoxedPrimitive(Type type) {
-        for (ResolvedPrimitiveType primitive : ResolvedPrimitiveType.ALL) {
+        for (ResolvedPrimitiveType primitive : ResolvedPrimitiveType.values()) {
             if (primitive.boxTypeQName == type.asString()
                     || StringUtils.substringAfterLast(primitive.boxTypeQName, ".") == type.asString()) {
                 return true

@@ -45,7 +45,7 @@ class UnitTestGenerator {
             it.generate(unitUnderTest).stream()
         }.toList()
 
-        testUnit.addDependenciesAndTests(StreamEx.of(testGeneratorResults).flatMap { it.tests.stream() }.toList())
+        testUnit.addTestsAndDependencies(StreamEx.of(testGeneratorResults).flatMap { it.tests.stream() }.toList())
 
         boolean hasTests = testGeneratorResults.any { it.tests }
         return hasTests ? Optional.of(testUnit) : Optional.empty()

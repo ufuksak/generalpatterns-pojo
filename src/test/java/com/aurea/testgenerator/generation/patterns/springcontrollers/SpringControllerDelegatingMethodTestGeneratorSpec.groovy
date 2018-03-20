@@ -34,6 +34,7 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
  
         import com.aurea.auth.generalpatternsspringtest.service.DelegateService;
         import com.fasterxml.jackson.databind.ObjectMapper;
+        import javax.annotation.Generated;
         import org.junit.Before;
         import org.junit.Test;
         import org.mockito.InjectMocks;
@@ -48,8 +49,9 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         import static org.mockito.Mockito.*;
         import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
         import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-         
-        public class FooTest {
+        
+        @Generated("GeneralPatterns")
+        public class FooPatternTest {
          
             @InjectMocks()
             private SimpleDelegatingController controllerInstance;
@@ -107,6 +109,7 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
  
         import com.aurea.auth.generalpatternsspringtest.service.DelegateService;
         import com.fasterxml.jackson.databind.ObjectMapper;
+        import javax.annotation.Generated;
         import org.junit.Before;
         import org.junit.Test;
         import org.mockito.InjectMocks;
@@ -125,7 +128,8 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
         import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
          
-        public class FooTest {
+        @Generated("GeneralPatterns")
+        public class FooPatternTest {
          
             @InjectMocks()
             private DelegatingWithParametersController controllerInstance;
@@ -241,6 +245,7 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
  
         import com.aurea.auth.generalpatternsspringtest.service.DelegateService;
         import com.fasterxml.jackson.databind.ObjectMapper;
+        import javax.annotation.Generated;
         import org.junit.Before;
         import org.junit.Test;
         import org.mockito.InjectMocks;
@@ -263,8 +268,9 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         import static org.mockito.Mockito.mock;
         import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
         import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-         
-        public class FooTest {
+        
+        @Generated("GeneralPatterns")
+        public class FooPatternTest {
          
             @InjectMocks()
             private DelegatingWithReturnValueController controllerInstance;
