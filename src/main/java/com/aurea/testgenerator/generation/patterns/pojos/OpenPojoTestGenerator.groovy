@@ -65,12 +65,12 @@ class OpenPojoTestGenerator implements TestGenerator {
             TestGeneratorResult result = new TestGeneratorResult()
             result.type = OPEN_POJO
             if (Callability.isInstantiable(classDeclaration) && Pojos.isPojo(classDeclaration)) {
-                if (Pojos.hasAtleastOneGetter(classDeclaration)) {
+                if (Pojos.getGetters(classDeclaration)) {
                     def test = buildTest(classDeclaration, testMethodNomenclature, POJO_GETTER_TESTER_NAME, OPEN_POJO_GETTER)
                     publishAndAddResolved(test, tests, unit, Pojos.getGetters(classDeclaration))
                 }
 
-                if (Pojos.hasAtLeastOneSetter(classDeclaration)) {
+                if (Pojos.getSetters(classDeclaration)) {
                     def test = buildTest(classDeclaration, testMethodNomenclature, POJO_SETTER_TESTER_NAME, OPEN_POJO_SETTER)
                     publishAndAddResolved(test, tests, unit, Pojos.getSetters(classDeclaration))
                 }

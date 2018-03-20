@@ -4,7 +4,6 @@ import com.aurea.testgenerator.value.Resolution
 import com.github.javaparser.ast.AccessSpecifier
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
-import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.stmt.BlockStmt
 import com.github.javaparser.ast.stmt.Statement
@@ -20,30 +19,17 @@ import one.util.streamex.StreamEx
 class Pojos {
 
     static boolean isPojo(ClassOrInterfaceDeclaration classDeclaration) {
-        hasAtleastOneGetter(classDeclaration) ||
-                hasToStringMethod(classDeclaration) ||
-                hasEquals(classDeclaration) ||
-                hasHashCode(classDeclaration) ||
-                hasConstructors(classDeclaration) ||
-                hasAtLeastOneSetter(classDeclaration)
-    }
-
-    static boolean hasToStringMethod(ClassOrInterfaceDeclaration classDeclaration) {
-        classDeclaration.methods.any {
-            it.nameAsString == 'toString' && it.type.toString() == 'String' && it.public && !it.parameters
-        }
+        getGetters(classDeclaration) ||
+                tryGetToStringMethod(classDeclaration).present ||
+                tryGetEqualsMethod(classDeclaration).present ||
+                tryGetHashCodeMethod(classDeclaration).present ||
+                classDeclaration.constructors ||
+                getSetters(classDeclaration)
     }
 
     static Optional<MethodDeclaration> tryGetToStringMethod(ClassOrInterfaceDeclaration classDeclaration) {
         StreamEx.of(classDeclaration.methods).findFirst {
             it.nameAsString == 'toString' && it.type.toString() == 'String' && it.public && !it.parameters
-        }
-    }
-
-    static boolean hasEquals(ClassOrInterfaceDeclaration classDeclaration) {
-        classDeclaration.methods.any {
-            it.nameAsString == 'equals' && it.type.toString() == 'boolean' && it.public &&
-                    it.parameters.size() == 1 && it.parameters.first().type.toString() == 'Object'
         }
     }
 
@@ -54,24 +40,10 @@ class Pojos {
         }
     }
 
-    static boolean hasHashCode(ClassOrInterfaceDeclaration classDeclaration) {
-        classDeclaration.methods.any {
-            it.nameAsString == 'hashCode' && it.type.toString() == 'int' && it.public && !it.parameters
-        }
-    }
-
     static Optional<MethodDeclaration> tryGetHashCodeMethod(ClassOrInterfaceDeclaration classDeclaration) {
         StreamEx.of(classDeclaration.methods).findFirst {
             it.nameAsString == 'hashCode' && it.type.toString() == 'int' && it.public && !it.parameters
         }
-    }
-
-    static boolean hasConstructors(ClassOrInterfaceDeclaration classDeclaration) {
-        classDeclaration.constructors
-    }
-
-    static boolean hasAtleastOneGetter(ClassOrInterfaceDeclaration classDeclaration) {
-        resolvedFields(classDeclaration).any { PojoMethodsFinder.findGetterMethod(it).present }
     }
 
     static List<ResolvedMethodDeclaration> getGetters(ClassOrInterfaceDeclaration classDeclaration) {
@@ -79,10 +51,6 @@ class Pojos {
                 .collect { PojoMethodsFinder.findGetterMethod(it) }
                 .findAll { it.present }
                 *.get()
-    }
-
-    static boolean hasAtLeastOneSetter(ClassOrInterfaceDeclaration classDeclaration) {
-        resolvedFields(classDeclaration).any { PojoMethodsFinder.findSetterMethod(it).present }
     }
 
     static List<ResolvedMethodDeclaration> getSetters(ClassOrInterfaceDeclaration classDeclaration) {
@@ -110,16 +78,16 @@ class Pojos {
     }
 
     static boolean isGetterSignature(ResolvedMethodDeclaration resolvedMethod) {
-        resolvedMethod.accessSpecifier() != AccessSpecifier.PRIVATE &&
-                isGetterImplementation(resolvedMethod)
+        resolvedMethod.accessSpecifier() != AccessSpecifier.PRIVATE && isGetterImplementation(resolvedMethod)
     }
 
     static boolean isSetterImplementation(ResolvedMethodDeclaration resolvedMethod) {
-        if (resolvedMethod instanceof JavaParserMethodDeclaration) {
-            MethodDeclaration md = (resolvedMethod as JavaParserMethodDeclaration).wrappedNode
-            md.body.present && simplyAssignsValue(md.body.get())
+        if (!(resolvedMethod instanceof JavaParserMethodDeclaration)) {
+            return true
         }
-        true
+
+        MethodDeclaration methodDeclaration = resolvedMethod.wrappedNode
+        methodDeclaration.body.present && simplyAssignsValue(methodDeclaration.body.get())
     }
 
     static boolean isSetterCall(MethodCallExpr methodCall) {
@@ -133,23 +101,19 @@ class Pojos {
     }
 
     private static boolean isAssignExpr(Statement statement) {
-        if (statement.expressionStmt) {
-            Expression expr = statement.asExpressionStmt().expression
-            return expr.assignExpr
-        }
-        return false
+        statement.expressionStmt && statement.asExpressionStmt().expression.assignExpr
     }
 
     private static boolean isGetterImplementation(ResolvedMethodDeclaration rmd) {
-        if (rmd instanceof JavaParserMethodDeclaration) {
-            MethodDeclaration md = (rmd as JavaParserMethodDeclaration).wrappedNode
-            md.body.present && simplyReturnsFieldValue(md.body.get())
+        if (!(rmd instanceof JavaParserMethodDeclaration)) {
+            return true
         }
-        true
+
+        MethodDeclaration methodDeclaration = rmd.wrappedNode
+        methodDeclaration.body.present && simplyReturnsFieldValue(methodDeclaration.body.get())
     }
 
     private static boolean simplyReturnsFieldValue(BlockStmt block) {
         block.statements.size() == 1 && block.statements.first().returnStmt
     }
-
 }
