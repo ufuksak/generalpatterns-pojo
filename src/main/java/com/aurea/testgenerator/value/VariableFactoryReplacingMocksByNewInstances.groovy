@@ -8,8 +8,10 @@ import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import com.github.javaparser.ast.type.Type
 import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
+import org.springframework.stereotype.Component
 
 @Log4j2
+@Component
 class VariableFactoryReplacingMocksByNewInstances {
 
     ValueFactory valueFactory

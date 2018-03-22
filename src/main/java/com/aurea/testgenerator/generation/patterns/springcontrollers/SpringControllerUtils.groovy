@@ -5,6 +5,7 @@ import com.aurea.testgenerator.generation.methods.MethodsUtils
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
+import com.github.javaparser.ast.body.Parameter
 import com.github.javaparser.ast.expr.AnnotationExpr
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.MethodCallExpr
@@ -14,45 +15,26 @@ import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration
 import groovy.util.logging.Log4j2
 import org.apache.commons.lang3.StringUtils
 
+import java.util.stream.Collectors
+
 @Log4j2
 class SpringControllerUtils {
     static final String NAME_ANNOTATION_PROPERTY = "name"
     static final Set<String> PARAMETER_ANNOTATION_PROPERTIES = [AnnotationsProcessor.DEFAULT_ANNOTATION_PROPERTY,
                                                                 NAME_ANNOTATION_PROPERTY]
     static final String PATH_PROPERTY = "path"
-    static final String REQUEST_MAPPING = "RequestMapping"
-    static final String GET_MAPPING = "GetMapping"
-    static final String POST_MAPPING = "PostMapping"
-    static final String PUT_MAPPING = "PutMapping"
-    static final String PATCH_MAPPING = "PatchMapping"
-    static final String DELETE_MAPPING = "DeleteMapping"
-    static final Set<String> REQUEST_MAPPING_ANNOTATIONS = [REQUEST_MAPPING, GET_MAPPING,
-                                                                      POST_MAPPING, PUT_MAPPING, PATCH_MAPPING,
-                                                            DELETE_MAPPING].toSet()
     static final String REST_CONTROLLER = "RestController"
     static final String PATH_VARIABLE = "PathVariable"
     static final String REQUEST_PARAM = "RequestParam"
     static final String REQUEST_HEADER = "RequestHeader"
-    static final int MAPPING_SUFFIX_LENGTH = 7
     static final String REQUEST_BODY = "RequestBody"
     static final String DEFAULT_HTTP_METHOD = "get"
 
     static String getHttpMethod(AnnotationExpr annotationExpr) {
-        String annotationName = annotationExpr.nameAsString
-        String method
-        if (!REQUEST_MAPPING_ANNOTATIONS.contains(annotationName)) {
-            throw new IllegalArgumentException("Unsuported annotation type: $annotationName")
-        } else if (annotationName == REQUEST_MAPPING) {
-            method = AnnotationsProcessor.getStringValue(annotationExpr, "method").toLowerCase()
-        } else {
-            method = annotationName.substring(0, annotationName.length()
-                    - MAPPING_SUFFIX_LENGTH).toLowerCase()
-        }
-        method = method.isEmpty() ? DEFAULT_HTTP_METHOD : method
-        if (method.contains(".")) {
-            method = StringUtils.substringAfterLast(method, ".")
-        }
-        method
+        String method = RequestMappingAnnotation.of(annotationExpr.nameAsString).method
+        method = method ?: AnnotationsProcessor.getStringValue(annotationExpr, "method") .toLowerCase()
+        method = method.contains(".") ? StringUtils.substringAfterLast(method, ".") : method
+        method ?: DEFAULT_HTTP_METHOD
     }
 
     static String fillPathVariablesUrl(String urlTemplate, Map<String, String> pathVariableToName) {
@@ -64,9 +46,8 @@ class SpringControllerUtils {
     }
 
     static String getUrlTemplate(AnnotationExpr requestMappingAnnotation) {
-        String template = AnnotationsProcessor.getStringValue(requestMappingAnnotation,
-                PATH_PROPERTY)
-        template.isEmpty() ? AnnotationsProcessor.getStringValue(requestMappingAnnotation, AnnotationsProcessor.DEFAULT_ANNOTATION_PROPERTY) : template
+        String template = AnnotationsProcessor.getStringValue(requestMappingAnnotation, PATH_PROPERTY)
+        template ?: AnnotationsProcessor.getStringValue(requestMappingAnnotation, AnnotationsProcessor.DEFAULT_ANNOTATION_PROPERTY)
     }
 
     static boolean callDelegateWithParamValuesAndReturnResults(MethodDeclaration methodDeclaration) {
@@ -133,48 +114,43 @@ class SpringControllerUtils {
 
     static boolean isRestControllerMethod(MethodDeclaration methodDeclaration) {
         !methodDeclaration.static &&
-                AnnotationsProcessor.hasAnnotation(methodDeclaration, REQUEST_MAPPING_ANNOTATIONS)
+                AnnotationsProcessor.hasAnnotation(methodDeclaration, RequestMappingAnnotation.names())
     }
 
     static boolean isRestController(ClassOrInterfaceDeclaration classDeclaration) {
         return AnnotationsProcessor.hasAnnotation(classDeclaration, REST_CONTROLLER)
     }
 
-    static Map<String, String> getVariablesMap(MethodDeclaration methodDeclaration, String annotationName) {
-        methodDeclaration.parameters.collect {
-            AnnotationExpr annotation = AnnotationsProcessor.getAnnotation(it, annotationName)
-            if (annotation) {
-                String key = AnnotationsProcessor.getStringValue(annotation, PARAMETER_ANNOTATION_PROPERTIES)
-                Tuple2<String, String> pair = new Tuple2<>(key.isEmpty()?it.nameAsString:key
-                        ,  it.nameAsString)
-                return Optional.of(pair)
-            }
-            return Optional.<Tuple2<String, String>> empty()
-        }.findAll { it.isPresent() }.collectEntries { [(it.get().first): it.get().second] }
+    static Map<String, String> getAnnotatedVariablesMap(MethodDeclaration methodDeclaration, String annotationName) {
+        methodDeclaration.parameters.stream()
+                .filter{ AnnotationsProcessor.getAnnotation(it, annotationName) != null }
+                .collect( Collectors.<Parameter,?,Map<String,String>>toMap(
+                    {
+                        AnnotationExpr annotation = AnnotationsProcessor.getAnnotation(it, annotationName)
+                        AnnotationsProcessor.getStringValue(annotation, PARAMETER_ANNOTATION_PROPERTIES) ?: it.nameAsString
+                    },
+                    {it.nameAsString} ))
     }
 
     static String buildUrl(MethodDeclaration method) {
-        ClassOrInterfaceDeclaration classDeclaration = method.parentNode.get() as ClassOrInterfaceDeclaration
+        ClassOrInterfaceDeclaration classDeclaration = method.getAncestorOfType(ClassOrInterfaceDeclaration).get()
         String classUrlTemplate = getNodeUrlTemplate(classDeclaration)
-
         String methodUrlTemplate = getNodeUrlTemplate(method)
         String urlTemplate = classUrlTemplate + methodUrlTemplate
         String urlSep = "/"
-        urlTemplate = urlTemplate.isEmpty() ? urlSep : urlTemplate
+        urlTemplate = urlTemplate ?: urlSep
         urlTemplate = urlTemplate.startsWith(urlSep) ? urlTemplate : (urlSep +  urlTemplate)
-        Map<String, String> pathVariableToName = getVariablesMap(method, PATH_VARIABLE)
-        String url = fillPathVariablesUrl(urlTemplate, pathVariableToName)
-        url
+        Map<String, String> pathVariableToNames = getAnnotatedVariablesMap(method, PATH_VARIABLE)
+        fillPathVariablesUrl(urlTemplate, pathVariableToNames)
     }
 
     private static String getNodeUrlTemplate(Node node) {
-        AnnotationExpr mappingAnnotation = AnnotationsProcessor.getAnnotation(node, REQUEST_MAPPING_ANNOTATIONS)
-        String urlTemplate = mappingAnnotation ? getUrlTemplate(mappingAnnotation) : ""
-        urlTemplate
+        AnnotationExpr mappingAnnotation = AnnotationsProcessor.getAnnotation(node, RequestMappingAnnotation.names())
+        mappingAnnotation ? getUrlTemplate(mappingAnnotation) : ""
     }
 
     static boolean hasSimpleUrlTemplate(Node node) {
-        AnnotationExpr mappingAnnotation = AnnotationsProcessor.getAnnotation(node, REQUEST_MAPPING_ANNOTATIONS)
+        AnnotationExpr mappingAnnotation = AnnotationsProcessor.getAnnotation(node, RequestMappingAnnotation.names())
         if(!mappingAnnotation){
             return true
         }

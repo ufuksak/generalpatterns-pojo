@@ -10,12 +10,12 @@ import com.aurea.testgenerator.generation.merge.TestNodeMerger
 import com.aurea.testgenerator.generation.methods.MethodsUtils
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.TestMethodNomenclature
+import com.aurea.testgenerator.generation.patterns.pojos.Pojos
 import com.aurea.testgenerator.generation.source.Imports
 import com.aurea.testgenerator.reporting.CoverageReporter
 import com.aurea.testgenerator.reporting.TestGeneratorResultReporter
 import com.aurea.testgenerator.source.Unit
 import com.aurea.testgenerator.value.Types
-import com.aurea.testgenerator.value.ValueFactory
 import com.aurea.testgenerator.value.VariableFactoryReplacingMocksByNewInstances
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.Modifier
@@ -36,10 +36,13 @@ import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
 @Component
-@Profile("spring-controller")
+@Profile("manual")
 @Log4j2
 //TODO add dependency mergers
 class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGeneratorWithClassContext<MethodDeclaration> {
+
+    public static final String MOCK_ANNOTATION = "Mock"
+    public static final String INJECT_MOCK_ANNOTATION = "InjectMocks"
 
     private static final String EXPECTED_RESULT = "expectedResult"
     private static final String INSTANCE_NAME = "controllerInstance"
@@ -59,10 +62,10 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
 
 
     SpringControllerDelegatingMethodTestGenerator(JavaParserFacade solver, TestGeneratorResultReporter reporter,
-                                                  CoverageReporter coverageReporter, NomenclatureFactory
-                                                          nomenclatures, ValueFactory valueFactory) {
+                                                  CoverageReporter coverageReporter, NomenclatureFactory nomenclatures,
+                                                  VariableFactoryReplacingMocksByNewInstances variableFactory) {
         super(solver, reporter, coverageReporter, nomenclatures)
-        this.variableFactory = new VariableFactoryReplacingMocksByNewInstances(valueFactory)
+        this.variableFactory = variableFactory
     }
 
     private static List<FieldDeclaration> getTargetFields(ClassOrInterfaceDeclaration classDeclaration) {
@@ -73,22 +76,13 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
 
     @Override
     protected void visitClass(ClassOrInterfaceDeclaration classDeclaration, List<TestGeneratorResult> results) {
-        List<FieldDeclaration> targetFields = getTargetFields(classDeclaration)
-        Set<FieldDeclaration> testFields = targetFields.collect {
-            VariableDeclarator variable = it.variables.first()
-            new FieldDeclaration(EnumSet.of(Modifier.PRIVATE), new
-                    VariableDeclarator(variable.type, variable.name)).addAnnotation("Mock") //TODO add support
-            // for primitive types
-        }.toSet()
-
-        FieldDeclaration instanceField = new FieldDeclaration(EnumSet.of(Modifier.PRIVATE), new
-                VariableDeclarator(new ClassOrInterfaceType(classDeclaration.nameAsString), INSTANCE_NAME))
-                .addAnnotation("InjectMocks")
+        Set<FieldDeclaration> mockedDelegates = createDelegateMocks(classDeclaration)
+        FieldDeclaration controllerInstance = createControllerInstance(classDeclaration)
 
         for(TestGeneratorResult methodResult: results){
             methodResult.tests.forEach {
-                it.dependency.fields.addAll(testFields)
-                it.dependency.fields << instanceField
+                it.dependency.fields.addAll(mockedDelegates)
+                it.dependency.fields << controllerInstance
                 it.dependency.fields << MOCKMVC_FIELD.clone()
                 it.dependency.methodSetups << SETUP_METHOD.clone()
                 it.dependency.imports.addAll(Imports.SPRING_CONTROLLER_IMPORTS)
@@ -96,34 +90,52 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
         }
     }
 
+    private FieldDeclaration createControllerInstance(ClassOrInterfaceDeclaration classDeclaration){
+        new FieldDeclaration(EnumSet.of(Modifier.PRIVATE), new
+                VariableDeclarator(new ClassOrInterfaceType(classDeclaration.nameAsString), INSTANCE_NAME))
+                .addAnnotation(INJECT_MOCK_ANNOTATION)
+    }
+
+    private Set<FieldDeclaration> createDelegateMocks(ClassOrInterfaceDeclaration classDeclaration){
+        List<FieldDeclaration> targetFields = getTargetFields(classDeclaration)
+        targetFields.collect {
+            it.clone().addAnnotation(MOCK_ANNOTATION).setModifiers(EnumSet.of(Modifier.PRIVATE))
+        }.toSet()
+    }
+
     @Override
     protected TestGeneratorResult generate(MethodDeclaration method, Unit unit) {
         TestGeneratorResult result = new TestGeneratorResult()
         try {
             MethodCallExpr delegateExpression = method.findAll(MethodCallExpr).last()
-            String requestBodyName = method.parameters.find {
-                AnnotationsProcessor.hasAnnotation(it, SpringControllerUtils.REQUEST_BODY)
-            }?.nameAsString
-
+            String requestBodyName = getRequestBodyName(method)
             AnnotationExpr methodRequestMappingAnnotation = AnnotationsProcessor.getAnnotation(method,
-                    SpringControllerUtils.REQUEST_MAPPING_ANNOTATIONS)
+                    RequestMappingAnnotation.names())
 
             DependableNode<MethodDeclaration> testMethod = buildTestMethod(unit, method, delegateExpression,
                     requestBodyName, methodRequestMappingAnnotation)
+
             result.tests = [testMethod]
 
         } catch (TestGeneratorError tge) {
             result.errors << tge
         }
-        return result
+
+        result
+    }
+
+    private String getRequestBodyName(MethodDeclaration method){
+        method.parameters.find {
+            AnnotationsProcessor.hasAnnotation(it, SpringControllerUtils.REQUEST_BODY)
+        }?.nameAsString
     }
 
     private DependableNode<MethodDeclaration> buildTestMethod(Unit unit, MethodDeclaration method, MethodCallExpr delegateExpression,
                                                               String requestBodyName,
                                                               AnnotationExpr methodRequestMappingAnnotation) {
-        TestMethodNomenclature testMethodNomenclature = nomenclatures.getTestMethodNomenclature(unit.javaClass)
-        String testName = testMethodNomenclature.requestTestMethodName(getType(), method)
+        String testName = getTestMethodName(unit, method)
         String args = getArgs(method, delegateExpression)
+
         String testCode = """
             @Test
             public void ${testName}() throws Exception {
@@ -146,20 +158,21 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
        return getTestMdethod(method, testCode)
     }
 
+    private String getTestMethodName(Unit unit, MethodDeclaration method){
+        TestMethodNomenclature testMethodNomenclature = nomenclatures.getTestMethodNomenclature(unit.javaClass)
+        testMethodNomenclature.requestTestMethodName(getType(), method)
+    }
+
     private static String getScope(MethodCallExpr delegateExpression) {
         delegateExpression.scope.get().asNameExpr().nameAsString
     }
 
     private String getExpectedResultStatementCode(MethodDeclaration method, MethodCallExpr delegateExpression, String args) {
-        Optional<DependableNode<VariableDeclarationExpr>> expectedResultDepNode = getExpectedResultDepNode(method)
-        if (!expectedResultDepNode.isPresent()) {
-            return ""
-        }
-        VariableDeclarationExpr expectedResultDeclaration = expectedResultDepNode.get().node
-         """
-         $expectedResultDeclaration;
-         Mockito.when(${getScope(delegateExpression)}.${delegateExpression.nameAsString}($args)).thenReturn(${EXPECTED_RESULT});
-         """
+        getExpectedResultDepNode(method).map{
+            """
+            $it.node;
+            Mockito.when(${getScope(delegateExpression)}.${delegateExpression.nameAsString}($args)).thenReturn(${EXPECTED_RESULT});
+            """ }.orElse("")
     }
 
     private Optional<DependableNode<VariableDeclarationExpr>> getExpectedResultDepNode(MethodDeclaration method) {
@@ -183,8 +196,7 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
     }
 
     private static String getParamsCode(MethodDeclaration method) {
-        getParametersCode(method, "param", SpringControllerUtils
-                .REQUEST_PARAM)
+        getParametersCode(method, "param", SpringControllerUtils.REQUEST_PARAM)
     }
 
     private static String getHeadersCode(MethodDeclaration method) {
@@ -193,11 +205,9 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
     }
 
     private static String getParametersCode(MethodDeclaration method, String parameterMethod,  String annotationName){
-        Map<String, String> requestParamToname = SpringControllerUtils.getVariablesMap(method, annotationName)
-        String parametersCode = requestParamToname.isEmpty() ? "" : requestParamToname.entrySet().collect {
-            "${System.lineSeparator()}.${parameterMethod}(\"${it.key}\", String.valueOf(${it.value}))"
-        }.join("")
-        parametersCode
+        SpringControllerUtils.getAnnotatedVariablesMap(method, annotationName).collect {
+                "${System.lineSeparator()}.${parameterMethod}(\"${it.key}\", String.valueOf(${it.value}))"
+            }.join("")
     }
 
     private String getVariableStatements(MethodDeclaration method) {
@@ -231,16 +241,11 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
     }
 
     private static String getContenTypeCode(String requestBodyName, AnnotationExpr methodRequestMappingAnnotation) {
-        Optional<Expression> consumeTypeExpression = AnnotationsProcessor.getAnnotationMemberExpressionValue(methodRequestMappingAnnotation, "consumes")
-        if (requestBodyName || consumeTypeExpression.isPresent()) {
-            if (!consumeTypeExpression.isPresent()) {
-                return '.contentType("application/json;charset=UTF-8")'
-            } else {
-                Expression consumeType = getChilDNodeIfArray(consumeTypeExpression.get())
-                return ".contentType($consumeType)"
-            }
-        }
-        return ""
+        AnnotationsProcessor.getAnnotationMemberExpressionValue(methodRequestMappingAnnotation, "consumes")
+                .map{
+                    ".contentType(${getChilDNodeIfArray(it)})"
+                }.orElse(requestBodyName ? '.contentType("application/json;charset=UTF-8")' : "")
+
     }
 
     private static Expression getChilDNodeIfArray(Expression expression){
@@ -252,23 +257,17 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
 
     private static String getExpectedJsonCode(MethodDeclaration method) {
         //TODO add support for @JsonAttribute
-        List<FieldDeclaration> expectedFields = method.type.findAll(FieldDeclaration)
-        String expectedJsonCode = expectedFields.find { !it.static }.collect {
+        method.type.findAll(FieldDeclaration).find { !it.static }.collect {
             String fieldName = it.getVariable(0).nameAsString
             String getMethodName = "get${fieldName.charAt(0).toUpperCase()}${fieldName.substring(1)}()"
             """${System.lineSeparator()}.andExpect(jsonPath("\$.$fieldName").value($EXPECTED_RESULT.${getMethodName}))"""
         }.join("")
-        expectedJsonCode
     }
 
     private static String getAcceptCode(AnnotationExpr methodRequestMappingAnnotation) {
-        Optional<Expression> produceTypeExpression = AnnotationsProcessor.getAnnotationMemberExpressionValue(methodRequestMappingAnnotation, "produces")
-        if(produceTypeExpression.isPresent()){
-            Expression produceType = getChilDNodeIfArray(produceTypeExpression.get())
-            """.accept(MediaType.parseMediaType($produceType))"""
-        }else {
-            ""
-        }
+        AnnotationsProcessor.getAnnotationMemberExpressionValue(methodRequestMappingAnnotation, "produces")
+                .map{ """.accept(MediaType.parseMediaType(${getChilDNodeIfArray(it)}))""" }
+                .orElse("")
     }
 
     @Override
