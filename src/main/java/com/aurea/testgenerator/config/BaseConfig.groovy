@@ -13,7 +13,6 @@ import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSol
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JarTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.EnableAspectJAutoProxy
@@ -47,7 +46,18 @@ class BaseConfig {
                 new JavaParserTypeSolver(projectConfiguration.srcPath.toFile()))
 
         if (projectConfiguration.resolveJars) {
-            projectConfiguration.resolveJars.split(",").each { solver.add(new JarTypeSolver(it)) }
+            projectConfiguration.resolveJars.split(",").each {
+                def file = new File(it)
+                if (file.directory) {
+                    file.traverse {
+                        if (it.file) {
+                            solver.add(new JarTypeSolver(it.path))
+                        }
+                    }
+                } else {
+                    solver.add(new JarTypeSolver(it))
+                }
+            }
         }
         solver
     }
