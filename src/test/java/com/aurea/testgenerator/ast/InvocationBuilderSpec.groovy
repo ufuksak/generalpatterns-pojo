@@ -1,7 +1,6 @@
 package com.aurea.testgenerator.ast
 
 import com.aurea.testgenerator.TestUnitSpec
-import com.aurea.testgenerator.extensions.Extensions
 import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.value.ArbitraryPrimitiveValuesFactory
 import com.aurea.testgenerator.value.ArbitraryReferenceTypeFactory
@@ -14,7 +13,6 @@ import com.github.javaparser.ast.CompilationUnit
 import com.github.javaparser.ast.body.ConstructorDeclaration
 import com.github.javaparser.ast.expr.IntegerLiteralExpr
 import com.github.javaparser.ast.expr.ObjectCreationExpr
-import com.github.javaparser.ast.expr.SimpleName
 
 import static org.assertj.core.api.Assertions.assertThat
 
@@ -127,7 +125,7 @@ class InvocationBuilderSpec extends TestUnitSpec {
     def "with given parameters"() {
         setup:
         builder.usingForParameters([
-                (new SimpleName("i")): DependableNode.from(new IntegerLiteralExpr(123))
+                i: DependableNode.from(new IntegerLiteralExpr(123))
         ])
 
         expect:

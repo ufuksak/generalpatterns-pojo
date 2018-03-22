@@ -12,93 +12,91 @@ import com.github.javaparser.resolution.declarations.ResolvedFieldDeclaration
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration
 import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserMethodDeclaration
 import com.jasongoodwin.monads.Try
+import groovy.transform.Memoized
 import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
 
 @Log4j2
 class Pojos {
 
-    static boolean isPojo(ClassOrInterfaceDeclaration coid) {
-        hasAtleastOneGetter(coid) ||
-                hasToStringMethod(coid) ||
-                hasEquals(coid) ||
-                hasHashCode(coid) ||
-                hasConstructors(coid) ||
-                hasAtLeastOneSetter(coid)
+    static boolean isPojo(ClassOrInterfaceDeclaration classDeclaration) {
+        hasAtleastOneGetter(classDeclaration) ||
+                hasToStringMethod(classDeclaration) ||
+                hasEquals(classDeclaration) ||
+                hasHashCode(classDeclaration) ||
+                hasConstructors(classDeclaration) ||
+                hasAtLeastOneSetter(classDeclaration)
     }
 
-    static boolean hasToStringMethod(ClassOrInterfaceDeclaration coid) {
-        coid.methods.any {
+    static boolean hasToStringMethod(ClassOrInterfaceDeclaration classDeclaration) {
+        classDeclaration.methods.any {
             it.nameAsString == 'toString' && it.type.toString() == 'String' && it.public && !it.parameters
         }
     }
 
-    static Optional<MethodDeclaration> tryGetToStringMethod(ClassOrInterfaceDeclaration coid) {
-        StreamEx.of(coid.methods).findFirst {
+    static Optional<MethodDeclaration> tryGetToStringMethod(ClassOrInterfaceDeclaration classDeclaration) {
+        StreamEx.of(classDeclaration.methods).findFirst {
             it.nameAsString == 'toString' && it.type.toString() == 'String' && it.public && !it.parameters
         }
     }
 
-    static boolean hasEquals(ClassOrInterfaceDeclaration coid) {
-        coid.methods.any {
+    static boolean hasEquals(ClassOrInterfaceDeclaration classDeclaration) {
+        classDeclaration.methods.any {
             it.nameAsString == 'equals' && it.type.toString() == 'boolean' && it.public &&
                     it.parameters.size() == 1 && it.parameters.first().type.toString() == 'Object'
         }
     }
 
-    static Optional<MethodDeclaration> tryGetEqualsMethod(ClassOrInterfaceDeclaration coid) {
-        StreamEx.of(coid.methods).findFirst {
+    static Optional<MethodDeclaration> tryGetEqualsMethod(ClassOrInterfaceDeclaration classDeclaration) {
+        StreamEx.of(classDeclaration.methods).findFirst {
             it.nameAsString == 'equals' && it.type.toString() == 'boolean' && it.public &&
                     it.parameters.size() == 1 && it.parameters.first().type.toString() == 'Object'
         }
     }
 
-    static boolean hasHashCode(ClassOrInterfaceDeclaration coid) {
-        coid.methods.any {
+    static boolean hasHashCode(ClassOrInterfaceDeclaration classDeclaration) {
+        classDeclaration.methods.any {
             it.nameAsString == 'hashCode' && it.type.toString() == 'int' && it.public && !it.parameters
         }
     }
 
-    static Optional<MethodDeclaration> tryGetHashCodeMethod(ClassOrInterfaceDeclaration coid) {
-        StreamEx.of(coid.methods).findFirst {
+    static Optional<MethodDeclaration> tryGetHashCodeMethod(ClassOrInterfaceDeclaration classDeclaration) {
+        StreamEx.of(classDeclaration.methods).findFirst {
             it.nameAsString == 'hashCode' && it.type.toString() == 'int' && it.public && !it.parameters
         }
     }
 
-    static boolean hasConstructors(ClassOrInterfaceDeclaration coid) {
-        coid.constructors
+    static boolean hasConstructors(ClassOrInterfaceDeclaration classDeclaration) {
+        classDeclaration.constructors
     }
 
-    static boolean hasAtleastOneGetter(ClassOrInterfaceDeclaration coid) {
-        resolvedFields(coid).anyMatch { resolvedField ->
-            PojoMethodsFinder getterFinder = new PojoMethodsFinder(resolvedField)
-            getterFinder.tryToFindGetter().present
-        }
+    static boolean hasAtleastOneGetter(ClassOrInterfaceDeclaration classDeclaration) {
+        resolvedFields(classDeclaration).anyMatch { PojoMethodsFinder.findGetterMethod(it).present }
     }
 
-    static List<ResolvedMethodDeclaration> getGetters(ClassOrInterfaceDeclaration coid) {
-        resolvedFields(coid).map { resolvedField ->
-            PojoMethodsFinder getterFinder = new PojoMethodsFinder(resolvedField)
-            getterFinder.tryToFindGetter()
-        }.filter { it.present }.map { it.get() }.toList()
+    static List<ResolvedMethodDeclaration> getGetters(ClassOrInterfaceDeclaration classDeclaration) {
+        resolvedFields(classDeclaration)
+                .map { PojoMethodsFinder.findGetterMethod(it) }
+                .filter { it.present }
+                .map { it.get() }
+                .toList()
     }
 
-    static boolean hasAtLeastOneSetter(ClassOrInterfaceDeclaration coid) {
-        resolvedFields(coid).anyMatch { resolvedField ->
-            PojoMethodsFinder setterFinder = new PojoMethodsFinder(resolvedField)
-            setterFinder.tryToFindSetter().present
-        }
+    static boolean hasAtLeastOneSetter(ClassOrInterfaceDeclaration classDeclaration) {
+        resolvedFields(classDeclaration).anyMatch { PojoMethodsFinder.findSetterMethod(it).present }
     }
 
-    static List<ResolvedMethodDeclaration> getSetters(ClassOrInterfaceDeclaration coid) {
-        resolvedFields(coid).map { resolvedField ->
-            PojoMethodsFinder setterFinder = new PojoMethodsFinder(resolvedField)
-            setterFinder.tryToFindSetter()
-        }.filter { it.present }.map { it.get() }.toList()
+    static List<ResolvedMethodDeclaration> getSetters(ClassOrInterfaceDeclaration classDeclaration) {
+        resolvedFields(classDeclaration)
+                .map { PojoMethodsFinder.findSetterMethod(it) }
+                .filter { it.present }
+                .map { it.get() }
+                .toList()
     }
 
-    private static StreamEx<ResolvedFieldDeclaration> resolvedFields(ClassOrInterfaceDeclaration coid) {
-        StreamEx.of(coid.fields)
+    @Memoized
+    private static StreamEx<ResolvedFieldDeclaration> resolvedFields(ClassOrInterfaceDeclaration classDeclaration) {
+        StreamEx.of(classDeclaration.fields)
                 .map { Resolution.tryResolve(it) }
                 .filter { it.present }
                 .map { it.get() }
@@ -127,9 +125,9 @@ class Pojos {
     }
 
     static boolean isSetterCall(MethodCallExpr methodCall) {
-        Resolution.tryResolve(methodCall).map {
-            isSetterSignature(it)
-        }.orElse(false)
+        Resolution.tryResolve(methodCall)
+                .map { isSetterSignature(it) }
+                .orElse(false)
     }
 
     private static boolean simplyAssignsValue(BlockStmt block) {

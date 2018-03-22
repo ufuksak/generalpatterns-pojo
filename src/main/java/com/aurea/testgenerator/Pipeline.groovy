@@ -45,8 +45,8 @@ class Pipeline {
             log.info "${counter.incrementAndGet()} / $totalUnits: $it.fullName"
             unitTestGenerator.tryGenerateTest(it)
         }
-             .filter { it.present }
-             .map { it.get() }
-             .each { unitTestWriter.write(it.test) }
+                .filter { it.present }
+                .map { it.get() }
+                .each { unitTestWriter.write(it.test) }
     }
 }
