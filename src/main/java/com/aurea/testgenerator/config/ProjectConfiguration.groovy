@@ -23,6 +23,7 @@ class ProjectConfiguration {
     String src
 
     List<String> resolvePaths = []
+    List<String> resolveJars = []
 
     String testSrc
     String out

@@ -45,29 +45,29 @@ class BaseConfig {
     @Bean
     TypeSolver combinedTypeSolver(ProjectConfiguration projectConfiguration) {
         CombinedTypeSolver solver = new CombinedTypeSolver(new ReflectionTypeSolver())
-/*
+
         projectConfiguration.resolvePaths.stream()
+                .map{new File(it)}
+                .filter{it.exists() && it.isDirectory()}
+                .forEach {
+                    solver.add(new JavaParserTypeSolver(it))
+                }
+
+        projectConfiguration.resolveJars.stream()
                 .map{new File(it)}
                 .filter{it.exists()}
                 .filter{(it.isFile() && it.name.endsWith(".jar")) || it.isDirectory()}
                 .forEach {
-                    solver.add( it.isDirectory() ? new JavaParserTypeSolver(it) : new JarTypeSolver(it.absolutePath) )
-                }
-*/
-        if (projectConfiguration.resolveJars) {
-            projectConfiguration.resolveJars.split(",").each {
-                def file = new File(it)
-                if (file.directory) {
-                    file.traverse {
-                        if (it.file) {
-                            solver.add(new JarTypeSolver(it.path))
+                    if (it.isDirectory()) {
+                        it.traverse {
+                            if (it.isFile() && it.name.endsWith(".jar")) {
+                                solver.add(new JarTypeSolver(it.path))
+                            }
                         }
+                    } else {
+                        solver.add(new JarTypeSolver(it.path))
                     }
-                } else {
-                    solver.add(new JarTypeSolver(it))
                 }
-            }
-        }
 
         solver
     }
