@@ -6,6 +6,7 @@ import com.aurea.testgenerator.config.ProjectConfiguration
 import com.aurea.testgenerator.generation.TestType
 import com.aurea.testgenerator.generation.patterns.pojos.PojoTestTypes
 import com.aurea.testgenerator.generation.patterns.singleton.SingletonTypes
+import com.aurea.testgenerator.generation.patterns.springrepository.SpringRepositoryTestTypes
 import com.aurea.testgenerator.generation.patterns.staticfactory.StaticFactoryMethodTypes
 import com.github.javaparser.ast.Node
 import com.github.javaparser.ast.body.CallableDeclaration
@@ -18,24 +19,26 @@ class TestMethodNomenclature {
     static final String TEST_NAME_SPACE = "_"
 
     private static final Map<? extends TestType, String> TEST_METHOD_NAME_SUFFIXES = [
-            (StaticFactoryMethodTypes.IS_CALLABLE)        : 'IsCallable',
-            (StaticFactoryMethodTypes.ASSIGNMENT_CHECK)   : 'AssignsValues',
-            (StaticFactoryMethodTypes.DIFFERENT_INSTANCES): 'OnSecondCall_CreateDifferentInstance',
-            (SingletonTypes.SAME_INSTANCE)                : 'OnSecondCall_ReturnsSameInstance',
-            (SingletonTypes.THREAD_SAFE)                  : 'IsThreadSafe',
+            (StaticFactoryMethodTypes.IS_CALLABLE)                     : 'IsCallable',
+            (StaticFactoryMethodTypes.ASSIGNMENT_CHECK)                : 'AssignsValues',
+            (StaticFactoryMethodTypes.DIFFERENT_INSTANCES)             : 'OnSecondCall_CreateDifferentInstance',
+            (SingletonTypes.SAME_INSTANCE)                             : 'OnSecondCall_ReturnsSameInstance',
+            (SingletonTypes.THREAD_SAFE)                               : 'IsThreadSafe',
+            (SpringRepositoryTestTypes.SPRING_REPOSITORY_FIND_ENTITY)  : 'Returns_Entity',
+            (SpringRepositoryTestTypes.SPRING_REPOSITORY_FIND_MULTIPLE): 'Returns_List',
 
-            (PojoTestTypes.OPEN_POJO_GETTER)              : 'Getters',
-            (PojoTestTypes.OPEN_POJO_SETTER)              : 'Setters',
-            (PojoTestTypes.OPEN_POJO_TO_STRING)           : 'ToString',
-            (PojoTestTypes.OPEN_POJO_EQUALS)              : 'Equals',
-            (PojoTestTypes.OPEN_POJO_HASH_CODE)           : 'HashCode',
-            (PojoTestTypes.OPEN_POJO_CONSTRUCTORS)        : 'Constructors',
-            (PojoTestTypes.POJO_TESTER_GETTER)            : 'Getters',
-            (PojoTestTypes.POJO_TESTER_SETTER)            : 'Setters',
-            (PojoTestTypes.POJO_TESTER_TO_STRING)         : 'ToString',
-            (PojoTestTypes.POJO_TESTER_EQUALS)            : 'Equals',
-            (PojoTestTypes.POJO_TESTER_HASH_CODE)         : 'HashCode',
-            (PojoTestTypes.POJO_TESTER_CONSTRUCTORS)      : 'Constructors',
+            (PojoTestTypes.OPEN_POJO_GETTER)                           : 'Getters',
+            (PojoTestTypes.OPEN_POJO_SETTER)                           : 'Setters',
+            (PojoTestTypes.OPEN_POJO_TO_STRING)                        : 'ToString',
+            (PojoTestTypes.OPEN_POJO_EQUALS)                           : 'Equals',
+            (PojoTestTypes.OPEN_POJO_HASH_CODE)                        : 'HashCode',
+            (PojoTestTypes.OPEN_POJO_CONSTRUCTORS)                     : 'Constructors',
+            (PojoTestTypes.POJO_TESTER_GETTER)                         : 'Getters',
+            (PojoTestTypes.POJO_TESTER_SETTER)                         : 'Setters',
+            (PojoTestTypes.POJO_TESTER_TO_STRING)                      : 'ToString',
+            (PojoTestTypes.POJO_TESTER_EQUALS)                         : 'Equals',
+            (PojoTestTypes.POJO_TESTER_HASH_CODE)                      : 'HashCode',
+            (PojoTestTypes.POJO_TESTER_CONSTRUCTORS)                   : 'Constructors',
     ].asImmutable()
 
     private static final Map<? extends TestType, String> TEST_METHOD_NAME_PREFIXES = [
@@ -67,13 +70,15 @@ class TestMethodNomenclature {
         try {
             String suffix = TEST_METHOD_NAME_SUFFIXES[type]
 
-            if (type instanceof StaticFactoryMethodTypes || type instanceof SingletonTypes) {
-                return new CallableNameRepository(suffix, context as CallableDeclaration).get()
-            }
+            switch (type) {
+                case StaticFactoryMethodTypes:
+                case SingletonTypes:
+                case SpringRepositoryTestTypes:
+                    return new CallableNameRepository(suffix, context as CallableDeclaration).get()
 
-            if (type instanceof PojoTestTypes) {
-                String prefix = TEST_METHOD_NAME_PREFIXES[type]
-                return new TypeNameRepository(prefix, suffix, context as TypeDeclaration).get()
+                case PojoTestTypes:
+                    String prefix = TEST_METHOD_NAME_PREFIXES[type]
+                    return new TypeNameRepository(prefix, suffix, context as TypeDeclaration).get()
             }
 
             throw new IllegalArgumentException("Cannot generate name for $type in $context")
