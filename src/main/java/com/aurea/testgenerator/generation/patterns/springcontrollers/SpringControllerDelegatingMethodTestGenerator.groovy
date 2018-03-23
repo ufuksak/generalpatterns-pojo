@@ -10,7 +10,6 @@ import com.aurea.testgenerator.generation.merge.TestNodeMerger
 import com.aurea.testgenerator.generation.methods.MethodsUtils
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.TestMethodNomenclature
-import com.aurea.testgenerator.generation.patterns.pojos.Pojos
 import com.aurea.testgenerator.generation.source.Imports
 import com.aurea.testgenerator.reporting.CoverageReporter
 import com.aurea.testgenerator.reporting.TestGeneratorResultReporter
@@ -146,16 +145,16 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
                 
                 mockMvc.perform(${SpringControllerUtils.getHttpMethod(methodRequestMappingAnnotation)}("${SpringControllerUtils.buildUrl(method)}")
                 ${getContentCode(requestBodyName)}\
-                ${getContenTypeCode(requestBodyName, methodRequestMappingAnnotation)}\
+                ${getContentTypeCode(requestBodyName, methodRequestMappingAnnotation)}\
                 ${getParamsCode(method)}\
                 ${getHeadersCode(method)}\
                 ${getAcceptCode(methodRequestMappingAnnotation)})
-                .andExpect(status().is2xxSuccessful())${getExpectedJsonCode(method)};                       
+                .andExpect(status().is2xxSuccessful());                       
                 
                 ${getVerifyCode(delegateExpression, args)}
              }
             """
-       return getTestMdethod(method, testCode)
+       return getTestMethod(method, testCode)
     }
 
     private String getTestMethodName(Unit unit, MethodDeclaration method){
@@ -216,9 +215,9 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
     }
 
     private static String getArgs(MethodDeclaration method, MethodCallExpr delegateExpression) {
-        Map<String, Type> methodParmaTotype = method.parameters.collectEntries { [(it.nameAsString), it.type] }
+        Map<String, Type> methodParamToType = method.parameters.collectEntries { [(it.nameAsString), it.type] }
         String args = delegateExpression.arguments.collect {
-            Type argType = methodParmaTotype.get(it.toString())
+            Type argType = methodParamToType.get(it.toString())
             if (argType && argType.isClassOrInterfaceType()
                     && !Types.isString(argType)
                     && !Types.isBoxedPrimitive(argType)) {
@@ -230,43 +229,33 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
         args
     }
 
-    private DependableNode<MethodDeclaration> getTestMdethod(MethodDeclaration methodDeclaration, String testCode) {
+    private DependableNode<MethodDeclaration> getTestMethod(MethodDeclaration methodDeclaration, String testCode) {
         DependableNode<MethodDeclaration> testMethod = new DependableNode<>()
-        Optional<DependableNode<VariableDeclarationExpr>> expectedResultDepNode = getExpectedResultDepNode(methodDeclaration)
-        if (expectedResultDepNode.isPresent()) {
-            TestNodeMerger.appendDependencies(testMethod, expectedResultDepNode.get())
-        }
+
+        getExpectedResultDepNode(methodDeclaration)
+                .ifPresent{TestNodeMerger.appendDependencies(testMethod, it)}
+
         testMethod.node = JavaParser.parseBodyDeclaration(testCode).asMethodDeclaration()
         testMethod
     }
 
-    private static String getContenTypeCode(String requestBodyName, AnnotationExpr methodRequestMappingAnnotation) {
+    private static String getContentTypeCode(String requestBodyName, AnnotationExpr methodRequestMappingAnnotation) {
         AnnotationsProcessor.getAnnotationMemberExpressionValue(methodRequestMappingAnnotation, "consumes")
-                .map{
-                    ".contentType(${getChilDNodeIfArray(it)})"
-                }.orElse(requestBodyName ? '.contentType("application/json;charset=UTF-8")' : "")
+                .map{ ".contentType(${getChildNodeIfArray(it)})" }
+                .orElse(requestBodyName ? '.contentType("application/json;charset=UTF-8")' : "")
 
     }
 
-    private static Expression getChilDNodeIfArray(Expression expression){
+    private static Expression getChildNodeIfArray(Expression expression){
         if(expression.isArrayInitializerExpr() && ! expression.childNodes.isEmpty()){
             return expression.findAll(Expression).first()
         }
         return expression
     }
 
-    private static String getExpectedJsonCode(MethodDeclaration method) {
-        //TODO add support for @JsonAttribute
-        method.type.findAll(FieldDeclaration).find { !it.static }.collect {
-            String fieldName = it.getVariable(0).nameAsString
-            String getMethodName = "get${fieldName.charAt(0).toUpperCase()}${fieldName.substring(1)}()"
-            """${System.lineSeparator()}.andExpect(jsonPath("\$.$fieldName").value($EXPECTED_RESULT.${getMethodName}))"""
-        }.join("")
-    }
-
     private static String getAcceptCode(AnnotationExpr methodRequestMappingAnnotation) {
         AnnotationsProcessor.getAnnotationMemberExpressionValue(methodRequestMappingAnnotation, "produces")
-                .map{ """.accept(MediaType.parseMediaType(${getChilDNodeIfArray(it)}))""" }
+                .map{ """.accept(MediaType.parseMediaType(${getChildNodeIfArray(it)}))""" }
                 .orElse("")
     }
 
