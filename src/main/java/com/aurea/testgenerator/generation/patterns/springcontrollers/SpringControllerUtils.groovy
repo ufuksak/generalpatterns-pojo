@@ -12,6 +12,7 @@ import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.stmt.ReturnStmt
 import com.github.javaparser.resolution.UnsolvedSymbolException
 import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration
+import com.jasongoodwin.monads.Try
 import groovy.util.logging.Log4j2
 import org.apache.commons.lang3.StringUtils
 
@@ -51,8 +52,7 @@ class SpringControllerUtils {
     }
 
     static boolean callDelegateWithParamValuesAndReturnResults(MethodDeclaration methodDeclaration) {
-        List<ReturnStmt> returnStatements = methodDeclaration.findAll(ReturnStmt)
-        if (returnStatements.size() > 1) {
+        if (methodDeclaration.findAll(ReturnStmt).size() > 1) {
             return false
         }
         Optional<MethodCallExpr> optionalExpression = MethodsUtils.findLastMethodCallExpression(methodDeclaration)
@@ -80,16 +80,11 @@ class SpringControllerUtils {
     }
 
     static boolean returnSameType(MethodDeclaration methodDeclaration, MethodCallExpr methodCallExpr) {
-        try {
-            if (methodDeclaration.type.isVoidType()){
-                return true
-            }
-            return methodDeclaration.type.resolve() == methodCallExpr.calculateResolvedType()
-        } catch (Exception ex) { // catching Exception here because com.github.javaparser.symbolsolver
-            // .javaparsermodel.JavaParserFacade.solveMethodAsUsage thros RuntimeExdeption
-            log.error("Unable to resolve types for $methodDeclaration and $methodCallExpr", ex)
-            return false
+        if (methodDeclaration.type.isVoidType()){
+            return true
         }
+        Try.ofFailable { methodDeclaration.type.resolve() == methodCallExpr.calculateResolvedType() }
+                .orElse(false)
     }
 
     static boolean callsDelegate(MethodCallExpr methodCallExpr) {
