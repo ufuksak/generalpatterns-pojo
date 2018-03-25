@@ -63,7 +63,7 @@ class BaseConfig {
                                 solver.add(new JarTypeSolver(it.path))
                             }
                         }
-                    } else {
+                    } else if (it.name.endsWith(".jar")){
                         solver.add(new JarTypeSolver(it.path))
                     }
                 }
