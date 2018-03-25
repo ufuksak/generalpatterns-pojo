@@ -14,7 +14,7 @@ abstract class PojoFieldFinder {
 
     static Optional<ResolvedFieldDeclaration> findSetterField(ResolvedMethodDeclaration method) {
         Try.ofFailable {
-            if (method.numberOfParams == 1 && Types.isBooleanType(method.getParam(0).type) && validPrefix(method.name, 'set')) {
+            if (method.numberOfParams == 1 && Types.isBooleanType(method.getParam(0).getType()) && validPrefix(method.name, 'set')) {
                 def expectedName = method.name.replaceFirst('set', 'is')
                 Optional<ResolvedFieldDeclaration> maybeField = findFieldWithName(method, expectedName)
                 if (maybeField.present) {

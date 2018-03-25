@@ -37,7 +37,7 @@ class PojoMethodsFinder {
     static Optional<ResolvedMethodDeclaration> findSetterMethod(ResolvedFieldDeclaration fieldDeclaration) {
         Try.ofFailable {
             String fieldName = fieldDeclaration.name
-            if (Types.isBooleanType(fieldDeclaration.type) && validPrefix(fieldName, 'is')) {
+            if (Types.isBooleanType(fieldDeclaration.getType()) && validPrefix(fieldName, 'is')) {
 
                 String expectedName = fieldName.replaceFirst('is', 'set')
                 Optional<ResolvedMethodDeclaration> withIsName = findSetterWithName(fieldDeclaration, expectedName)
@@ -88,12 +88,12 @@ class PojoMethodsFinder {
     private static boolean isGetter(ResolvedFieldDeclaration fieldDeclaration, ResolvedMethodDeclaration methodDeclaration) {
         methodDeclaration.static == fieldDeclaration.static &&
                 isGetterSignature(methodDeclaration) &&
-                areSameOrBoxedSame(methodDeclaration.returnType, fieldDeclaration.type)
+                areSameOrBoxedSame(methodDeclaration.returnType, fieldDeclaration.getType())
     }
 
     private static boolean isSetter(ResolvedFieldDeclaration fieldDeclaration, ResolvedMethodDeclaration methodDeclaration) {
         methodDeclaration.static == fieldDeclaration.static &&
                 isSetterSignature(methodDeclaration) &&
-                areSameOrBoxedSame(methodDeclaration.getParam(0).type, fieldDeclaration.type)
+                areSameOrBoxedSame(methodDeclaration.getParam(0).getType(), fieldDeclaration.getType())
     }
 }
