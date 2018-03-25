@@ -6,25 +6,35 @@ import com.aurea.testgenerator.generation.TestType
 import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.TestMethodNomenclature
-import com.aurea.testgenerator.generation.source.Imports
 import com.aurea.testgenerator.reporting.CoverageReporter
 import com.aurea.testgenerator.reporting.TestGeneratorResultReporter
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.JavaParser
+import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.Modifier
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.FieldDeclaration
 import com.github.javaparser.ast.body.MethodDeclaration
 import com.github.javaparser.ast.body.VariableDeclarator
+import com.github.javaparser.ast.expr.AnnotationExpr
 import com.github.javaparser.ast.expr.ClassExpr
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr
 import com.github.javaparser.ast.expr.Name
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr
+import com.github.javaparser.ast.type.ClassOrInterfaceType
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import groovy.util.logging.Log4j2
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
+
+import static com.aurea.testgenerator.generation.source.Imports.getASSERTJ_ASSERTTHAT
+import static com.aurea.testgenerator.generation.source.Imports.getJUNIT_RUNWITH
+import static com.aurea.testgenerator.generation.source.Imports.getJUNIT_TEST
+import static com.aurea.testgenerator.generation.source.Imports.getSPRING_AUTOWIRED
+import static com.aurea.testgenerator.generation.source.Imports.getSPRING_DATAJPATEST
+import static com.aurea.testgenerator.generation.source.Imports.getSPRING_SPRINGRUNNER
+import static com.aurea.testgenerator.generation.source.Imports.getSPRING_TESTENTITYMANAGER
 
 @Component
 @Profile("manual")
@@ -42,23 +52,12 @@ class SpringRepositoryTestGenerator extends AbstractMethodTestGenerator {
     private static final String SPRINGRUNNER = 'SpringRunner'
     private static final String REPOSITORY_LOWER = 'repository'
     private static final String TEST_STRING = '"testString"'
-    private static final String SPACE = ' '
-    private static final String ASSIGN = '='
-    private static final String NEW = 'new'
-    private static final String OPEN_BRACE = '('
-    private static final String CLOSE_BRACE = ')'
-    private static final String SEMICOLON = ';'
-    private static final String NEW_LINE = System.getProperty('line.separator')
-    private static final String COMMA = ','
-    private static final String ENTITY_SET = 'entity.set'
 
-    NomenclatureFactory nomenclatures
+    private NomenclatureFactory nomenclatures
 
     @Autowired
-    SpringRepositoryTestGenerator(JavaParserFacade solver,
-                                  TestGeneratorResultReporter reporter,
-                                  CoverageReporter visitReporter,
-                                  NomenclatureFactory nomenclatures) {
+    SpringRepositoryTestGenerator(JavaParserFacade solver, TestGeneratorResultReporter reporter,
+                                  CoverageReporter visitReporter, NomenclatureFactory nomenclatures) {
         super(solver, reporter, visitReporter, nomenclatures)
         this.nomenclatures = nomenclatures
     }
@@ -70,26 +69,20 @@ class SpringRepositoryTestGenerator extends AbstractMethodTestGenerator {
         DependableNode<MethodDeclaration> testMethod = new DependableNode<>()
 
         TestMethodNomenclature testMethodNomenclature = nomenclatures.getTestMethodNomenclature(unitUnderTest.javaClass)
-        String testName = testMethodNomenclature
-                .requestTestMethodName(SpringRepositoryTestTypes.SPRING_REPOSITORY_FIND_ENTITY, method)
+        String testName = testMethodNomenclature.requestTestMethodName(SpringRepositoryTestTypes.SPRING_REPOSITORY_FIND_ENTITY, method)
         ClassOrInterfaceDeclaration parentClass = method.getAncestorOfType(ClassOrInterfaceDeclaration).get()
 
-        Optional<String> classNameOptional = parentClass.extendedTypes[0].childNodes.stream()
-                .map { it.toString() }.filter() {
-            !(it.contains(REPOSITORY) || it.contains(STRING) || it.contains(LONG))
-        }
-        .findFirst()
-        classNameOptional.ifPresent {
-            fillTestMethod(it, testName, method, testMethod, result)
-        }
+        List<String> typeNames = parentClass.extendedTypes[0].findAll(ClassOrInterfaceType).nameAsString
+        def entityTypeName = typeNames.find { !it.contains(REPOSITORY) && !it.contains(STRING) && !it.contains(LONG) }
+        if (entityTypeName) { fillTestMethod(entityTypeName, testName, method, testMethod, result) }
 
         result
     }
 
-    private fillTestMethod(String className, String testName, MethodDeclaration method,
-                           DependableNode<MethodDeclaration> testMethod, result) {
-        String methodName = method.nameAsString
-        def firstParamName = method.parameters[0].name.asString().capitalize()
+    private static fillTestMethod(String className, String testName, MethodDeclaration method,
+                                  DependableNode<MethodDeclaration> testMethod, result) {
+        def methodName = method.nameAsString
+        def firstParamName = method.parameters[0].nameAsString.capitalize()
         String testCode = """
                 @Test
                 public void ${testName}() throws Exception {
@@ -101,7 +94,7 @@ class SpringRepositoryTestGenerator extends AbstractMethodTestGenerator {
                     entityManager.flush();
                     
                     // when
-                    ${className} found = repository.${methodName}(${listParams(method)});
+                    ${className} found = repository.${methodName}(${method.parameters.name.join(', ')});
                     
                     // then
                     assertThat(found.get${firstParamName}()).isEqualTo(entity.get${firstParamName}());
@@ -113,70 +106,47 @@ class SpringRepositoryTestGenerator extends AbstractMethodTestGenerator {
         result.tests << testMethod
     }
 
-    def listParams(MethodDeclaration methodDeclaration) {
-        def sb = new StringBuilder()
-        boolean first = true
-        methodDeclaration.parameters.each {
-            if (!first) {
-                sb.append(COMMA).append(SPACE)
-            } else {
-                first = false
-            }
-            sb.append(it.name.asString())
-        }
-        sb.toString()
-    }
-
     // TODO: parse param types, assign default values
     // TODO: parse collections types
     // TODO: parse other standard method names
-    def fillParams(MethodDeclaration methodDeclaration) {
+    private static fillParams(MethodDeclaration methodDeclaration) {
         def sb = new StringBuilder()
         methodDeclaration.parameters.each {
-            def fieldName = it.name.asString()
+            def fieldName = it.name.identifier
             def fieldType = it.type.asString()
-            sb.append(fieldType).append(SPACE).append(fieldName).append(SPACE).append(ASSIGN)
-                    .append(SPACE).append(NEW).append(SPACE).append(fieldType).append(OPEN_BRACE).append(TEST_STRING)
-                    .append(CLOSE_BRACE).append(SEMICOLON).append(NEW_LINE)
-            sb.append(ENTITY_SET).append(fieldName.capitalize()).append(OPEN_BRACE).append(fieldName)
-                    .append(CLOSE_BRACE).append(SEMICOLON).append(NEW_LINE)
+            sb.append("$fieldType $fieldName = new $fieldType($TEST_STRING);${System.lineSeparator()}")
+            sb.append("entity.set${fieldName.capitalize()}($fieldName);${System.lineSeparator()}")
         }
         sb.toString()
     }
 
-    private void fillClassLevel(DependableNode<MethodDeclaration> testMethod, MethodDeclaration method) {
-        fillClassAnnotations(testMethod)
-        fillFields(method, testMethod)
-        fillImports(testMethod)
-    }
-
-    private void fillImports(DependableNode<MethodDeclaration> testMethod) {
-        testMethod.dependency.imports << Imports.JUNIT_TEST
-        testMethod.dependency.imports << Imports.JUNIT_RUNWITH
-        testMethod.dependency.imports << Imports.SPRING_AUTOWIRED
-        testMethod.dependency.imports << Imports.SPRING_TESTENTITYMANAGER
-        testMethod.dependency.imports << Imports.SPRING_DATAJPATEST
-        testMethod.dependency.imports << Imports.SPRING_SPRINGRUNNER
-        testMethod.dependency.imports << Imports.ASSERTJ_ASSERTTHAT
-    }
-
-    private void fillClassAnnotations(DependableNode<MethodDeclaration> testMethod) {
-        testMethod.dependency.classAnnotations << new SingleMemberAnnotationExpr(new Name(RUN_WITH),
-                new ClassExpr(JavaParser.parseClassOrInterfaceType(SPRINGRUNNER)))
-        testMethod.dependency.classAnnotations << new MarkerAnnotationExpr(DATA_JPA_TEST)
-    }
-
-    private void fillFields(MethodDeclaration method, DependableNode<MethodDeclaration> testMethod) {
-        def testEntityManagerField = new FieldDeclaration(EnumSet.of(Modifier.PRIVATE),
-                new VariableDeclarator(JavaParser.parseClassOrInterfaceType(TEST_ENTITY_MANAGER), ENTITY_MANAGER))
-                .addAnnotation(AUTOWIRED)
-        testMethod.dependency.fields << testEntityManagerField
+    private static void fillClassLevel(DependableNode<MethodDeclaration> testMethod, MethodDeclaration method) {
+        testMethod.dependency.classAnnotations.addAll(annotationsList())
         ClassOrInterfaceDeclaration parentClass = method.getAncestorOfType(ClassOrInterfaceDeclaration).get()
-        def repositoryField = new FieldDeclaration(EnumSet.of(Modifier.PRIVATE),
-                new VariableDeclarator(JavaParser.parseClassOrInterfaceType(parentClass.name.identifier),
-                        REPOSITORY_LOWER)).addAnnotation(AUTOWIRED)
-        testMethod.dependency.fields << repositoryField
+        testMethod.dependency.fields.addAll(listFields(parentClass.nameAsString))
+
+        testMethod.dependency.imports.addAll(importsList())
     }
+
+    private static List<FieldDeclaration> listFields(String parentClassName) {
+        [new FieldDeclaration(EnumSet.of(Modifier.PRIVATE),
+                new VariableDeclarator(new ClassOrInterfaceType(TEST_ENTITY_MANAGER), ENTITY_MANAGER))
+                 .addAnnotation(AUTOWIRED),
+         new FieldDeclaration(EnumSet.of(Modifier.PRIVATE),
+                new VariableDeclarator(new ClassOrInterfaceType(parentClassName), REPOSITORY_LOWER))
+                 .addAnnotation(AUTOWIRED)]
+    }
+
+    private static List<AnnotationExpr> annotationsList() {
+        [new SingleMemberAnnotationExpr(new Name(RUN_WITH), new ClassExpr(new ClassOrInterfaceType(SPRINGRUNNER))),
+         new MarkerAnnotationExpr(DATA_JPA_TEST)]
+    }
+
+    private static List<ImportDeclaration> importsList() {
+        [JUNIT_TEST, JUNIT_RUNWITH, SPRING_AUTOWIRED, SPRING_TESTENTITYMANAGER,
+         SPRING_DATAJPATEST, SPRING_SPRINGRUNNER, ASSERTJ_ASSERTTHAT]
+    }
+
 
     @Override
     protected TestType getType() {
@@ -188,13 +158,9 @@ class SpringRepositoryTestGenerator extends AbstractMethodTestGenerator {
         super.shouldBeVisited(unit, method) && isInterfaceExtendedFromRepository(method)
     }
 
-    static boolean isInterfaceExtendedFromRepository(MethodDeclaration method) {
+    private static boolean isInterfaceExtendedFromRepository(MethodDeclaration method) {
         def parentNode = method.parentNode.get()
-        if (parentNode instanceof ClassOrInterfaceDeclaration) {
-            ClassOrInterfaceDeclaration coid = parentNode
-            coid.isInterface && coid.extendedTypes.stream().map { it.name.identifier }.anyMatch {
-                it.contains REPOSITORY
-            }
-        } else false
+        parentNode instanceof ClassOrInterfaceDeclaration && parentNode.interface &&
+                parentNode.extendedTypes.nameAsString.any { it.contains REPOSITORY }
     }
 }
