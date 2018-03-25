@@ -49,24 +49,24 @@ class BaseConfig {
                 .map { new File(it) }
                 .filter { it.exists() && it.isDirectory() }
                 .forEach {
-            solver.add(new JavaParserTypeSolver(it))
-        }
+                    solver.add(new JavaParserTypeSolver(it))
+                }
 
         projectConfiguration.resolveJars.stream()
                 .map { new File(it) }
                 .filter { it.exists() }
                 .filter { (it.isFile() && it.name.endsWith(".jar")) || it.isDirectory() }
                 .forEach {
-            if (it.isDirectory()) {
-                it.traverse {
-                    if (it.isFile() && it.name.endsWith(".jar")) {
+                    if (it.isDirectory()) {
+                        it.traverse {
+                            if (it.isFile() && it.name.endsWith(".jar")) {
+                                solver.add(new JarTypeSolver(it.path))
+                            }
+                        }
+                    } else {
                         solver.add(new JarTypeSolver(it.path))
                     }
                 }
-            } else {
-                solver.add(new JarTypeSolver(it.path))
-            }
-        }
 
         solver
     }
