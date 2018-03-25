@@ -42,20 +42,35 @@ class Imports {
     static final ImportDeclaration SINGLETON_TESTER = parse('com.aurea.unittest.commons.SingletonTester')
     static final ImportDeclaration CALLABLE = parse('java.util.concurrent.Callable')
 
-    //spring controllers
-    static final ImportDeclaration OBJECT_MAPPER = parse('com.fasterxml.jackson.databind.ObjectMapper')
+
     static final ImportDeclaration JUNIT_BEFORE = parse('org.junit.Before')
     static final ImportDeclaration INJECT_MOCKS = parse('org.mockito.InjectMocks')
     static final ImportDeclaration MOCK = parse('org.mockito.Mock')
     static final ImportDeclaration MOCKITO = parse('org.mockito.Mockito')
     static final ImportDeclaration MOCK_ANNOTATIONS = parse('org.mockito.MockitoAnnotations')
-    static final ImportDeclaration MEDIA_TYPE = parse('org.springframework.http.MediaType')
+
+    //spring controllers
+    static final ImportDeclaration OBJECT_MAPPER = parse('com.fasterxml.jackson.databind.ObjectMapper')
+    static final ImportDeclaration STATIC_MOCKITO_MATCHERS_ANY = new ImportDeclaration(new Name('org.mockito.ArgumentMatchers.any'), true, false)
+    static final ImportDeclaration STATIC_MOCKITO_MATCHERS_EQ = new ImportDeclaration(new Name('org.mockito.ArgumentMatchers.eq'), true, false)
+    static final ImportDeclaration STATIC_MOCKMVC_BUILDERS_POST = new ImportDeclaration(new Name('org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post'), true, false)
+    static final ImportDeclaration STATIC_MOCKMVC_BUILDERS_GET = new ImportDeclaration(new Name('org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get'), true, false)
+    static final ImportDeclaration STATIC_MOCKMVC_BUILDERS_DELETE = new ImportDeclaration(new Name('org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete'), true, false)
+    static final ImportDeclaration STATIC_MOCKMVC_BUILDERS_PUT = new ImportDeclaration(new Name('org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put'), true, false)
+    static final ImportDeclaration STATIC_MOCKMVC_MATCHERS_STATUS = new ImportDeclaration(new Name('org.springframework.test.web.servlet.result.MockMvcResultMatchers.status'), true, false)
+
     static final ImportDeclaration MOCK_MVC = parse('org.springframework.test.web.servlet.MockMvc')
     static final ImportDeclaration MOCK_MVC_BUILDERS = parse('org.springframework.test.web.servlet.setup.MockMvcBuilders')
-    static final ImportDeclaration STATIC_MOCK_MVC_BUILDERS = new ImportDeclaration(new Name('org.springframework.test.web.servlet.request.MockMvcRequestBuilders'), true, true)
-    static final ImportDeclaration STATIC_MOCK_MVC_MATCHERS = new ImportDeclaration(new Name('org.springframework.test.web.servlet.result.MockMvcResultMatchers'), true, true)
-    static final ImportDeclaration STATIC_MOCKITO = new ImportDeclaration(new Name('org.mockito.Mockito'), true, true)
+    static final ImportDeclaration MEDIA_TYPE = parse('org.springframework.http.MediaType')
+
     static final List<ImportDeclaration> SPRING_CONTROLLER_IMPORTS = [
+            STATIC_MOCKITO_MATCHERS_ANY,
+            STATIC_MOCKITO_MATCHERS_EQ,
+            STATIC_MOCKMVC_BUILDERS_POST,
+            STATIC_MOCKMVC_BUILDERS_GET,
+            STATIC_MOCKMVC_BUILDERS_DELETE,
+            STATIC_MOCKMVC_BUILDERS_PUT,
+            STATIC_MOCKMVC_MATCHERS_STATUS,
             OBJECT_MAPPER,
             JUNIT_BEFORE,
             JUNIT_TEST,
@@ -65,10 +80,8 @@ class Imports {
             MOCK_ANNOTATIONS,
             MEDIA_TYPE,
             MOCK_MVC,
-            MOCK_MVC_BUILDERS,
-            STATIC_MOCK_MVC_BUILDERS,
-            STATIC_MOCK_MVC_MATCHERS,
-            STATIC_MOCKITO]
+            MOCK_MVC_BUILDERS
+    ]
 
     static ImportDeclaration parse(String fullClassName) {
         JavaParser.parseImport("import $fullClassName;")

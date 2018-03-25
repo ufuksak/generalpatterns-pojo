@@ -2,7 +2,6 @@ package com.aurea.testgenerator.generation.patterns.springcontrollers
 
 import com.aurea.testgenerator.MatcherPipelineTest
 import com.aurea.testgenerator.generation.TestGenerator
-import com.aurea.testgenerator.value.VariableFactoryReplacingMocksByNewInstances
 
 class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineTest {
 
@@ -46,9 +45,13 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         import org.springframework.test.web.servlet.setup.MockMvcBuilders;
         import org.springframework.web.bind.annotation.RequestMapping;
         import org.springframework.web.bind.annotation.RestController;
-        import static org.mockito.Mockito.*;
-        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+        import static org.mockito.ArgumentMatchers.any;
+        import static org.mockito.ArgumentMatchers.eq;
+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
         
         @Generated("GeneralPatterns")
         public class FooPatternTest {
@@ -124,9 +127,13 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         import org.springframework.web.bind.annotation.RequestMapping;
         import org.springframework.web.bind.annotation.RequestParam;
         import org.springframework.web.bind.annotation.RestController;
-        import static org.mockito.Mockito.*;
-        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+        import static org.mockito.ArgumentMatchers.any;
+        import static org.mockito.ArgumentMatchers.eq;
+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
          
         @Generated("GeneralPatterns")
         public class FooPatternTest {
@@ -159,7 +166,6 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
     def "service call returning values should be mocked"() {
         expect:
         onClassCodeExpect """
-        import com.aurea.auth.generalpatternsspringtest.service.DelegateService;
         import org.springframework.web.bind.annotation.GetMapping;
         import org.springframework.web.bind.annotation.PathVariable;
         import org.springframework.web.bind.annotation.PostMapping;
@@ -168,6 +174,7 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         import org.springframework.web.bind.annotation.RequestMethod;
         import org.springframework.web.bind.annotation.RequestParam;
         import org.springframework.web.bind.annotation.RestController;
+        import org.springframework.web.bind.annotation.RequestHeader;
         
         @RestController
         @RequestMapping(value = "/return")
@@ -181,7 +188,7 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         
             @RequestMapping(value = "/delegate/{int_param}", method = RequestMethod.POST)
             public Value delegateWithValue(@PathVariable(name = "int_param") int intParam,
-                    @RequestParam(name = "string_param") String stringParam, @RequestBody Body body,
+                    @RequestParam(name = "string_param") String stringParam, @RequestBody BodyParent.Body body,
                     @RequestHeader("User-Agent") String userAgent) {
                 return delegateService.delegateWithValue(intParam, stringParam, body);
             }
@@ -215,28 +222,29 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
                 this.stringValue = stringValue;
             }
         }
-        
-        class Body {
-            int id;
-        
-            public Body(int id) {
-                this.id = id;
-            }
-        
-            public Body() {
-            }
-        
-            public int getId() {
-                return id;
-            }
-        
-            public void setId(int id) {
-                this.id = id;
+        class BodyParent{
+            static class Body {
+                int id;
+            
+                public Body(int id) {
+                    this.id = id;
+                }
+            
+                public Body() {
+                }
+            
+                public int getId() {
+                    return id;
+                }
+            
+                public void setId(int id) {
+                    this.id = id;
+                }
             }
         }
         
         class DelegateService {
-            public Value delegateWithValue(int intParam, String stringParam, Body body) {
+            public Value delegateWithValue(int intParam, String stringParam, BodyParent.Body body) {
                 return new Value(intParam,stringParam);
             }
         }
@@ -244,7 +252,6 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         """, """ 
         package sample;
  
-        import com.aurea.auth.generalpatternsspringtest.service.DelegateService;
         import com.fasterxml.jackson.databind.ObjectMapper;
         import javax.annotation.Generated;
         import org.junit.Before;
@@ -260,15 +267,18 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         import org.springframework.web.bind.annotation.PathVariable;
         import org.springframework.web.bind.annotation.PostMapping;
         import org.springframework.web.bind.annotation.RequestBody;
+        import org.springframework.web.bind.annotation.RequestHeader;
         import org.springframework.web.bind.annotation.RequestMapping;
         import org.springframework.web.bind.annotation.RequestMethod;
         import org.springframework.web.bind.annotation.RequestParam;
         import org.springframework.web.bind.annotation.RestController;
-        import static org.mockito.Mockito.*;
-        import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-        import static org.mockito.Mockito.mock;
-        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+        import static org.mockito.ArgumentMatchers.any;
+        import static org.mockito.ArgumentMatchers.eq;
+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
         
         @Generated("GeneralPatterns")
         public class FooPatternTest {
@@ -291,13 +301,13 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
             public void test_delegateWithValue_DelegatesToService() throws Exception {
                 int intParam = 42;
                 String stringParam = "ABC";
-                Body body = new Body();
+                BodyParent.Body body = new BodyParent.Body();
                 String userAgent = "ABC";
                 ObjectMapper mapper = new ObjectMapper();
                 Value expectedResult = new Value();
-                Mockito.when(delegateService.delegateWithValue(eq(intParam), eq(stringParam), any(Body.class))).thenReturn(expectedResult);
+                Mockito.when(delegateService.delegateWithValue(eq(intParam), eq(stringParam), any(BodyParent.Body.class))).thenReturn(expectedResult);
                 mockMvc.perform(post("/return/delegate/" + intParam + "").content(mapper.writeValueAsString(body)).contentType("application/json;charset=UTF-8").param("string_param", String.valueOf(stringParam)).header("User-Agent", String.valueOf(userAgent))).andExpect(status().is2xxSuccessful());
-                Mockito.verify(delegateService).delegateWithValue(eq(intParam), eq(stringParam), any(Body.class));
+                Mockito.verify(delegateService).delegateWithValue(eq(intParam), eq(stringParam), any(BodyParent.Body.class));
             }
         }
         """
@@ -305,8 +315,7 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
 
     @Override
     TestGenerator generator() {
-        VariableFactoryReplacingMocksByNewInstances variableFactory = new VariableFactoryReplacingMocksByNewInstances(valueFactory)
         return new SpringControllerDelegatingMethodTestGenerator(solver, reporter, visitReporter, nomenclatureFactory,
-                variableFactory)
+                valueFactory)
     }
 }

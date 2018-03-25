@@ -1,15 +1,14 @@
 package com.aurea.testgenerator.value.random
 
+import com.aurea.testgenerator.ast.InvocationBuilder
 import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.generation.merge.TestNodeMerger
 import com.aurea.testgenerator.generation.source.Imports
-import com.aurea.testgenerator.value.MockExpressionBuilder
-import com.aurea.testgenerator.value.PrimitiveValueFactory
-import com.aurea.testgenerator.value.ReferenceTypeFactory
-import com.aurea.testgenerator.value.Resolution
-import com.aurea.testgenerator.value.Types
-import com.aurea.testgenerator.value.ValueFactory
+import com.aurea.testgenerator.value.*
 import com.github.javaparser.JavaParser
+import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
+import com.github.javaparser.ast.body.ConstructorDeclaration
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.FieldAccessExpr
 import com.github.javaparser.ast.expr.StringLiteralExpr
@@ -17,7 +16,11 @@ import com.github.javaparser.resolution.declarations.ResolvedEnumDeclaration
 import com.github.javaparser.resolution.declarations.ResolvedTypeParameterDeclaration
 import com.github.javaparser.resolution.types.ResolvedReferenceType
 import com.github.javaparser.resolution.types.ResolvedType
+import com.github.javaparser.symbolsolver.JavaSymbolSolver
+import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserClassDeclaration
+import com.github.javaparser.symbolsolver.model.resolution.TypeSolver
 import com.github.javaparser.utils.Pair
+import one.util.streamex.StreamEx
 import org.apache.commons.lang.math.RandomUtils
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
@@ -27,10 +30,12 @@ class RandomJavaLangTypesFactory implements ReferenceTypeFactory {
 
     ValueFactory valueFactory
     PrimitiveValueFactory primitiveValueFactory
+    JavaSymbolSolver solver
 
     @Autowired
-    RandomJavaLangTypesFactory(PrimitiveValueFactory primitiveValueFactory) {
+    RandomJavaLangTypesFactory(PrimitiveValueFactory primitiveValueFactory, TypeSolver solver) {
         this.primitiveValueFactory = primitiveValueFactory
+        this.solver = new JavaSymbolSolver(solver)
     }
 
     @Override
@@ -134,6 +139,19 @@ class RandomJavaLangTypesFactory implements ReferenceTypeFactory {
             DependableNode<Expression> expression = DependableNode.from(JavaParser.parseExpression('new Object()'))
             return Optional.of(expression)
         }
+
+        if (type.getTypeDeclaration() instanceof JavaParserClassDeclaration) {
+            //TODO: now we have a circular dependency with InvocationBuilder. We should improve the design
+            //This can also be implemented by an ObjectBuilder mentioned below:
+            //https://github.com/trilogy-group/GeneralPatterns/issues/14
+            ClassOrInterfaceDeclaration classDeclaration = (type.getTypeDeclaration() as JavaParserClassDeclaration).getWrappedNode()
+            ConstructorDeclaration constructor = StreamEx.of(classDeclaration.getConstructors()).sortedBy {
+                it.parameters.size()
+            }.first()
+            solver.inject(classDeclaration.findParent(CompilationUnit).get())
+            return new InvocationBuilder(valueFactory).build(constructor)
+        }
+
         return Optional.of(MockExpressionBuilder.build(type.qualifiedName))
     }
 

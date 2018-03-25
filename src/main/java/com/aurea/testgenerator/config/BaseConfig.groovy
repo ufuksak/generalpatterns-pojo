@@ -18,9 +18,6 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.EnableAspectJAutoProxy
 
 import javax.annotation.PostConstruct
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.util.function.Predicate
 
 @Configuration
 @EnableAspectJAutoProxy
@@ -46,32 +43,33 @@ class BaseConfig {
     TypeSolver combinedTypeSolver(ProjectConfiguration projectConfiguration) {
         CombinedTypeSolver solver = new CombinedTypeSolver(new ReflectionTypeSolver())
 
+        solver.add(new JavaParserTypeSolver(new File(projectConfiguration.src)))
+
         projectConfiguration.resolvePaths.stream()
-                .map{new File(it)}
-                .filter{it.exists() && it.isDirectory()}
+                .map { new File(it) }
+                .filter { it.exists() && it.isDirectory() }
                 .forEach {
-                    solver.add(new JavaParserTypeSolver(it))
-                }
+            solver.add(new JavaParserTypeSolver(it))
+        }
 
         projectConfiguration.resolveJars.stream()
-                .map{new File(it)}
-                .filter{it.exists()}
-                .filter{(it.isFile() && it.name.endsWith(".jar")) || it.isDirectory()}
+                .map { new File(it) }
+                .filter { it.exists() }
+                .filter { (it.isFile() && it.name.endsWith(".jar")) || it.isDirectory() }
                 .forEach {
-                    if (it.isDirectory()) {
-                        it.traverse {
-                            if (it.isFile() && it.name.endsWith(".jar")) {
-                                solver.add(new JarTypeSolver(it.path))
-                            }
-                        }
-                    } else {
+            if (it.isDirectory()) {
+                it.traverse {
+                    if (it.isFile() && it.name.endsWith(".jar")) {
                         solver.add(new JarTypeSolver(it.path))
                     }
                 }
+            } else {
+                solver.add(new JarTypeSolver(it.path))
+            }
+        }
 
         solver
     }
-
 
 
     @Bean

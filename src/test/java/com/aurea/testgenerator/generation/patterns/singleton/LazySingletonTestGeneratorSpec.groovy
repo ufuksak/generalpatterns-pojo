@@ -24,12 +24,11 @@ class LazySingletonTestGeneratorSpec extends MatcherPipelineTest {
             """, """     
             package sample;
 
+            import com.aurea.unittest.commons.SingletonTester;
+            import java.util.concurrent.Callable;
             import javax.annotation.Generated;
             import org.junit.Test;
             import static org.assertj.core.api.Assertions.assertThat;
-            import org.junit.Test;
-            import java.util.concurrent.Callable;
-            import com.aurea.unittest.commons.SingletonTester;
              
             @Generated("GeneralPatterns")
             public class FooPatternTest {
