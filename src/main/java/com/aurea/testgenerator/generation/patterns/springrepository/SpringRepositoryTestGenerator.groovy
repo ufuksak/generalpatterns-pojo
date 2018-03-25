@@ -28,13 +28,13 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 
-import static com.aurea.testgenerator.generation.source.Imports.getASSERTJ_ASSERTTHAT
-import static com.aurea.testgenerator.generation.source.Imports.getJUNIT_RUNWITH
-import static com.aurea.testgenerator.generation.source.Imports.getJUNIT_TEST
-import static com.aurea.testgenerator.generation.source.Imports.getSPRING_AUTOWIRED
-import static com.aurea.testgenerator.generation.source.Imports.getSPRING_DATAJPATEST
-import static com.aurea.testgenerator.generation.source.Imports.getSPRING_SPRINGRUNNER
-import static com.aurea.testgenerator.generation.source.Imports.getSPRING_TESTENTITYMANAGER
+import static com.aurea.testgenerator.generation.source.Imports.ASSERTJ_ASSERTTHAT
+import static com.aurea.testgenerator.generation.source.Imports.JUNIT_RUNWITH
+import static com.aurea.testgenerator.generation.source.Imports.JUNIT_TEST
+import static com.aurea.testgenerator.generation.source.Imports.SPRING_AUTOWIRED
+import static com.aurea.testgenerator.generation.source.Imports.SPRING_DATAJPATEST
+import static com.aurea.testgenerator.generation.source.Imports.SPRING_SPRINGRUNNER
+import static com.aurea.testgenerator.generation.source.Imports.SPRING_TESTENTITYMANAGER
 
 @Component
 @Profile("manual")
