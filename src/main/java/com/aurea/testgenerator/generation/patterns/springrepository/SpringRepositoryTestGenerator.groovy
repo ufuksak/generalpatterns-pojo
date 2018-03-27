@@ -109,6 +109,7 @@ class SpringRepositoryTestGenerator extends AbstractMethodTestGenerator {
     // TODO: parse param types, assign default values
     // TODO: parse collections types
     // TODO: parse other standard method names
+    // Corresponding issue https://github.com/trilogy-group/GeneralPatterns/issues/47
     private static fillParams(MethodDeclaration methodDeclaration) {
         def sb = new StringBuilder()
         methodDeclaration.parameters.each {
