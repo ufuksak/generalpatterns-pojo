@@ -159,8 +159,8 @@ class SpringRepositoryTestGenerator extends AbstractMethodTestGenerator {
     }
 
     private static boolean isInterfaceExtendedFromRepository(MethodDeclaration method) {
-        def parentNode = method.parentNode.get()
-        parentNode instanceof ClassOrInterfaceDeclaration && parentNode.interface &&
-                parentNode.extendedTypes.nameAsString.any { it.contains REPOSITORY }
+        method.findParent(ClassOrInterfaceDeclaration)
+                .filter{it.interface && it.extendedTypes.nameAsString.any { it.contains REPOSITORY }}
+                .present
     }
 }
