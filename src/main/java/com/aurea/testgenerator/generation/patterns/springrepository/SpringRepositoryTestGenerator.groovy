@@ -73,6 +73,7 @@ class SpringRepositoryTestGenerator extends AbstractMethodTestGenerator {
         ClassOrInterfaceDeclaration parentClass = method.getAncestorOfType(ClassOrInterfaceDeclaration).get()
 
         List<String> typeNames = parentClass.extendedTypes[0].findAll(ClassOrInterfaceType).nameAsString
+        //TODO:Improve entity type detection  https://github.com/trilogy-group/GeneralPatterns/issues/48
         def entityTypeName = typeNames.find { !it.contains(REPOSITORY) && !it.contains(STRING) && !it.contains(LONG) }
         if (entityTypeName) { fillTestMethod(entityTypeName, testName, method, testMethod, result) }
 
