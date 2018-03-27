@@ -55,11 +55,11 @@ class BaseConfig {
         projectConfiguration.resolveJars.stream()
                 .map { new File(it) }
                 .filter { it.exists() }
-                .filter { (it.isFile() && it.name.endsWith(".jar")) || it.isDirectory() }
+                .filter { isJarFile(it) || it.isDirectory() }
                 .forEach {
                     if (it.isDirectory()) {
                         it.traverse {
-                            if (it.isFile() && it.name.endsWith(".jar")) {
+                            if (isJarFile(it)) {
                                 solver.add(new JarTypeSolver(it.path))
                             }
                         }
@@ -69,6 +69,10 @@ class BaseConfig {
                 }
 
         solver
+    }
+
+    private boolean isJarFile(File file){
+        file.isFile() && file.name.toLowerCase().endsWith('.jar')
     }
 
 

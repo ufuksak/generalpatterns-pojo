@@ -15,7 +15,7 @@ class MethodsUtils {
         List<MethodCallExpr> expressions = methodDeclaration.findAll(MethodCallExpr).findAll {
             !(it.parentNode.isPresent() && it.parentNode.get() instanceof MethodCallExpr)
         }
-        Optional.ofNullable(Try.ofFailable{expressions.last()}.orElse(null))
+        Try.ofFailable { expressions.last() }.toOptional()
     }
 
     static List<String> getParamNames(MethodDeclaration methodDeclaration) {
@@ -23,6 +23,6 @@ class MethodsUtils {
     }
 
     static boolean returnsClassOrInterface(MethodDeclaration method) {
-        method.type && method.type.isClassOrInterfaceType()
+        method.type?.classOrInterfaceType
     }
 }

@@ -8,15 +8,16 @@ import com.aurea.testgenerator.generation.annotations.AnnotationsProcessor
 import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.generation.merge.TestNodeMerger
 import com.aurea.testgenerator.generation.methods.MethodsUtils
+import com.aurea.testgenerator.generation.mock.util.MockitoUtils
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.TestMethodNomenclature
 import com.aurea.testgenerator.generation.source.Imports
 import com.aurea.testgenerator.reporting.CoverageReporter
 import com.aurea.testgenerator.reporting.TestGeneratorResultReporter
 import com.aurea.testgenerator.source.Unit
-import com.aurea.testgenerator.value.Types
 import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
+import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.Modifier
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.FieldDeclaration
@@ -28,13 +29,10 @@ import com.github.javaparser.ast.expr.MethodCallExpr
 import com.github.javaparser.ast.expr.VariableDeclarationExpr
 import com.github.javaparser.ast.stmt.ExpressionStmt
 import com.github.javaparser.ast.type.ClassOrInterfaceType
-import com.github.javaparser.ast.type.Type
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import groovy.util.logging.Log4j2
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
-
-import java.util.stream.Collectors
 
 @Component
 @Profile("manual")
@@ -44,6 +42,26 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
 
     public static final String MOCK_ANNOTATION = "Mock"
     public static final String INJECT_MOCK_ANNOTATION = "InjectMocks"
+
+    private static final List<ImportDeclaration> SPRING_CONTROLLER_IMPORTS = [
+            Imports.STATIC_MOCKITO_MATCHERS_ANY,
+            Imports.STATIC_MOCKITO_MATCHERS_EQ,
+            Imports.STATIC_MOCKMVC_BUILDERS_POST,
+            Imports.STATIC_MOCKMVC_BUILDERS_GET,
+            Imports.STATIC_MOCKMVC_BUILDERS_DELETE,
+            Imports.STATIC_MOCKMVC_BUILDERS_PUT,
+            Imports.STATIC_MOCKMVC_MATCHERS_STATUS,
+            Imports.OBJECT_MAPPER,
+            Imports.JUNIT_BEFORE,
+            Imports.JUNIT_TEST,
+            Imports.INJECT_MOCKS,
+            Imports.MOCK,
+            Imports.MOCKITO,
+            Imports.MOCK_ANNOTATIONS,
+            Imports.MEDIA_TYPE,
+            Imports.MOCK_MVC,
+            Imports.MOCK_MVC_BUILDERS
+    ]
 
     private static final String EXPECTED_RESULT = "expectedResult"
     private static final String INSTANCE_NAME = "controllerInstance"
@@ -85,7 +103,7 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
                 it.dependency.fields << controllerInstance
                 it.dependency.fields << MOCKMVC_FIELD.clone()
                 it.dependency.methodSetups << SETUP_METHOD.clone()
-                it.dependency.imports.addAll(Imports.SPRING_CONTROLLER_IMPORTS)
+                it.dependency.imports.addAll(SPRING_CONTROLLER_IMPORTS)
             }
         }
     }
@@ -134,7 +152,7 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
                                                               String requestBodyName,
                                                               AnnotationExpr methodRequestMappingAnnotation) {
         String testName = getTestMethodName(unit, method)
-        String args = getArgs(method, delegateExpression)
+        String args = MockitoUtils.getArgs(method, delegateExpression)
 
         String testCode = """
             @Test
@@ -192,8 +210,8 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
         requestBodyName ? "${System.lineSeparator()}.content(mapper.writeValueAsString($requestBodyName))" : ""
     }
 
-    private static GString getVerifyCode(MethodCallExpr delegateExpression, String args) {
-        """Mockito.verify(${getScope(delegateExpression)}).${delegateExpression.nameAsString}($args);"""
+    private static String getVerifyCode(MethodCallExpr delegateExpression, String args) {
+        "Mockito.verify(${getScope(delegateExpression)}).${delegateExpression.nameAsString}($args);".toString()
     }
 
     private static String getObjectMapperCode(String requestBodyName) {
@@ -216,24 +234,9 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
     }
 
     private String getVariableStatements(MethodDeclaration method) {
-        method.parameters.stream().map {
+        method.parameters.collect {
             new ExpressionStmt(valueFactory.getVariable(it.nameAsString, it.type).get().node)
-        }.collect(Collectors.toList()).join(System.lineSeparator())
-    }
-
-    private static String getArgs(MethodDeclaration method, MethodCallExpr delegateExpression) {
-        Map<String, Type> methodParamToType = method.parameters.collectEntries { [(it.nameAsString), it.type] }
-        String args = delegateExpression.arguments.collect {
-            Type argType = methodParamToType.get(it.toString())
-            if (argType && argType.isClassOrInterfaceType()
-                    && !Types.isString(argType)
-                    && !Types.isBoxedPrimitive(argType)) {
-                "any(${argType.asString()}.class)"
-            } else {
-                "eq(${it})"
-            }
-        }.join(",")
-        args
+        }.join(System.lineSeparator())
     }
 
     private DependableNode<MethodDeclaration> getTestMethod(MethodDeclaration methodDeclaration, String testCode) {
@@ -262,7 +265,7 @@ class SpringControllerDelegatingMethodTestGenerator extends MethodLevelTestGener
 
     private static String getAcceptCode(AnnotationExpr methodRequestMappingAnnotation) {
         AnnotationsProcessor.getAnnotationMemberExpressionValue(methodRequestMappingAnnotation, "produces")
-                .map { """.accept(MediaType.parseMediaType(${getChildNodeIfArray(it)}))""" }
+                .map { ".accept(MediaType.parseMediaType(${getChildNodeIfArray(it)}))" }
                 .orElse("")
     }
 

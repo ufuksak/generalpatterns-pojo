@@ -9,6 +9,7 @@ import com.github.javaparser.ast.body.Parameter
 import com.github.javaparser.ast.expr.AnnotationExpr
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.MethodCallExpr
+import com.github.javaparser.ast.nodeTypes.NodeWithAnnotations
 import com.github.javaparser.ast.stmt.ReturnStmt
 import com.github.javaparser.resolution.UnsolvedSymbolException
 import com.github.javaparser.resolution.declarations.ResolvedValueDeclaration
@@ -33,20 +34,21 @@ class SpringControllerUtils {
 
     static String getHttpMethod(AnnotationExpr annotationExpr) {
         String method = RequestMappingAnnotation.of(annotationExpr.nameAsString).method
-        method = method ?: AnnotationsProcessor.getStringValue(annotationExpr, "method") .toLowerCase()
+        method = method ?: AnnotationsProcessor.getStringValue(annotationExpr, "method").toLowerCase()
         method = method.contains(".") ? StringUtils.substringAfterLast(method, ".") : method
         method ?: DEFAULT_HTTP_METHOD
     }
 
-    static String fillPathVariablesUrl(String urlTemplate, Map<String, String> pathVariableToName) {
+    private static String fillPathVariablesUrl(String urlTemplate, Map<String, String> pathVariableToName) {
         String url = urlTemplate
-        for (String name : pathVariableToName.keySet()) {
-            url = url.replaceAll("\\{$name\\}", "\"+${pathVariableToName.get(name)}+\"")
+        pathVariableToName.each { key, value ->
+            url = url.replaceAll("\\{$key\\}", "\"+$value+\"")
         }
+
         url
     }
 
-    static String getUrlTemplate(AnnotationExpr requestMappingAnnotation) {
+    private static String getUrlTemplate(AnnotationExpr requestMappingAnnotation) {
         String template = AnnotationsProcessor.getStringValue(requestMappingAnnotation, PATH_PROPERTY)
         template ?: AnnotationsProcessor.getStringValue(requestMappingAnnotation, AnnotationsProcessor.DEFAULT_ANNOTATION_PROPERTY)
     }
@@ -60,26 +62,24 @@ class SpringControllerUtils {
             return false
         }
         MethodCallExpr methodCallExpr = optionalExpression.get()
-        if(!callsDelegate(methodCallExpr)){
+        if (!callsDelegate(methodCallExpr)) {
             return false
         }
-        if(!returnSameType(methodDeclaration,methodCallExpr)){
+        if (!returnSameType(methodDeclaration, methodCallExpr)) {
             return false
         }
         if (methodCallExpr.arguments.any { !(it.nameExpr || it.literalExpr) }) {
             return false
         }
         List<String> paramNames = MethodsUtils.getParamNames(methodDeclaration)
-        List<String> usedParameters = methodCallExpr.arguments.findAll { it.nameExpr }.collect {
-            it.asNameExpr().nameAsString
-        }
+        List<String> usedParameters = methodCallExpr.arguments.findAll { it.nameExpr }*.asNameExpr().nameAsString
         if (!paramNames.containsAll(usedParameters)) {
             return false
         }
         return true
     }
 
-    static boolean returnSameType(MethodDeclaration methodDeclaration, MethodCallExpr methodCallExpr) {
+    private static boolean returnSameType(MethodDeclaration methodDeclaration, MethodCallExpr methodCallExpr) {
         if (methodDeclaration.type.isVoidType()){
             return true
         }
@@ -87,24 +87,12 @@ class SpringControllerUtils {
                 .orElse(false)
     }
 
-    static boolean callsDelegate(MethodCallExpr methodCallExpr) {
-        if (!methodCallExpr.scope.isPresent()) {
-            return false
-        }
-        try{
-            Expression scope = methodCallExpr.scope.get()
-            if(!scope.isNameExpr()){
-                return false
-            }
-            ResolvedValueDeclaration resolvedScope = scope.asNameExpr().resolve()
-            if(!resolvedScope.isField()){
-                return false
-            }
-        }catch (UnsolvedSymbolException ex){
-            log.error("Unresoolvable return type for method $methodCallExpr", ex)
-            return false
-        }
-        return true
+    private static boolean callsDelegate(MethodCallExpr methodCallExpr) {
+        Try.ofFailable {
+            methodCallExpr.scope.map { it.isNameExpr() && it.asNameExpr().resolve().isField() }.orElse(false)
+        }.onFailure {
+            log.error("Unresoolvable return type for method $methodCallExpr", it)
+        }.orElse(false)
     }
 
     static boolean isRestControllerMethod(MethodDeclaration methodDeclaration) {
@@ -117,14 +105,13 @@ class SpringControllerUtils {
     }
 
     static Map<String, String> getAnnotatedVariablesMap(MethodDeclaration methodDeclaration, String annotationName) {
-        methodDeclaration.parameters.stream()
-                .filter{ AnnotationsProcessor.getAnnotation(it, annotationName) != null }
-                .collect( Collectors.<Parameter,?,Map<String,String>>toMap(
-                    {
-                        AnnotationExpr annotation = AnnotationsProcessor.getAnnotation(it, annotationName)
-                        AnnotationsProcessor.getStringValue(annotation, PARAMETER_ANNOTATION_PROPERTIES) ?: it.nameAsString
-                    },
-                    {it.nameAsString} ))
+        methodDeclaration.parameters.findAll {
+            AnnotationsProcessor.getAnnotation(it, annotationName)
+        }.collectEntries {
+            def annotation = AnnotationsProcessor.getAnnotation(it, annotationName)
+            def key = AnnotationsProcessor.getStringValue(annotation, PARAMETER_ANNOTATION_PROPERTIES) ?: it.nameAsString
+            [key, it.nameAsString]
+        }
     }
 
     static String buildUrl(MethodDeclaration method) {
@@ -139,18 +126,18 @@ class SpringControllerUtils {
         fillPathVariablesUrl(urlTemplate, pathVariableToNames)
     }
 
-    private static String getNodeUrlTemplate(Node node) {
+    private static String getNodeUrlTemplate(NodeWithAnnotations node) {
         AnnotationExpr mappingAnnotation = AnnotationsProcessor.getAnnotation(node, RequestMappingAnnotation.names())
         mappingAnnotation ? getUrlTemplate(mappingAnnotation) : ""
     }
 
-    static boolean hasSimpleUrlTemplate(Node node) {
+    static boolean hasSimpleUrlTemplate(NodeWithAnnotations node) {
         AnnotationExpr mappingAnnotation = AnnotationsProcessor.getAnnotation(node, RequestMappingAnnotation.names())
         if(!mappingAnnotation){
             return true
         }
-        Optional<Expression> mappingExpression = AnnotationsProcessor.getAnnotationMemberExpressionValue(mappingAnnotation,
+        AnnotationsProcessor.getAnnotationMemberExpressionValue(mappingAnnotation,
                 [AnnotationsProcessor.DEFAULT_ANNOTATION_PROPERTY, PATH_PROPERTY])
-        return (!mappingExpression.isPresent() || mappingExpression.get().isStringLiteralExpr())
+                .map{it.isStringLiteralExpr()}.orElse(true)
     }
 }

@@ -127,7 +127,6 @@ class AssignmentCheckStaticFactoryMethodTestGenerator extends AbstractMethodTest
         return StaticFactoryMethodTypes.ASSIGNMENT_CHECK
     }
 
-    //TODO All the methods below are the same as the ones in DifferentInstancesStaticFactoryMethodTestGenerator, push them to a common abstract class
     @Override
     protected boolean shouldBeVisited(Unit unit, MethodDeclaration method) {
         super.shouldBeVisited(unit, method) &&

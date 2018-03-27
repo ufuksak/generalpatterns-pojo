@@ -238,22 +238,13 @@ class Types {
     }
 
     static boolean isBoxedPrimitive(Type type) {
-        for (ResolvedPrimitiveType primitive : ResolvedPrimitiveType.values()) {
-            if (primitive.boxTypeQName == type.asString()
-                    || StringUtils.substringAfterLast(primitive.boxTypeQName, ".") == type.asString()) {
-                return true
-            }
-        }
-        return false
+        ResolvedPrimitiveType.values().boxTypeQName.any {
+            type.asString() in [it, StringUtils.substringAfterLast(it, '.')]
+        } || false
     }
 
     static ResolvedPrimitiveType unbox(ResolvedReferenceType type) {
-        for (ResolvedPrimitiveType primitive : ResolvedPrimitiveType.values()) {
-            if (primitive.boxTypeQName == type.qualifiedName) {
-                return primitive
-            }
-        }
-        return null
+        ResolvedPrimitiveType.values().find { it.boxTypeQName == type.qualifiedName }
     }
 
     static boolean isBooleanType(ResolvedType type) {

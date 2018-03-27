@@ -11,7 +11,7 @@ class AnnotationsProcessor {
 
     static String getStringValue(AnnotationExpr annotation, String memberName) {
         getAnnotationMemberExpressionValue(annotation, memberName)
-                .map(this.&getAnnotationMemberValueAsString)
+                .map{getAnnotationMemberValueAsString(it)}
                 .orElse("")
     }
 
@@ -25,11 +25,10 @@ class AnnotationsProcessor {
     static Optional<Expression> getAnnotationMemberExpressionValue(AnnotationExpr annotation, String memberName) {
         if (annotation.isSingleMemberAnnotationExpr() && memberName == DEFAULT_ANNOTATION_PROPERTY) {
             return Optional.of(annotation.asSingleMemberAnnotationExpr().memberValue)
-        } else if (annotation.isNormalAnnotationExpr()) {
-            return annotation.asNormalAnnotationExpr().pairs.stream()
-                    .filter { it.nameAsString == memberName }
-                    .map { it.value }
-                    .findFirst()
+        }
+        if (annotation.isNormalAnnotationExpr()) {
+            return Optional.ofNullable(annotation.asNormalAnnotationExpr()
+                    .pairs.find { it.nameAsString == memberName }?.value)
         }
         return Optional.empty()
     }
@@ -52,12 +51,11 @@ class AnnotationsProcessor {
     }
 
     static String getStringValue(AnnotationExpr annotation, Set<String> memberNames) {
-        memberNames.stream().map{getStringValue(annotation, it)}
-                .filter{! it.isEmpty()}.findFirst().orElse("")
+        memberNames.collect { getStringValue(annotation, it) }.find { it } ?: ''
     }
 
     static boolean hasAnnotation(NodeWithAnnotations node, Set<String> annotationNames) {
-        node.annotations.any { annotationNames.contains(it.nameAsString) }
+        node.annotations.any { it.nameAsString in annotationNames }
     }
 
     static boolean hasAnnotation(NodeWithAnnotations node, String annotationName) {
@@ -65,10 +63,10 @@ class AnnotationsProcessor {
     }
 
     static AnnotationExpr getAnnotation(NodeWithAnnotations node, Set<String> annotationNames) {
-        return node.annotations.find { annotationNames.contains(it.nameAsString) }
+        node.annotations.find { annotationNames.contains(it.nameAsString) }
     }
 
     static AnnotationExpr getAnnotation(NodeWithAnnotations node, String annotationName) {
-        return getAnnotation(node, Collections.singleton(annotationName))
+        getAnnotation(node, Collections.singleton(annotationName))
     }
 }

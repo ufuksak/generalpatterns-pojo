@@ -63,25 +63,6 @@ class Imports {
     static final ImportDeclaration MOCK_MVC_BUILDERS = parse('org.springframework.test.web.servlet.setup.MockMvcBuilders')
     static final ImportDeclaration MEDIA_TYPE = parse('org.springframework.http.MediaType')
 
-    static final List<ImportDeclaration> SPRING_CONTROLLER_IMPORTS = [
-            STATIC_MOCKITO_MATCHERS_ANY,
-            STATIC_MOCKITO_MATCHERS_EQ,
-            STATIC_MOCKMVC_BUILDERS_POST,
-            STATIC_MOCKMVC_BUILDERS_GET,
-            STATIC_MOCKMVC_BUILDERS_DELETE,
-            STATIC_MOCKMVC_BUILDERS_PUT,
-            STATIC_MOCKMVC_MATCHERS_STATUS,
-            OBJECT_MAPPER,
-            JUNIT_BEFORE,
-            JUNIT_TEST,
-            INJECT_MOCKS,
-            MOCK,
-            MOCKITO,
-            MOCK_ANNOTATIONS,
-            MEDIA_TYPE,
-            MOCK_MVC,
-            MOCK_MVC_BUILDERS
-    ]
 
     static ImportDeclaration parse(String fullClassName) {
         JavaParser.parseImport("import $fullClassName;")

@@ -141,7 +141,6 @@ class RandomJavaLangTypesFactory implements ReferenceTypeFactory {
         }
 
         if (type.getTypeDeclaration() instanceof JavaParserClassDeclaration) {
-            //TODO: now we have a circular dependency with InvocationBuilder. We should improve the design
             //This can also be implemented by an ObjectBuilder mentioned below:
             //https://github.com/trilogy-group/GeneralPatterns/issues/14
             ClassOrInterfaceDeclaration classDeclaration = (type.getTypeDeclaration() as JavaParserClassDeclaration).getWrappedNode()

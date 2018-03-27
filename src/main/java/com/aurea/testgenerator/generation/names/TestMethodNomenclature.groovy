@@ -22,7 +22,7 @@ class TestMethodNomenclature {
             (StaticFactoryMethodTypes.IS_CALLABLE)        : 'IsCallable',
             (StaticFactoryMethodTypes.ASSIGNMENT_CHECK)   : 'AssignsValues',
             (StaticFactoryMethodTypes.DIFFERENT_INSTANCES): 'OnSecondCall_CreateDifferentInstance',
-            (SpringControllersTestTypes.DELEGATING) : 'DelegatesToService',
+            (SpringControllersTestTypes.DELEGATING)       : 'DelegatesToService',
             (SingletonTypes.SAME_INSTANCE)                : 'OnSecondCall_ReturnsSameInstance',
             (SingletonTypes.THREAD_SAFE)                  : 'IsThreadSafe',
 
@@ -68,7 +68,7 @@ class TestMethodNomenclature {
     String createTestMethodName(TestType type, Node context) {
         try {
             String suffix = TEST_METHOD_NAME_SUFFIXES[type]
-            //TODO refactor this so that we don't have to change here for each new type
+            
             if (type instanceof StaticFactoryMethodTypes || type instanceof SingletonTypes || type instanceof SpringControllersTestTypes) {
                 return new CallableNameRepository(suffix, context as CallableDeclaration).get()
             }

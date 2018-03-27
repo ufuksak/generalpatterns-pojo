@@ -27,11 +27,11 @@ class TestUnit {
     TestUnit addTestsAndDependencies(List<DependableNode<MethodDeclaration>> testNodes) {
         addImports(testNodes)
 
-        StreamEx.of(testNodes).flatMap{it.dependency.fields.stream()}.toSet().sort { it.getVariable(0).nameAsString }.each {
+        testNodes.dependency.fields.flatten().toSet().sort { it.nameAsString }.each{
             addField(it)
         }
 
-        StreamEx.of(testNodes).flatMap{it.dependency.methodSetups.stream()}.toSet().sort{it.nameAsString}.each {
+        testNodes.dependency.methodSetups.flatten().toSet().sort { it.nameAsString }.each{
             addTest(it)
         }
 
@@ -41,7 +41,7 @@ class TestUnit {
     }
 
     private List<ImportDeclaration> addImports(List<DependableNode<MethodDeclaration>> testNodes) {
-        StreamEx.of(testNodes).flatMap { it.dependency.imports.stream() }.each {
+        testNodes.dependency.imports.flatten().each {
             addImport(it)
         }
         test.cu.imports = test.cu.imports.toSet().sort{it.toString()}

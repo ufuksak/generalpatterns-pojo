@@ -25,7 +25,7 @@ enum RequestMappingAnnotation {
     }
 
     static Set<String> names(){
-        values().collect {it.name}.toSet()
+        values().name.toSet()
     }
 
  }
