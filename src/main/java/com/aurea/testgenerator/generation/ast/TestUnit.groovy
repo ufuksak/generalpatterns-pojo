@@ -3,6 +3,7 @@ package com.aurea.testgenerator.generation.ast
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.Node
+import com.github.javaparser.ast.Modifier
 import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
 import com.github.javaparser.ast.body.FieldDeclaration
@@ -20,7 +21,9 @@ class TestUnit {
     }
 
     TestUnit addImport(ImportDeclaration id) {
-        test.cu.imports << id
+        if (!test.cu.imports.contains(id)) {
+            test.cu.imports << id
+        }
         this
     }
 
@@ -31,14 +34,22 @@ class TestUnit {
             addField(it)
         }
 
+
         testNodes.dependency.methodSetups.flatten().toSet().sort { it.nameAsString }.each{
             addTest(it)
+        }
+
+        testNodes.dependency.classAnnotations.flatten().toSet().each {
+            if (!test.cu.types[0].annotations.contains(it)) {
+                test.cu.types[0].annotations.add(it)
+            }
         }
 
         testNodes.each {addTest(it.node)}
 
         this
     }
+
 
     private List<ImportDeclaration> addImports(List<DependableNode<MethodDeclaration>> testNodes) {
         testNodes.dependency.imports.flatten().each {

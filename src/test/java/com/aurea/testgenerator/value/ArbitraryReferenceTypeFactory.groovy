@@ -117,14 +117,11 @@ class ArbitraryReferenceTypeFactory implements ReferenceTypeFactory {
         }
 
         if (type.getTypeDeclaration() instanceof JavaParserClassDeclaration) {
-            //This can also be implemented by an ObjectBuilder mentioned below:
-            //https://github.com/trilogy-group/GeneralPatterns/issues/14
             ClassOrInterfaceDeclaration classDeclaration = (type.getTypeDeclaration() as JavaParserClassDeclaration).getWrappedNode()
-            symbolSolver.inject(classDeclaration.findParent(CompilationUnit).get())
-            ConstructorDeclaration constructor = StreamEx.of(classDeclaration.getConstructors()).sortedBy {
-                it.parameters.size()
-            }.first()
-            return new InvocationBuilder(valueFactory).build(constructor)
+
+            //TODO: Replace this by the ObjectBuilder mentioned below when implemented:
+            //https://github.com/trilogy-group/GeneralPatterns/issues/14
+            return Optional.of(DependableNode.from(JavaParser.parseExpression("new ${classDeclaration.nameAsString}()")))
         }
 
         String className = type.typeDeclaration.className

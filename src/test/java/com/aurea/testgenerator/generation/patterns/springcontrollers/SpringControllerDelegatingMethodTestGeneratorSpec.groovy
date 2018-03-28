@@ -188,7 +188,7 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         
             @RequestMapping(value = "/delegate/{int_param}", method = RequestMethod.POST)
             public Value delegateWithValue(@PathVariable(name = "int_param") int intParam,
-                    @RequestParam(name = "string_param") String stringParam, @RequestBody BodyParent.Body body,
+                    @RequestParam(name = "string_param") String stringParam, @RequestBody Body body,
                     @RequestHeader("User-Agent") String userAgent) {
                 return delegateService.delegateWithValue(intParam, stringParam, body);
             }
@@ -222,29 +222,28 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
                 this.stringValue = stringValue;
             }
         }
-        class BodyParent{
-            static class Body {
-                int id;
-            
-                public Body(int id) {
-                    this.id = id;
-                }
-            
-                public Body() {
-                }
-            
-                public int getId() {
-                    return id;
-                }
-            
-                public void setId(int id) {
-                    this.id = id;
-                }
+        class Body {
+            int id;
+        
+            public Body(int id) {
+                this.id = id;
+            }
+        
+            public Body() {
+            }
+        
+            public int getId() {
+                return id;
+            }
+        
+            public void setId(int id) {
+                this.id = id;
             }
         }
         
+        
         class DelegateService {
-            public Value delegateWithValue(int intParam, String stringParam, BodyParent.Body body) {
+            public Value delegateWithValue(int intParam, String stringParam, Body body) {
                 return new Value(intParam,stringParam);
             }
         }
@@ -301,13 +300,13 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
             public void test_delegateWithValue_DelegatesToService() throws Exception {
                 int intParam = 42;
                 String stringParam = "ABC";
-                BodyParent.Body body = new BodyParent.Body();
+                Body body = new Body();
                 String userAgent = "ABC";
                 ObjectMapper mapper = new ObjectMapper();
                 Value expectedResult = new Value();
-                Mockito.when(delegateService.delegateWithValue(eq(intParam), eq(stringParam), any(BodyParent.Body.class))).thenReturn(expectedResult);
+                Mockito.when(delegateService.delegateWithValue(eq(intParam), eq(stringParam), any(Body.class))).thenReturn(expectedResult);
                 mockMvc.perform(post("/return/delegate/" + intParam + "").content(mapper.writeValueAsString(body)).contentType("application/json;charset=UTF-8").param("string_param", String.valueOf(stringParam)).header("User-Agent", String.valueOf(userAgent))).andExpect(status().is2xxSuccessful());
-                Mockito.verify(delegateService).delegateWithValue(eq(intParam), eq(stringParam), any(BodyParent.Body.class));
+                Mockito.verify(delegateService).delegateWithValue(eq(intParam), eq(stringParam), any(Body.class));
             }
         }
         """

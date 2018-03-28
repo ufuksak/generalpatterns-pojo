@@ -141,17 +141,24 @@ class RandomJavaLangTypesFactory implements ReferenceTypeFactory {
         }
 
         if (type.getTypeDeclaration() instanceof JavaParserClassDeclaration) {
-            //This can also be implemented by an ObjectBuilder mentioned below:
-            //https://github.com/trilogy-group/GeneralPatterns/issues/14
-            ClassOrInterfaceDeclaration classDeclaration = (type.getTypeDeclaration() as JavaParserClassDeclaration).getWrappedNode()
-            ConstructorDeclaration constructor = StreamEx.of(classDeclaration.getConstructors()).sortedBy {
-                it.parameters.size()
-            }.first()
+            return createObjectCreationExpression(type)
+        }
+
+        return Optional.of(MockExpressionBuilder.build(type.qualifiedName))
+    }
+
+    //TODO: We definitely need a cleaner implemention This can be implemented by an ObjectBuilder mentioned below:
+    //https://github.com/trilogy-group/GeneralPatterns/issues/14
+    private Optional<DependableNode<Expression>> createObjectCreationExpression(ResolvedReferenceType type) {
+        ClassOrInterfaceDeclaration classDeclaration = (type.getTypeDeclaration() as JavaParserClassDeclaration).getWrappedNode()
+
+        if (classDeclaration.constructors) {
+            ConstructorDeclaration constructor = classDeclaration.constructors.sort { it.parameters.size() }.first()
             solver.inject(classDeclaration.findParent(CompilationUnit).get())
             return new InvocationBuilder(valueFactory).build(constructor)
         }
 
-        return Optional.of(MockExpressionBuilder.build(type.qualifiedName))
+        return Optional.of(DependableNode.from(JavaParser.parseExpression("new ${classDeclaration.nameAsString}()")))
     }
 
     private Optional<DependableNode<Expression>> getCollectionComponentValue(ResolvedReferenceType type) {
