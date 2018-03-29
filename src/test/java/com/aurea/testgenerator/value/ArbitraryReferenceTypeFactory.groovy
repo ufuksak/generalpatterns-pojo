@@ -1,9 +1,13 @@
 package com.aurea.testgenerator.value
 
+import com.aurea.testgenerator.ast.InvocationBuilder
 import com.aurea.testgenerator.generation.ast.DependableNode
 import com.aurea.testgenerator.generation.merge.TestNodeMerger
 import com.aurea.testgenerator.generation.source.Imports
 import com.github.javaparser.JavaParser
+import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration
+import com.github.javaparser.ast.body.ConstructorDeclaration
 import com.github.javaparser.ast.expr.Expression
 import com.github.javaparser.ast.expr.FieldAccessExpr
 import com.github.javaparser.ast.expr.StringLiteralExpr
@@ -12,12 +16,20 @@ import com.github.javaparser.resolution.declarations.ResolvedTypeParameterDeclar
 import com.github.javaparser.resolution.types.ResolvedPrimitiveType
 import com.github.javaparser.resolution.types.ResolvedReferenceType
 import com.github.javaparser.resolution.types.ResolvedType
+import com.github.javaparser.symbolsolver.JavaSymbolSolver
+import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserClassDeclaration
 import com.github.javaparser.utils.Pair
+import one.util.streamex.StreamEx
 
 class ArbitraryReferenceTypeFactory implements ReferenceTypeFactory {
 
     ValueFactory valueFactory
     ArbitraryPrimitiveValuesFactory arbitraryPrimitiveValuesFactory = new ArbitraryPrimitiveValuesFactory()
+    JavaSymbolSolver symbolSolver
+
+    ArbitraryReferenceTypeFactory(JavaSymbolSolver symbolSolver){
+        this.symbolSolver = symbolSolver
+    }
 
     @Override
     Optional<DependableNode<Expression>> get(ResolvedReferenceType type) {
@@ -102,6 +114,14 @@ class ArbitraryReferenceTypeFactory implements ReferenceTypeFactory {
             ResolvedEnumDeclaration resolvedEnumDeclaration = type.typeDeclaration.asEnum()
             Optional<FieldAccessExpr> accessFirstEnum = resolvedEnumDeclaration.accessFirst()
             return accessFirstEnum.map { DependableNode.from(it) }
+        }
+
+        if (type.getTypeDeclaration() instanceof JavaParserClassDeclaration) {
+            ClassOrInterfaceDeclaration classDeclaration = (type.getTypeDeclaration() as JavaParserClassDeclaration).getWrappedNode()
+
+            //TODO: Replace this by the ObjectBuilder mentioned below when implemented:
+            //https://github.com/trilogy-group/GeneralPatterns/issues/14
+            return Optional.of(DependableNode.from(JavaParser.parseExpression("new ${classDeclaration.nameAsString}()")))
         }
 
         String className = type.typeDeclaration.className

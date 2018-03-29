@@ -48,9 +48,7 @@ abstract class MatcherPipelineTest extends Specification {
     UnitTestWriter unitTestWriter
     UnitTestGenerator unitTestGenerator
     CoverageService coverageService
-    ValueFactory valueFactory = new ValueFactoryImpl(
-            new ArbitraryReferenceTypeFactory(),
-            new ArbitraryPrimitiveValuesFactory())
+    ValueFactory valueFactory
     TestGeneratorResultReporter reporter = new TestGeneratorResultReporter(mock(ApplicationEventPublisher))
     CoverageReporter visitReporter = new CoverageReporter(mock(ApplicationEventPublisher))
     NomenclatureFactory nomenclatureFactory = new NomenclatureFactory(new StandardTestClassNomenclatureFactory(), cfg)
@@ -66,6 +64,10 @@ abstract class MatcherPipelineTest extends Specification {
         cfg.testSrc = folder.newFolder("test").absolutePath
         cfg.disableMethodPrefix = false
         cfg.methodPrefix = "test"
+
+        valueFactory = new ValueFactoryImpl(
+                new ArbitraryReferenceTypeFactory(getSymbolSolver()),
+                new ArbitraryPrimitiveValuesFactory())
 
         source = new PathUnitSource(new JavaSourceFinder(cfg), cfg, SourceFilters.empty(), getSymbolSolver())
         TestGenerator generator = generator()

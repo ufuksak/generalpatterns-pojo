@@ -23,33 +23,32 @@ class LazySingletonTestGeneratorSpec extends MatcherPipelineTest {
             }
             """, """     
             package sample;
-             
+
+            import com.aurea.unittest.commons.SingletonTester;
+            import java.util.concurrent.Callable;
             import javax.annotation.Generated;
             import org.junit.Test;
             import static org.assertj.core.api.Assertions.assertThat;
-            import java.util.concurrent.Callable;
-            import com.aurea.unittest.commons.SingletonTester;
              
             @Generated("GeneralPatterns")
             public class FooPatternTest {
-             
+                
                 @Test
                 public void test_getInstance_OnSecondCall_ReturnsSameInstance() throws Exception {
                     Foo first = Foo.getInstance();
                     Foo other = Foo.getInstance();
-                    
                     assertThat(first).isSameAs(other);
                 }
-             
+            
                 @Test
                 public void test_getInstance_IsThreadSafe() throws Exception {
                     SingletonTester tester = SingletonTester.fromSingleton(new Callable<Foo>() {
+            
                         @Override
                         public Foo call() throws Exception {
                             return Foo.getInstance();
                         }
                     });
-                    
                     tester.testThreadSafety();
                 }
             }

@@ -21,7 +21,7 @@ class InvocationBuilderSpec extends TestUnitSpec {
     InvocationBuilder builder
 
     def setup() {
-        ReferenceTypeFactory typesFactory = new ArbitraryReferenceTypeFactory()
+        ReferenceTypeFactory typesFactory = new ArbitraryReferenceTypeFactory(getSymbolSolver())
         PrimitiveValueFactory primitiveValueFactory = new ArbitraryPrimitiveValuesFactory()
         ValueFactory valueFactory = new ValueFactoryImpl(typesFactory, primitiveValueFactory)
         typesFactory.setValueFactory(valueFactory)

@@ -17,7 +17,7 @@ class ValueFactoryImplSpec extends TestUnitSpec {
 
     def setup() {
         PrimitiveValueFactory arbitraryPrimitiveValues = new ArbitraryPrimitiveValuesFactory()
-        ArbitraryReferenceTypeFactory javaLangTypesFactory = new ArbitraryReferenceTypeFactory()
+        ArbitraryReferenceTypeFactory javaLangTypesFactory = new ArbitraryReferenceTypeFactory(getSymbolSolver())
         javaLangTypesFactory.arbitraryPrimitiveValuesFactory = arbitraryPrimitiveValues
         factory = new ValueFactoryImpl(javaLangTypesFactory, arbitraryPrimitiveValues)
     }

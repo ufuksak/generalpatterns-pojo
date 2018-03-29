@@ -40,27 +40,41 @@ class BaseConfig {
     }
 
     @Bean
-    TypeSolver combinedTypeSolver(ProjectConfiguration projectConfiguration){
-        CombinedTypeSolver solver = new CombinedTypeSolver(
-                new ReflectionTypeSolver(),
-                new JavaParserTypeSolver(projectConfiguration.srcPath.toFile()))
+    TypeSolver combinedTypeSolver(ProjectConfiguration projectConfiguration) {
+        CombinedTypeSolver solver = new CombinedTypeSolver(new ReflectionTypeSolver())
 
-        if (projectConfiguration.resolveJars) {
-            projectConfiguration.resolveJars.split(",").each {
-                def file = new File(it)
-                if (file.directory) {
-                    file.traverse {
-                        if (it.file) {
-                            solver.add(new JarTypeSolver(it.path))
-                        }
-                    }
-                } else {
-                    solver.add(new JarTypeSolver(it))
+        solver.add(new JavaParserTypeSolver(new File(projectConfiguration.src)))
+
+        projectConfiguration.resolvePaths.stream()
+                .map { new File(it) }
+                .filter { it.exists() && it.isDirectory() }
+                .forEach {
+                    solver.add(new JavaParserTypeSolver(it))
                 }
-            }
-        }
+
+        projectConfiguration.resolveJars.stream()
+                .map { new File(it) }
+                .filter { it.exists() }
+                .filter { isJarFile(it) || it.isDirectory() }
+                .forEach {
+                    if (it.isDirectory()) {
+                        it.traverse {
+                            if (isJarFile(it)) {
+                                solver.add(new JarTypeSolver(it.path))
+                            }
+                        }
+                    } else {
+                        solver.add(new JarTypeSolver(it.path))
+                    }
+                }
+
         solver
     }
+
+    private boolean isJarFile(File file){
+        file.isFile() && file.name.toLowerCase().endsWith('.jar')
+    }
+
 
     @Bean
     JavaParserFacade javaParserFacade(TypeSolver solver) {
