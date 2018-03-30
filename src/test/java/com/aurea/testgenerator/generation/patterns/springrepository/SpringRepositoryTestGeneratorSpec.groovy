@@ -48,7 +48,7 @@ class SpringRepositoryTestGeneratorSpec extends MatcherPipelineTest {
                 public void test_findByName_Returns_Entity() throws Exception {
                     // given
                     BillPugh entity = new BillPugh();
-                    String name = new String("testString");
+                    String name = "ABC";
                     entity.setName(name);
                     entityManager.persist(entity);
                     entityManager.flush();
@@ -57,14 +57,14 @@ class SpringRepositoryTestGeneratorSpec extends MatcherPipelineTest {
                     // then
                     assertThat(found.getName()).isEqualTo(entity.getName());
                 }
-            
+             
                 @Test
                 public void test_findFirstBySourceUrlAndCommitOrderByDateUpdatedDesc_Returns_Entity() throws Exception {
                     // given
                     BillPugh entity = new BillPugh();
-                    String sourceUrl = new String("testString");
+                    String sourceUrl = "ABC";
+                    String commit = "ABC";
                     entity.setSourceUrl(sourceUrl);
-                    String commit = new String("testString");
                     entity.setCommit(commit);
                     entityManager.persist(entity);
                     entityManager.flush();
@@ -73,12 +73,12 @@ class SpringRepositoryTestGeneratorSpec extends MatcherPipelineTest {
                     // then
                     assertThat(found.getSourceUrl()).isEqualTo(entity.getSourceUrl());
                 }
-            
+             
                 @Test
                 public void test_findAllByNeedRun_Returns_Entity() throws Exception {
                     // given
                     BillPugh entity = new BillPugh();
-                    Boolean needRun = new Boolean("testString");
+                    Boolean needRun = true;
                     entity.setNeedRun(needRun);
                     entityManager.persist(entity);
                     entityManager.flush();
@@ -93,6 +93,6 @@ class SpringRepositoryTestGeneratorSpec extends MatcherPipelineTest {
 
     @Override
     TestGenerator generator() {
-        new SpringRepositoryTestGenerator(solver, reporter, visitReporter, nomenclatureFactory)
+        new SpringRepositoryTestGenerator(solver, reporter, visitReporter, nomenclatureFactory, valueFactory)
     }
 }
