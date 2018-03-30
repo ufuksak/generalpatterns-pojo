@@ -9,6 +9,7 @@ import com.aurea.testgenerator.generation.names.TestMethodNomenclature
 import com.aurea.testgenerator.reporting.CoverageReporter
 import com.aurea.testgenerator.reporting.TestGeneratorResultReporter
 import com.aurea.testgenerator.source.Unit
+import com.aurea.testgenerator.value.ValueFactory
 import com.github.javaparser.JavaParser
 import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.Modifier
@@ -21,6 +22,7 @@ import com.github.javaparser.ast.expr.ClassExpr
 import com.github.javaparser.ast.expr.MarkerAnnotationExpr
 import com.github.javaparser.ast.expr.Name
 import com.github.javaparser.ast.expr.SingleMemberAnnotationExpr
+import com.github.javaparser.ast.stmt.ExpressionStmt
 import com.github.javaparser.ast.type.ClassOrInterfaceType
 import com.github.javaparser.symbolsolver.javaparsermodel.JavaParserFacade
 import groovy.util.logging.Log4j2
@@ -54,12 +56,15 @@ class SpringRepositoryTestGenerator extends AbstractMethodTestGenerator {
     private static final String TEST_STRING = '"testString"'
 
     private NomenclatureFactory nomenclatures
+    ValueFactory valueFactory
 
     @Autowired
     SpringRepositoryTestGenerator(JavaParserFacade solver, TestGeneratorResultReporter reporter,
-                                  CoverageReporter visitReporter, NomenclatureFactory nomenclatures) {
+                                  CoverageReporter visitReporter, NomenclatureFactory nomenclatures,
+                                    ValueFactory valueFactory) {
         super(solver, reporter, visitReporter, nomenclatures)
         this.nomenclatures = nomenclatures
+        this.valueFactory = valueFactory
     }
 
     @Override
@@ -80,10 +85,13 @@ class SpringRepositoryTestGenerator extends AbstractMethodTestGenerator {
         result
     }
 
-    private static fillTestMethod(String className, String testName, MethodDeclaration method,
+    private fillTestMethod(String className, String testName, MethodDeclaration method,
                                   DependableNode<MethodDeclaration> testMethod, result) {
         def methodName = method.nameAsString
         def firstParamName = method.parameters[0].nameAsString.capitalize()
+
+        //TODO:improve entity generation.
+        //Corresponding issue https://github.com/trilogy-group/GeneralPatterns/issues/47
         String testCode = """
                 @Test
                 public void ${testName}() throws Exception {
@@ -107,19 +115,15 @@ class SpringRepositoryTestGenerator extends AbstractMethodTestGenerator {
         result.tests << testMethod
     }
 
-    // TODO: parse param types, assign default values
-    // TODO: parse collections types
-    // TODO: parse other standard method names
     // Corresponding issue https://github.com/trilogy-group/GeneralPatterns/issues/47
-    private static fillParams(MethodDeclaration methodDeclaration) {
-        def sb = new StringBuilder()
-        methodDeclaration.parameters.each {
-            def fieldName = it.name.identifier
-            def fieldType = it.type.asString()
-            sb.append("$fieldType $fieldName = new $fieldType($TEST_STRING);${System.lineSeparator()}")
-            sb.append("entity.set${fieldName.capitalize()}($fieldName);${System.lineSeparator()}")
-        }
-        sb.toString()
+    private String fillParams(MethodDeclaration methodDeclaration) {
+        methodDeclaration.parameters.collect {
+            new ExpressionStmt(valueFactory.getVariable(it.nameAsString, it.type).get().node)
+        }.join(System.lineSeparator()) +
+
+        methodDeclaration.parameters.collect {
+            "entity.set${it.name.identifier.capitalize()}($it.name.identifier);"
+        }.join(System.lineSeparator())
     }
 
     private static void fillClassLevel(DependableNode<MethodDeclaration> testMethod, MethodDeclaration method) {
