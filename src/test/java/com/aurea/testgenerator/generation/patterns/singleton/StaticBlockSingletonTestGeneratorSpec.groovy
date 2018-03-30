@@ -37,7 +37,7 @@ class StaticBlockSingletonTestGeneratorSpec extends MatcherPipelineTest {
             public class FooPatternTest {
              
                 @Test
-                public void test_getInstance_OnSecondCall_ReturnsSameInstance() throws Exception {
+                public void getInstanceOnSecondCallReturnsSameInstance() throws Exception {
                     Foo first = Foo.getInstance();
                     Foo other = Foo.getInstance();
                     

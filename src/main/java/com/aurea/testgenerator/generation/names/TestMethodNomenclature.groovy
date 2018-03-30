@@ -17,17 +17,17 @@ import one.util.streamex.StreamEx
 import pl.allegro.finance.tradukisto.ValueConverters
 
 class TestMethodNomenclature {
-    static final String TEST_NAME_SPACE = "_"
 
+    private static final String TEST_NAME_SPACE = ""
     private static final Map<? extends TestType, String> TEST_METHOD_NAME_SUFFIXES = [
             (StaticFactoryMethodTypes.IS_CALLABLE)                      : 'IsCallable',
             (StaticFactoryMethodTypes.ASSIGNMENT_CHECK)                 : 'AssignsValues',
-            (StaticFactoryMethodTypes.DIFFERENT_INSTANCES)              : 'OnSecondCall_CreateDifferentInstance',
+            (StaticFactoryMethodTypes.DIFFERENT_INSTANCES)              : 'OnSecondCallCreateDifferentInstance',
             (SpringControllersTestTypes.DELEGATING)                     : 'DelegatesToService',
-            (SingletonTypes.SAME_INSTANCE)                              : 'OnSecondCall_ReturnsSameInstance',
+            (SingletonTypes.SAME_INSTANCE)                              : 'OnSecondCallReturnsSameInstance',
             (SingletonTypes.THREAD_SAFE)                                : 'IsThreadSafe',
-            (SpringRepositoryTestTypes.SPRING_REPOSITORY_FIND_ENTITY)   : 'Returns_Entity',
-            (SpringRepositoryTestTypes.SPRING_REPOSITORY_FIND_MULTIPLE) : 'Returns_List',
+            (SpringRepositoryTestTypes.SPRING_REPOSITORY_FIND_ENTITY)   : 'ReturnsEntity',
+            (SpringRepositoryTestTypes.SPRING_REPOSITORY_FIND_MULTIPLE) : 'ReturnsList',
 
             (PojoTestTypes.OPEN_POJO_GETTER)                            : 'Getters',
             (PojoTestTypes.OPEN_POJO_SETTER)                            : 'Setters',
@@ -46,13 +46,11 @@ class TestMethodNomenclature {
     private static final Map<? extends TestType, String> TEST_METHOD_NAME_PREFIXES = [
             (PojoTestTypes.OPEN_POJO)               : 'validate',
             (PojoTestTypes.OPEN_POJO_GETTER)        : 'validate',
-            (PojoTestTypes.OPEN_POJO_GETTER)        : 'validate',
             (PojoTestTypes.OPEN_POJO_SETTER)        : 'validate',
             (PojoTestTypes.OPEN_POJO_TO_STRING)     : 'validate',
             (PojoTestTypes.OPEN_POJO_EQUALS)        : 'validate',
             (PojoTestTypes.OPEN_POJO_HASH_CODE)     : 'validate',
             (PojoTestTypes.OPEN_POJO_CONSTRUCTORS)  : 'validate',
-            (PojoTestTypes.POJO_TESTER_GETTER)      : 'validate',
             (PojoTestTypes.POJO_TESTER_GETTER)      : 'validate',
             (PojoTestTypes.POJO_TESTER_SETTER)      : 'validate',
             (PojoTestTypes.POJO_TESTER_TO_STRING)   : 'validate',
@@ -96,11 +94,7 @@ class TestMethodNomenclature {
     }
 
     private String addGlobalPrefix(String methodName) {
-        if (!projectConfiguration.disableMethodPrefix) {
-            return [projectConfiguration.methodPrefix, methodName].join(TEST_NAME_SPACE)
-        }
-
-        methodName
+        projectConfiguration.methodPrefix + methodName
     }
 
     class CallableNameRepository {

@@ -62,8 +62,6 @@ abstract class MatcherPipelineTest extends Specification {
         cfg.out = folder.newFolder("test-out").absolutePath
         cfg.src = folder.newFolder("src").absolutePath
         cfg.testSrc = folder.newFolder("test").absolutePath
-        cfg.disableMethodPrefix = false
-        cfg.methodPrefix = "test"
 
         valueFactory = new ValueFactoryImpl(
                 new ArbitraryReferenceTypeFactory(getSymbolSolver()),
