@@ -11,7 +11,6 @@ class TestMethodNomenclatureSpec extends Specification {
     TestMethodNomenclature nameRepository
 
     def setup() {
-        projectConfiguration.disableMethodPrefix = false
         projectConfiguration.methodPrefix = "test"
         nameRepository = new TestMethodNomenclature(projectConfiguration)
     }
@@ -29,7 +28,7 @@ class TestMethodNomenclatureSpec extends Specification {
                 constructors.first())
 
         then:
-        name == "test_Foo_OnSecondCall_CreateDifferentInstance"
+        name == "testFooOnSecondCallCreateDifferentInstance"
     }
 
     def "two constructors"() {
@@ -48,8 +47,8 @@ class TestMethodNomenclatureSpec extends Specification {
                 constructors[1])
 
         then:
-        noArg == 'test_Foo_OnSecondCall_CreateDifferentInstance'
-        arg == 'test_FooWithOneArgument_OnSecondCall_CreateDifferentInstance'
+        noArg == 'testFooOnSecondCallCreateDifferentInstance'
+        arg == 'testFooWithOneArgumentOnSecondCallCreateDifferentInstance'
     }
 
     def "two constructors with same number of arguments"() {
@@ -68,8 +67,8 @@ class TestMethodNomenclatureSpec extends Specification {
                 constructors[1])
 
         then:
-        boolArg == 'test_Foo_OnSecondCall_CreateDifferentInstance'
-        intArg == 'test_FooWithOneArgument_OnSecondCall_CreateDifferentInstance'
+        boolArg == 'testFooOnSecondCallCreateDifferentInstance'
+        intArg == 'testFooWithOneArgumentOnSecondCallCreateDifferentInstance'
     }
 
     def "constructors with array argument"() {
@@ -88,8 +87,8 @@ class TestMethodNomenclatureSpec extends Specification {
                 constructors[1])
 
         then:
-        intArrayArg == 'test_Foo_OnSecondCall_CreateDifferentInstance'
-        doubleArrayArg == 'test_FooWithOneArgument_OnSecondCall_CreateDifferentInstance'
+        intArrayArg == 'testFooOnSecondCallCreateDifferentInstance'
+        doubleArrayArg == 'testFooWithOneArgumentOnSecondCallCreateDifferentInstance'
 
     }
 
@@ -107,45 +106,8 @@ class TestMethodNomenclatureSpec extends Specification {
                 constructors.first())
 
         then:
-        name == "tryThat_Foo_OnSecondCall_CreateDifferentInstance"
+        name == "tryThatFooOnSecondCallCreateDifferentInstance"
     }
-
-    def "constructor with global prefix disabled"() {
-        setup:
-        projectConfiguration.disableMethodPrefix = true
-        List<ConstructorDeclaration> constructors = getConstructors """
-        class Foo {
-            Foo() {}
-        }
-        """
-
-        when:
-        String name = nameRepository.requestTestMethodName(StaticFactoryMethodTypes.DIFFERENT_INSTANCES,
-                constructors.first())
-
-        then:
-        name == "Foo_OnSecondCall_CreateDifferentInstance"
-    }
-
-
-    def "constructor with custom global prefix provided but disabled"() {
-        setup:
-        projectConfiguration.disableMethodPrefix = true
-        projectConfiguration.methodPrefix = "should"
-        List<ConstructorDeclaration> constructors = getConstructors """
-        class Foo {
-            Foo() {}
-        }
-        """
-
-        when:
-        String name = nameRepository.requestTestMethodName(StaticFactoryMethodTypes.DIFFERENT_INSTANCES,
-                constructors.first())
-
-        then:
-        name == "Foo_OnSecondCall_CreateDifferentInstance"
-    }
-
 
     List<ConstructorDeclaration> getConstructors(String code) {
         JavaParser.parse(code).findAll(ConstructorDeclaration)

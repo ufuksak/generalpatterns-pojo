@@ -45,7 +45,7 @@ class SpringRepositoryTestGeneratorSpec extends MatcherPipelineTest {
                 private BillPughRepository repository;
             
                 @Test
-                public void test_findByName_Returns_Entity() throws Exception {
+                public void findByNameReturnsEntity() throws Exception {
                     // given
                     BillPugh entity = new BillPugh();
                     String name = new String("testString");
@@ -59,7 +59,7 @@ class SpringRepositoryTestGeneratorSpec extends MatcherPipelineTest {
                 }
             
                 @Test
-                public void test_findFirstBySourceUrlAndCommitOrderByDateUpdatedDesc_Returns_Entity() throws Exception {
+                public void findFirstBySourceUrlAndCommitOrderByDateUpdatedDescReturnsEntity() throws Exception {
                     // given
                     BillPugh entity = new BillPugh();
                     String sourceUrl = new String("testString");
@@ -75,7 +75,7 @@ class SpringRepositoryTestGeneratorSpec extends MatcherPipelineTest {
                 }
             
                 @Test
-                public void test_findAllByNeedRun_Returns_Entity() throws Exception {
+                public void findAllByNeedRunReturnsEntity() throws Exception {
                     // given
                     BillPugh entity = new BillPugh();
                     Boolean needRun = new Boolean("testString");

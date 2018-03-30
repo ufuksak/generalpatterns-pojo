@@ -29,7 +29,6 @@ class ProjectConfiguration {
     String out
     String jacoco
     String methodPrefix
-    boolean disableMethodPrefix
 
     FileNameConflictResolutionStrategyType fileNameResolution = FileNameConflictResolutionStrategyType.OVERRIDE
 
@@ -49,11 +48,11 @@ class ProjectConfiguration {
         Paths.get(out)
     }
 
-    boolean isBlank() {
-        return blank
+    String getMethodPrefix() {
+        Objects.toString(methodPrefix, "")
     }
 
-    boolean isDisableMethodPrefix(){
-        disableMethodPrefix
+    boolean isBlank() {
+        return blank
     }
 }

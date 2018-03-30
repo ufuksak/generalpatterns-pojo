@@ -40,7 +40,7 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             public class FooPatternTest {
              
                 @Test
-                public void test_emptyProfile_AssignsValues() throws Exception {
+                public void emptyProfileAssignsValues() throws Exception {
                     String username = "ABC";
                     UserProfile resultingInstance = UserProfile.emptyProfile(username);
                     SoftAssertions sa = new SoftAssertions();
@@ -130,7 +130,7 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
 
              
                 @Test
-                public void test_emptyProfile_AssignsValues() throws Exception {
+                public void emptyProfileAssignsValues() throws Exception {
                     String username = "ABC";
                     UserProfile resultingInstance = UserProfile.emptyProfile(username);
                     SoftAssertions sa = new SoftAssertions();
@@ -180,7 +180,7 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             public class FooPatternTest {
              
                 @Test
-                public void test_emptyProfile_AssignsValues() throws Exception {
+                public void emptyProfileAssignsValues() throws Exception {
                     String username = "ABC";
                     UserProfile resultingInstance = UserProfile.emptyProfile(username);
                     SoftAssertions sa = new SoftAssertions();
@@ -230,7 +230,7 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             public class FooPatternTest {
              
                 @Test
-                public void test_emptyProfile_AssignsValues() throws Exception {
+                public void emptyProfileAssignsValues() throws Exception {
                     Foo resultingInstance = Foo.emptyProfile();
                     SoftAssertions sa = new SoftAssertions();
                     sa.assertThat(resultingInstance.getAge()).isEqualTo(58);
@@ -277,7 +277,7 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             public class FooPatternTest {
              
                 @Test
-                public void test_emptyProfile_AssignsValues() throws Exception {
+                public void emptyProfileAssignsValues() throws Exception {
                     Foo resultingInstance = Foo.emptyProfile();
                     SoftAssertions sa = new SoftAssertions();
                     sa.assertThat(resultingInstance.getAge()).isEqualTo(58);
@@ -325,7 +325,7 @@ class AssignmentCheckStaticFactoryMethodTestGeneratorSpec extends MatcherPipelin
             public class FooPatternTest {
              
                 @Test
-                public void test_emptyProfile_AssignsValues() throws Exception {
+                public void emptyProfileAssignsValues() throws Exception {
                     String username = "ABC";
                     Foo resultingInstance = Foo.emptyProfile(username);
                     SoftAssertions sa = new SoftAssertions();

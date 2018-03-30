@@ -71,7 +71,7 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
             }
          
             @Test
-            public void test_delegate_DelegatesToService() throws Exception {
+            public void delegateDelegatesToService() throws Exception {
                 mockMvc.perform(get("/delegate")).andExpect(status().is2xxSuccessful());
                 Mockito.verify(delegateService).delegate();
             }
@@ -153,7 +153,7 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
             }
          
             @Test
-            public void test_delegate_DelegatesToService() throws Exception {
+            public void delegateDelegatesToService() throws Exception {
                 int intParam = 42;
                 String stringParam = "ABC";
                 mockMvc.perform(post("/params/delegate/" + intParam + "").param("string_param", String.valueOf(stringParam))).andExpect(status().is2xxSuccessful());
@@ -297,7 +297,7 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
             }
          
             @Test
-            public void test_delegateWithValue_DelegatesToService() throws Exception {
+            public void delegateWithValueDelegatesToService() throws Exception {
                 int intParam = 42;
                 String stringParam = "ABC";
                 Body body = new Body();

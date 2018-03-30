@@ -24,7 +24,7 @@ class DifferentInstancesStaticFactoryMethodTestGeneratorSpec extends MatcherPipe
             public class FooPatternTest {
              
                 @Test
-                public void test_newFoo_OnSecondCall_CreateDifferentInstance() throws Exception {
+                public void newFooOnSecondCallCreateDifferentInstance() throws Exception {
                     Foo first = Foo.newFoo("ABC");
                     Foo other = Foo.newFoo("ABC");
                     
@@ -59,7 +59,7 @@ class DifferentInstancesStaticFactoryMethodTestGeneratorSpec extends MatcherPipe
             public class FooPatternTest {
              
                 @Test
-                public void test_newFoo_OnSecondCall_CreateDifferentInstance() throws Exception {
+                public void newFooOnSecondCallCreateDifferentInstance() throws Exception {
                     Foo first = Foo.newFoo("ABC");
                     Foo other = Foo.newFoo("ABC");
                     
