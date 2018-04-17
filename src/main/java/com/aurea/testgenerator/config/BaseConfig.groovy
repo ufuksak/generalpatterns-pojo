@@ -41,40 +41,34 @@ class BaseConfig {
 
     @Bean
     TypeSolver combinedTypeSolver(ProjectConfiguration projectConfiguration) {
-        CombinedTypeSolver solver = new CombinedTypeSolver(new ReflectionTypeSolver())
+        def solver = new CombinedTypeSolver(new ReflectionTypeSolver())
 
         solver.add(new JavaParserTypeSolver(new File(projectConfiguration.src)))
 
-        projectConfiguration.resolvePaths.stream()
-                .map { new File(it) }
-                .filter { it.exists() && it.isDirectory() }
-                .forEach {
-                    solver.add(new JavaParserTypeSolver(it))
-                }
+        projectConfiguration.resolvePaths
+                .collect { new File(it) }
+                .findAll { it.exists() && it.isDirectory() }
+                .each { solver.add(new JavaParserTypeSolver(it)) }
 
         projectConfiguration.resolveJars.stream()
                 .map { new File(it) }
                 .filter { it.exists() }
-                .filter { isJarFile(it) || it.isDirectory() }
-                .forEach {
-                    if (it.isDirectory()) {
-                        it.traverse {
-                            if (isJarFile(it)) {
-                                solver.add(new JarTypeSolver(it.path))
-                            }
-                        }
-                    } else {
-                        solver.add(new JarTypeSolver(it.path))
+                .peek { addIndividualJarFileSolver(solver, it) }
+                .filter { it.isDirectory() }
+                .each {
+                    it.traverse {
+                        addIndividualJarFileSolver(solver, it)
                     }
                 }
 
         solver
     }
 
-    private boolean isJarFile(File file){
-        file.isFile() && file.name.toLowerCase().endsWith('.jar')
+    static void addIndividualJarFileSolver(CombinedTypeSolver solver, File file) {
+        if (file.isFile() && file.name.toLowerCase().endsWith('.jar')) {
+            solver.add(new JarTypeSolver(file.path))
+        }
     }
-
 
     @Bean
     JavaParserFacade javaParserFacade(TypeSolver solver) {
