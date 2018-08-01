@@ -68,6 +68,7 @@ dependencies {
     compile 'pl.allegro.finance:tradukisto'
     compile 'com.esotericsoftware.yamlbeans:yamlbeans'
     compile 'org.reflections:reflections'
+    compile 'com.google.googlejavaformat:google-java-format:1.6'
 
     testCompile 'junit:junit'
     testCompile 'pl.pragmatists:JUnitParams'

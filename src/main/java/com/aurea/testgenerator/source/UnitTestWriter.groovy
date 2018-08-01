@@ -1,5 +1,6 @@
 package com.aurea.testgenerator.source
 
+import com.aurea.common.ImportHelper
 import com.aurea.testgenerator.config.ProjectConfiguration
 import groovy.util.logging.Log4j2
 import one.util.streamex.StreamEx
@@ -41,7 +42,7 @@ class UnitTestWriter {
             }
             if (!testFile.exists()) {
                 log.debug "Writing test: $testFile"
-                testFile.write(unit.cu.toString())
+                testFile.write(ImportHelper.organizeImports(unit.cu.toString()))
             } else {
                 existingTestClassWriteStrategy.write(testFile, unit)
             }

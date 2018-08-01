@@ -1,6 +1,7 @@
 package com.aurea.testgenerator.generation
 
 import com.aurea.common.JavaClass
+import com.aurea.common.ImportHelper
 import com.aurea.testgenerator.generation.ast.TestUnit
 import com.aurea.testgenerator.generation.names.NomenclatureFactory
 import com.aurea.testgenerator.generation.names.TestClassNomenclature
@@ -46,7 +47,7 @@ class UnitTestGenerator {
         }.toList()
 
         testUnit.addTestsAndDependencies(StreamEx.of(testGeneratorResults).flatMap { it.tests.stream() }.toList())
-
+        ImportHelper.removeWildcardImport(testUnit, unitUnderTest)
         boolean hasTests = testGeneratorResults.any { it.tests }
         return hasTests ? Optional.of(testUnit) : Optional.empty()
     }
