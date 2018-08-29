@@ -139,9 +139,9 @@ class OpenPojoTestGenerator implements TestGenerator {
         String testText = """
             @Test
             public void ${testName}() {
-                Validator validator = TestChain.startWith(Testers.${testerName}()).buildValidator();
-                
-                validator.validate(PojoClassFactory.getPojoClass(${fullTypeName}.class));
+                TestChain.startWith(Testers.${testerName}())
+                        .buildValidator()
+                        .validate(PojoClassFactory.getPojoClass(${fullTypeName}.class));
             }"""
         try {
             MethodDeclaration testCode = JavaParser.parseBodyDeclaration(testText).asMethodDeclaration()

@@ -2,6 +2,7 @@ package com.aurea.testgenerator.source
 
 import com.aurea.common.ImportHelper
 import com.aurea.testgenerator.config.ProjectConfiguration
+import com.google.googlejavaformat.java.Formatter
 import com.google.googlejavaformat.java.ImportOrderer
 import com.google.googlejavaformat.java.RemoveUnusedImports
 import groovy.util.logging.Log4j2
@@ -47,6 +48,7 @@ class UnitTestWriter {
                 String fileContents = unit.cu.toString()
                 fileContents = RemoveUnusedImports.removeUnusedImports(fileContents)
                 fileContents = ImportOrderer.reorderImports(fileContents)
+                fileContents = new Formatter().formatSource(fileContents)
                 testFile.write(fileContents)
             } else {
                 existingTestClassWriteStrategy.write(testFile, unit)

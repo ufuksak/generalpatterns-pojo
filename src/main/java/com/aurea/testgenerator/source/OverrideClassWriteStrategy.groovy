@@ -1,5 +1,6 @@
 package com.aurea.testgenerator.source
 
+import com.google.googlejavaformat.java.Formatter
 import com.google.googlejavaformat.java.ImportOrderer
 import com.google.googlejavaformat.java.RemoveUnusedImports
 import groovy.util.logging.Log4j2
@@ -15,6 +16,7 @@ class OverrideClassWriteStrategy implements ExistingTestClassWriteStrategy {
         String fileContents = testUnit.cu.toString()
         fileContents = RemoveUnusedImports.removeUnusedImports(fileContents)
         fileContents = ImportOrderer.reorderImports(fileContents)
+        fileContents = new Formatter().formatSource(fileContents)
         existingTest.write(fileContents)
     }
 
