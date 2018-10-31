@@ -54,8 +54,8 @@ public class BuilderTestGenerator implements TestGenerator {
     private static final String DOUBLE_SUFFIX = ".0";
     private static final String NEW_CLASS_TEMPLATE = "new %s()";
 
-    private TestGeneratorResultReporter reporter;
-    private CoverageReporter coverageReporter;
+    private final TestGeneratorResultReporter reporter;
+    private final CoverageReporter coverageReporter;
 
     public BuilderTestGenerator(TestGeneratorResultReporter reporter, CoverageReporter coverageReporter) {
         this.reporter = reporter;

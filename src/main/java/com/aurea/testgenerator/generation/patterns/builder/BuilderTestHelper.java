@@ -11,6 +11,8 @@ class BuilderTestHelper {
     private static final String BUILDER_SUFFIX = "Builder";
     static final String BUILD_METHOD = "build";
     private static final String GET_PREFIX = "get";
+    private static final String WITH_PREFIX = "with";
+    private static final int WITH_OFFSET = 4;
 
     static boolean isBuilder(ClassOrInterfaceDeclaration classDeclaration) {
         if (!classDeclaration.getNameAsString().endsWith(BUILDER_SUFFIX)) {
@@ -21,7 +23,13 @@ class BuilderTestHelper {
     }
 
     static String buildGetterName(MethodDeclaration method) {
-        return GET_PREFIX + firstToUpperCase(method.getNameAsString());
+        String getter;
+        if (method.getNameAsString().startsWith(WITH_PREFIX)) {
+            getter = method.getNameAsString().substring(WITH_OFFSET);
+        } else {
+            getter = firstToUpperCase(method.getNameAsString());
+        }
+        return GET_PREFIX + getter;
     }
 
     static String firstToUpperCase(String text) {
