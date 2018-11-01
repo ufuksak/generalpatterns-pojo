@@ -217,16 +217,22 @@ public class BuilderTestGenerator implements TestGenerator {
         String getter = BuilderTestHelper.buildGetterName(BuilderTestHelper.GET_PREFIX, builderMethod);
         String isGetter = BuilderTestHelper.buildGetterName(BuilderTestHelper.IS_PREFIX, builderMethod);
         return StreamEx.of(pojoMethods)
-                .findFirst(pojoMethod -> pojoMethod.getName().equals(getter)
-                        || (pojoMethod.getName().equals(isGetter) && hasBooleanReturnType(pojoMethod)));
+                .findFirst(pojoMethod -> (pojoMethod.getName().equals(getter)
+                        || (pojoMethod.getName().equals(isGetter) && hasBooleanReturnType(pojoMethod)))
+                        && haveSameTypes(builderMethod, pojoMethod));
+    }
+
+    private boolean haveSameTypes(MethodDeclaration builderMethod, MethodUsage pojoMethods) {
+        String pojoReturnTypeName = normalize(pojoMethods.returnType().describe());
+        String builderMethodParamType = builderMethod.getParameter(0).getType().asString();
+        return pojoReturnTypeName.equals(builderMethodParamType);
+    }
+
+    private String normalize(String typeName) {
+        return typeName.substring(typeName.lastIndexOf(".") + 1);
     }
 
     private boolean hasBooleanReturnType(MethodUsage pojoMethod) {
-        if (!pojoMethod.returnType().isPrimitive()) {
-            return false;
-        }
-
-        ResolvedPrimitiveType type = pojoMethod.returnType().asPrimitive();
-        return type.describe().equals(Primitive.BOOLEAN.asString());
+        return normalize(pojoMethod.returnType().describe()).equalsIgnoreCase(Primitive.BOOLEAN.asString());
     }
 }
