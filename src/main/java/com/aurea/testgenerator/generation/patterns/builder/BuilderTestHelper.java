@@ -8,9 +8,11 @@ import one.util.streamex.StreamEx;
 
 class BuilderTestHelper {
 
-    private static final String BUILDER_SUFFIX = "Builder";
     static final String BUILD_METHOD = "build";
-    private static final String GET_PREFIX = "get";
+    static final String GET_PREFIX = "get";
+    static final String IS_PREFIX = "is";
+
+    private static final String BUILDER_SUFFIX = "Builder";
     private static final String WITH_PREFIX = "with";
     private static final int WITH_OFFSET = 4;
 
@@ -22,14 +24,14 @@ class BuilderTestHelper {
         return findBuilderMethod(classDeclaration).isPresent();
     }
 
-    static String buildGetterName(MethodDeclaration method) {
+    static String buildGetterName(String getterPrefix, MethodDeclaration method) {
         String getter;
         if (method.getNameAsString().startsWith(WITH_PREFIX)) {
             getter = method.getNameAsString().substring(WITH_OFFSET);
         } else {
             getter = firstToUpperCase(method.getNameAsString());
         }
-        return GET_PREFIX + getter;
+        return getterPrefix + getter;
     }
 
     static String firstToUpperCase(String text) {

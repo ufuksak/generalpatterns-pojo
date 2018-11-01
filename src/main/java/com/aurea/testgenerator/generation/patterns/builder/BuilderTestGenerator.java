@@ -20,10 +20,12 @@ import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.type.PrimitiveType.Primitive;
 import com.github.javaparser.ast.type.Type;
 import com.github.javaparser.resolution.MethodUsage;
+import com.github.javaparser.resolution.types.ResolvedPrimitiveType;
 import com.github.javaparser.resolution.types.ResolvedType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import one.util.streamex.StreamEx;
@@ -81,35 +83,37 @@ public class BuilderTestGenerator implements TestGenerator {
         return tests;
     }
 
-    private List<TestGeneratorResult> buildTests(Unit unit, ClassOrInterfaceDeclaration classDeclaration) {
+    private List<TestGeneratorResult> buildTests(Unit unit, ClassOrInterfaceDeclaration builderClass) {
         List<TestGeneratorResult> tests = new ArrayList<>();
-        BuilderTestHelper.findBuilderMethod(classDeclaration).ifPresent(builderMethod -> {
-            ResolvedType resolvedType = builderMethod.getType().resolve();
+        BuilderTestHelper.findBuilderMethod(builderClass).ifPresent(builder -> {
+            ResolvedType resolvedType = builder.getType().resolve();
 
             Set<MethodUsage> pojoMethods = resolvedType.asReferenceType()
                     .getTypeDeclaration().getAllMethods();
 
             String fullPojoTypeName = resolvedType.asReferenceType().getTypeDeclaration().getClassName();
-            String fullBuilderTypeName = ASTNodeUtils.getFullTypeName(classDeclaration);
-            for (MethodDeclaration method : classDeclaration.getMethods()) {
-                if (!isTestable(method, pojoMethods)) {
+            String fullBuilderTypeName = ASTNodeUtils.getFullTypeName(builderClass);
+            for (MethodDeclaration builderMethod : builderClass.getMethods()) {
+                if (!hasTestableType(builderMethod)) {
                     continue;
                 }
-                TestGeneratorResult test = buildTest(fullBuilderTypeName, fullPojoTypeName, method);
-                reporter.publish(test, unit, method);
-                coverageReporter.report(unit, test, method);
-                tests.add(test);
+                getCorrespondingGetter(builderMethod, pojoMethods).ifPresent(getter -> {
+                    TestGeneratorResult test = buildTest(fullBuilderTypeName, fullPojoTypeName, builderMethod, getter);
+                    reporter.publish(test, unit, builderMethod);
+                    coverageReporter.report(unit, test, builderMethod);
+                    tests.add(test);
+                });
             }
         });
         return tests;
     }
 
     private TestGeneratorResult buildTest(String fullBuilderTypeName, String fullPojoTypeName,
-            MethodDeclaration method) {
+            MethodDeclaration method, MethodUsage getter) {
         TestGeneratorResult result = new TestGeneratorResult();
         result.setType(BUILDER_TESTER);
 
-        String testText = getTestText(fullBuilderTypeName, fullPojoTypeName, method);
+        String testText = getTestText(fullBuilderTypeName, fullPojoTypeName, method, getter);
 
         try {
             MethodDeclaration testCode = JavaParser.parseBodyDeclaration(testText).asMethodDeclaration();
@@ -124,22 +128,18 @@ public class BuilderTestGenerator implements TestGenerator {
         return result;
     }
 
-    private String getTestText(String fullBuilderTypeName, String fullPojoTypeName, MethodDeclaration method) {
-        String dataType = method.getParameter(0).getType().asString();
-        String testData = getTestData(method.getParameter(0).getType());
-        String getter = BuilderTestHelper.buildGetterName(method);
+    private String getTestText(String fullBuilderTypeName, String fullPojoTypeName, MethodDeclaration builderMethod,
+            MethodUsage getter) {
+        String dataType = builderMethod.getParameter(0).getType().asString();
+        String testData = getTestData(builderMethod.getParameter(0).getType());
 
         return String.format(TEST_TEMPLATE,
-                BuilderTestHelper.firstToUpperCase(method.getNameAsString()),
+                BuilderTestHelper.firstToUpperCase(builderMethod.getNameAsString()),
                 dataType, testData,
                 fullBuilderTypeName, fullBuilderTypeName,
-                method.getNameAsString(),
+                builderMethod.getNameAsString(),
                 fullPojoTypeName,
-                getter);
-    }
-
-    private boolean isTestable(MethodDeclaration method, Set<MethodUsage> pojoMethods) {
-        return hasTestableType(method) && hasCorrespondingGetter(method, pojoMethods);
+                getter.getName());
     }
 
     private boolean hasTestableType(MethodDeclaration method) {
@@ -212,9 +212,21 @@ public class BuilderTestGenerator implements TestGenerator {
                 || primitive.asString().equals(paramType.asString());
     }
 
-    private boolean hasCorrespondingGetter(MethodDeclaration builderMethod, Set<MethodUsage> pojoMethods) {
-        String getter = BuilderTestHelper.buildGetterName(builderMethod);
+    private Optional<MethodUsage> getCorrespondingGetter(MethodDeclaration builderMethod,
+            Set<MethodUsage> pojoMethods) {
+        String getter = BuilderTestHelper.buildGetterName(BuilderTestHelper.GET_PREFIX, builderMethod);
+        String isGetter = BuilderTestHelper.buildGetterName(BuilderTestHelper.IS_PREFIX, builderMethod);
         return StreamEx.of(pojoMethods)
-                .findFirst(pojoMethod -> pojoMethod.getName().equals(getter)).isPresent();
+                .findFirst(pojoMethod -> pojoMethod.getName().equals(getter)
+                        || (pojoMethod.getName().equals(isGetter) && hasBooleanReturnType(pojoMethod)));
+    }
+
+    private boolean hasBooleanReturnType(MethodUsage pojoMethod) {
+        if (!pojoMethod.returnType().isPrimitive()) {
+            return false;
+        }
+
+        ResolvedPrimitiveType type = pojoMethod.returnType().asPrimitive();
+        return type.describe().equals(Primitive.BOOLEAN.asString());
     }
 }
