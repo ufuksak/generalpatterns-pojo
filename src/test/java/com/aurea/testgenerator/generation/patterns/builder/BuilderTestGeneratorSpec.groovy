@@ -213,29 +213,6 @@ class BuilderTestGeneratorSpec extends MatcherPipelineTest {
                     return person;
                 }
             }
-            
-            public class SomeClassWithoutCorrespondingGettersBuilder {
-            
-                private String firstName;
-                private String lastName;
-            
-                public PersonBuilder theFirstName(String firstName) {
-                    this.firstName = firstName;
-                    return this;
-                }
-            
-                public PersonBuilder theLastName(String lastName) {
-                    this.lastName = lastName;
-                    return this;
-                }
-            
-                public Person build() {
-                    Person person = new Person();
-                    person.setFirstName(firstName);
-                    person.setLastName(lastName);
-                    return person;
-                }
-            }
 
         """, """
             package sample;
@@ -330,30 +307,6 @@ class BuilderTestGeneratorSpec extends MatcherPipelineTest {
                     Person pojo = builder.build();
                     // Assert
                     assertEquals(testData, pojo.getRelative());
-                }
-            
-                @Test
-                public void testBuildTheFirstName() {
-                    // Arrange
-                    String testData = "testData";
-                    SomeClassWithoutCorrespondingGettersBuilder builder = new SomeClassWithoutCorrespondingGettersBuilder();
-                    builder.theFirstName(testData);
-                    // Act
-                    Person pojo = builder.build();
-                    // Assert
-                    assertEquals(testData, pojo.getTheFirstName());
-                }
-            
-                @Test
-                public void testBuildTheLastName() {
-                    // Arrange
-                    String testData = "testData";
-                    SomeClassWithoutCorrespondingGettersBuilder builder = new SomeClassWithoutCorrespondingGettersBuilder();
-                    builder.theLastName(testData);
-                    // Act
-                    Person pojo = builder.build();
-                    // Assert
-                    assertEquals(testData, pojo.getTheLastName());
                 }
             }
         """

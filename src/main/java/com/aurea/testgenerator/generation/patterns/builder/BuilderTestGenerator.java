@@ -19,11 +19,14 @@ import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
 import com.github.javaparser.ast.type.PrimitiveType.Primitive;
 import com.github.javaparser.ast.type.Type;
+import com.github.javaparser.resolution.MethodUsage;
 import com.github.javaparser.resolution.types.ResolvedType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
+import one.util.streamex.StreamEx;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
@@ -82,10 +85,14 @@ public class BuilderTestGenerator implements TestGenerator {
         List<TestGeneratorResult> tests = new ArrayList<>();
         BuilderTestHelper.findBuilderMethod(classDeclaration).ifPresent(builderMethod -> {
             ResolvedType resolvedType = builderMethod.getType().resolve();
+
+            Set<MethodUsage> pojoMethods = resolvedType.asReferenceType()
+                    .getTypeDeclaration().getAllMethods();
+
             String fullPojoTypeName = resolvedType.asReferenceType().getTypeDeclaration().getClassName();
             String fullBuilderTypeName = ASTNodeUtils.getFullTypeName(classDeclaration);
             for (MethodDeclaration method : classDeclaration.getMethods()) {
-                if (!isTestable(method)) {
+                if (!isTestable(method, pojoMethods)) {
                     continue;
                 }
                 TestGeneratorResult test = buildTest(fullBuilderTypeName, fullPojoTypeName, method);
@@ -131,7 +138,11 @@ public class BuilderTestGenerator implements TestGenerator {
                 getter);
     }
 
-    private boolean isTestable(MethodDeclaration method) {
+    private boolean isTestable(MethodDeclaration method, Set<MethodUsage> pojoMethods) {
+        return hasTestableType(method) && hasCorrespondingGetter(method, pojoMethods);
+    }
+
+    private boolean hasTestableType(MethodDeclaration method) {
         if (method.getNameAsString().equals(BuilderTestHelper.BUILD_METHOD)) {
             return false;
         }
@@ -146,8 +157,8 @@ public class BuilderTestGenerator implements TestGenerator {
         }
 
         ResolvedType resolvedType = paramType.resolve();
-
-        return resolvedType.isReferenceType() && resolvedType.asReferenceType().getTypeDeclaration().isClass()
+        return resolvedType.isReferenceType()
+                && resolvedType.asReferenceType().getTypeDeclaration().isClass()
                 && !resolvedType.asReferenceType().getTypeDeclaration().isGeneric();
     }
 
@@ -199,5 +210,11 @@ public class BuilderTestGenerator implements TestGenerator {
     private boolean isPrimitiveOf(Type paramType, Primitive primitive) {
         return primitive.toBoxedType().asString().equals(paramType.asString())
                 || primitive.asString().equals(paramType.asString());
+    }
+
+    private boolean hasCorrespondingGetter(MethodDeclaration builderMethod, Set<MethodUsage> pojoMethods) {
+        String getter = BuilderTestHelper.buildGetterName(builderMethod);
+        return StreamEx.of(pojoMethods)
+                .findFirst(pojoMethod -> pojoMethod.getName().equals(getter)).isPresent();
     }
 }

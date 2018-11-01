@@ -3,9 +3,9 @@ package com.aurea.testgenerator.generation.patterns.builder
 import com.aurea.testgenerator.MatcherPipelineTest
 import com.aurea.testgenerator.generation.TestGenerator
 
-class BuilderTestGeneratorWitherSpec extends MatcherPipelineTest {
+class BuilderTestGeneratorWithoutGetterSpec extends MatcherPipelineTest {
 
-    def "Builder cases test assignment 2"() {
+    def "Builder cases test assignment 3"() {
         expect:
         onClassCodeExpect """
             public class Person {
@@ -76,6 +76,10 @@ class BuilderTestGeneratorWitherSpec extends MatcherPipelineTest {
             
                 public EmployeeBuilder withLastName(String lastName) {
                     this.lastName = lastName;
+                    return this;
+                }
+            
+                public EmployeeBuilder nonExistingInPojo(String value) {
                     return this;
                 }
             
