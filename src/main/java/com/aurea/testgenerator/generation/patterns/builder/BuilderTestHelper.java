@@ -1,7 +1,10 @@
 package com.aurea.testgenerator.generation.patterns.builder;
 
+import com.aurea.testgenerator.value.Types;
 import com.github.javaparser.ast.body.ClassOrInterfaceDeclaration;
 import com.github.javaparser.ast.body.MethodDeclaration;
+import com.github.javaparser.ast.type.PrimitiveType.Primitive;
+import com.github.javaparser.ast.type.Type;
 import com.google.common.base.Strings;
 import java.util.Optional;
 import one.util.streamex.StreamEx;
@@ -50,5 +53,15 @@ class BuilderTestHelper {
     static Optional<MethodDeclaration> findBuilderMethod(ClassOrInterfaceDeclaration classDeclaration) {
         return StreamEx.of(classDeclaration.getMethods())
                 .findFirst(it -> it.getNameAsString().equals(BUILD_METHOD) && it.getParameters().isEmpty());
+    }
+
+    static boolean isPrimitive(Type paramType) {
+        return Types.isString(paramType) || paramType.isPrimitiveType()
+                || Types.isBoxedPrimitive(paramType);
+    }
+
+    static boolean isPrimitiveOf(Type paramType, Primitive primitive) {
+        return primitive.toBoxedType().asString().equals(paramType.asString())
+                || primitive.asString().equals(paramType.asString());
     }
 }
