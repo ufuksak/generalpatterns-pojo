@@ -8,6 +8,7 @@ import com.aurea.testgenerator.generation.names.TestClassNomenclature
 import com.aurea.testgenerator.generation.source.Imports
 import com.aurea.testgenerator.source.Unit
 import com.github.javaparser.ast.CompilationUnit
+import com.github.javaparser.ast.ImportDeclaration
 import com.github.javaparser.ast.Modifier
 import com.github.javaparser.ast.NodeList
 import com.github.javaparser.ast.PackageDeclaration
@@ -50,6 +51,16 @@ class UnitTestGenerator {
         ImportHelper.removeWildcardImport(testUnit, unitUnderTest)
         boolean hasTests = testGeneratorResults.any { it.tests }
         return hasTests ? Optional.of(testUnit) : Optional.empty()
+    }
+
+    private static removeWildcardImport(TestUnit testUnit, Unit unitUnderTest) {
+        NodeList<ImportDeclaration> importDeclarations = testUnit.imports
+        for (int i = 0; i < importDeclarations.size(); i++) {
+            ImportDeclaration id = testUnit.imports.get(i)
+            if (id.isAsterisk() && unitUnderTest.packageName.startsWith(id.nameAsString)) {
+                testUnit.imports.removeAt(i)
+            }
+        }
     }
 
     @Override

@@ -13,12 +13,13 @@ class DifferentInstancesStaticFactoryMethodTestGeneratorSpec extends MatcherPipe
                     return new Foo();
                 }   
             }
-        """, """     
+        """, """ 
             package sample;
              
+            import static org.assertj.core.api.Assertions.assertThat;
+            
             import javax.annotation.Generated;
             import org.junit.Test;
-            import static org.assertj.core.api.Assertions.assertThat;
             
             @Generated("GeneralPatterns")
             public class FooPatternTest {
@@ -50,10 +51,11 @@ class DifferentInstancesStaticFactoryMethodTestGeneratorSpec extends MatcherPipe
             }
         """, """     
             package sample;
-             
+
+            import static org.assertj.core.api.Assertions.assertThat;
+
             import javax.annotation.Generated;
             import org.junit.Test;
-            import static org.assertj.core.api.Assertions.assertThat;
              
             @Generated("GeneralPatterns")
             public class FooPatternTest {

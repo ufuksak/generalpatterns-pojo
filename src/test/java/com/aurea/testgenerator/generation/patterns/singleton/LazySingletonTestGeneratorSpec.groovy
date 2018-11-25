@@ -24,12 +24,13 @@ class LazySingletonTestGeneratorSpec extends MatcherPipelineTest {
             """, """     
             package sample;
 
+            import static org.assertj.core.api.Assertions.assertThat;
+
             import com.aurea.unittest.commons.SingletonTester;
             import java.util.concurrent.Callable;
             import javax.annotation.Generated;
             import org.junit.Test;
-            import static org.assertj.core.api.Assertions.assertThat;
-             
+
             @Generated("GeneralPatterns")
             public class FooPatternTest {
                 
@@ -42,13 +43,15 @@ class LazySingletonTestGeneratorSpec extends MatcherPipelineTest {
             
                 @Test
                 public void getInstanceIsThreadSafe() throws Exception {
-                    SingletonTester tester = SingletonTester.fromSingleton(new Callable<Foo>() {
-            
-                        @Override
-                        public Foo call() throws Exception {
-                            return Foo.getInstance();
-                        }
-                    });
+                    SingletonTester tester =
+                        SingletonTester.fromSingleton(
+                            new Callable<Foo>() {
+
+                                @Override
+                                public Foo call() throws Exception {
+                                    return Foo.getInstance();
+                                }
+                            });
                     tester.testThreadSafety();
                 }
             }

@@ -30,9 +30,11 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
 
         """, """     
         package sample;
- 
+
+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+        
         import com.aurea.auth.generalpatternsspringtest.service.DelegateService;
-        import com.fasterxml.jackson.databind.ObjectMapper;
         import javax.annotation.Generated;
         import org.junit.Before;
         import org.junit.Test;
@@ -40,36 +42,24 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         import org.mockito.Mock;
         import org.mockito.Mockito;
         import org.mockito.MockitoAnnotations;
-        import org.springframework.http.MediaType;
         import org.springframework.test.web.servlet.MockMvc;
         import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-        import org.springframework.web.bind.annotation.RequestMapping;
-        import org.springframework.web.bind.annotation.RestController;
-        import static org.mockito.ArgumentMatchers.any;
-        import static org.mockito.ArgumentMatchers.eq;
-        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
         
         @Generated("GeneralPatterns")
         public class FooPatternTest {
-         
-            @InjectMocks()
-            private SimpleDelegatingController controllerInstance;
-         
-            @Mock()
-            private DelegateService delegateService;
-         
+
+            @InjectMocks() private SimpleDelegatingController controllerInstance;
+
+            @Mock() private DelegateService delegateService;
+
             private MockMvc mockMvc;
-         
+
             @Before
             public void setup() {
                 MockitoAnnotations.initMocks(this);
                 mockMvc = MockMvcBuilders.standaloneSetup(controllerInstance).build();
             }
-         
+
             @Test
             public void delegateDelegatesToService() throws Exception {
                 mockMvc.perform(get("/delegate")).andExpect(status().is2xxSuccessful());
@@ -110,8 +100,11 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         """, """ 
         package sample;
  
+        import static org.mockito.ArgumentMatchers.eq;
+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+        
         import com.aurea.auth.generalpatternsspringtest.service.DelegateService;
-        import com.fasterxml.jackson.databind.ObjectMapper;
         import javax.annotation.Generated;
         import org.junit.Before;
         import org.junit.Test;
@@ -119,44 +112,33 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         import org.mockito.Mock;
         import org.mockito.Mockito;
         import org.mockito.MockitoAnnotations;
-        import org.springframework.http.MediaType;
         import org.springframework.test.web.servlet.MockMvc;
         import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-        import org.springframework.web.bind.annotation.PathVariable;
-        import org.springframework.web.bind.annotation.PostMapping;
-        import org.springframework.web.bind.annotation.RequestMapping;
-        import org.springframework.web.bind.annotation.RequestParam;
-        import org.springframework.web.bind.annotation.RestController;
-        import static org.mockito.ArgumentMatchers.any;
-        import static org.mockito.ArgumentMatchers.eq;
-        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-         
+        
         @Generated("GeneralPatterns")
         public class FooPatternTest {
-         
-            @InjectMocks()
-            private DelegatingWithParametersController controllerInstance;
-         
-            @Mock()
-            private DelegateService delegateService;
-         
+
+            @InjectMocks() private DelegatingWithParametersController controllerInstance;
+
+            @Mock() private DelegateService delegateService;
+
             private MockMvc mockMvc;
-         
+
             @Before
             public void setup() {
                 MockitoAnnotations.initMocks(this);
                 mockMvc = MockMvcBuilders.standaloneSetup(controllerInstance).build();
             }
-         
+
             @Test
             public void delegateDelegatesToService() throws Exception {
                 int intParam = 42;
                 String stringParam = "ABC";
-                mockMvc.perform(post("/params/delegate/" + intParam + "").param("string_param", String.valueOf(stringParam))).andExpect(status().is2xxSuccessful());
+                mockMvc
+                    .perform(
+                        post("/params/delegate/" + intParam + "")
+                            .param("string_param", String.valueOf(stringParam)))
+                    .andExpect(status().is2xxSuccessful());
                 Mockito.verify(delegateService).delegateWithParameters(eq(intParam), eq(stringParam));
             }
         }
@@ -251,6 +233,11 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         """, """ 
         package sample;
  
+        import static org.mockito.ArgumentMatchers.any;
+        import static org.mockito.ArgumentMatchers.eq;
+        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+        
         import com.fasterxml.jackson.databind.ObjectMapper;
         import javax.annotation.Generated;
         import org.junit.Before;
@@ -259,43 +246,24 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
         import org.mockito.Mock;
         import org.mockito.Mockito;
         import org.mockito.MockitoAnnotations;
-        import org.springframework.http.MediaType;
         import org.springframework.test.web.servlet.MockMvc;
         import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-        import org.springframework.web.bind.annotation.GetMapping;
-        import org.springframework.web.bind.annotation.PathVariable;
-        import org.springframework.web.bind.annotation.PostMapping;
-        import org.springframework.web.bind.annotation.RequestBody;
-        import org.springframework.web.bind.annotation.RequestHeader;
-        import org.springframework.web.bind.annotation.RequestMapping;
-        import org.springframework.web.bind.annotation.RequestMethod;
-        import org.springframework.web.bind.annotation.RequestParam;
-        import org.springframework.web.bind.annotation.RestController;
-        import static org.mockito.ArgumentMatchers.any;
-        import static org.mockito.ArgumentMatchers.eq;
-        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-        import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
-        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
         
         @Generated("GeneralPatterns")
         public class FooPatternTest {
-         
-            @InjectMocks()
-            private DelegatingWithReturnValueController controllerInstance;
-         
-            @Mock()
-            private DelegateService delegateService;
-         
+
+            @InjectMocks() private DelegatingWithReturnValueController controllerInstance;
+
+            @Mock() private DelegateService delegateService;
+
             private MockMvc mockMvc;
-         
+
             @Before
             public void setup() {
                 MockitoAnnotations.initMocks(this);
                 mockMvc = MockMvcBuilders.standaloneSetup(controllerInstance).build();
             }
-         
+
             @Test
             public void delegateWithValueDelegatesToService() throws Exception {
                 int intParam = 42;
@@ -304,9 +272,18 @@ class SpringControllerDelegatingMethodTestGeneratorSpec extends MatcherPipelineT
                 String userAgent = "ABC";
                 ObjectMapper mapper = new ObjectMapper();
                 Value expectedResult = new Value();
-                Mockito.when(delegateService.delegateWithValue(eq(intParam), eq(stringParam), any(Body.class))).thenReturn(expectedResult);
-                mockMvc.perform(post("/return/delegate/" + intParam + "").content(mapper.writeValueAsString(body)).contentType("application/json;charset=UTF-8").param("string_param", String.valueOf(stringParam)).header("User-Agent", String.valueOf(userAgent))).andExpect(status().is2xxSuccessful());
-                Mockito.verify(delegateService).delegateWithValue(eq(intParam), eq(stringParam), any(Body.class));
+                Mockito.when(delegateService.delegateWithValue(eq(intParam), eq(stringParam), any(Body.class)))
+                    .thenReturn(expectedResult);
+                mockMvc
+                    .perform(
+                        post("/return/delegate/" + intParam + "")
+                            .content(mapper.writeValueAsString(body))
+                            .contentType("application/json;charset=UTF-8")
+                            .param("string_param", String.valueOf(stringParam))
+                            .header("User-Agent", String.valueOf(userAgent)))
+                    .andExpect(status().is2xxSuccessful());
+                Mockito.verify(delegateService)
+                    .delegateWithValue(eq(intParam), eq(stringParam), any(Body.class));
             }
         }
         """
