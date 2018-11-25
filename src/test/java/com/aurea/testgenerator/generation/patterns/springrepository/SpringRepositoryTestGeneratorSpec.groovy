@@ -24,6 +24,8 @@ class SpringRepositoryTestGeneratorSpec extends MatcherPipelineTest {
         """, """
             package sample;
 
+            import static org.assertj.core.api.Assertions.assertThat;
+
             import javax.annotation.Generated;
             import org.junit.Test;
             import org.junit.runner.RunWith;
@@ -31,8 +33,7 @@ class SpringRepositoryTestGeneratorSpec extends MatcherPipelineTest {
             import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
             import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
             import org.springframework.test.context.junit4.SpringRunner;
-            import static org.assertj.core.api.Assertions.assertThat;
-            
+
             @Generated("GeneralPatterns")
             @RunWith(SpringRunner.class)
             @DataJpaTest
