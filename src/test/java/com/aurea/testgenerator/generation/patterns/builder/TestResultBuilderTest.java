@@ -166,6 +166,6 @@ public class TestResultBuilderTest extends TestBase {
 
         // Act
         return TestResultBuilder.buildTest(fullBuilderTypeName, fullPojoTypeName,
-                builderMethod, getter);
+                builderMethod, getter, "");
     }
 }
